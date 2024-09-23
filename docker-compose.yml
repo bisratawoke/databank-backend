@@ -1,0 +1,26 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mongo
+      - postgres
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/your_database
+      - DATABASE_URL=postgresql://user:password@postgres:5432/your_database?schema=public
+
+  mongo:
+    image: mongo
+    ports:
+      - '27017:27017'
+
+  postgres:
+    image: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: your_database
