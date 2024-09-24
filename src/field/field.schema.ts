@@ -6,7 +6,7 @@ export class Field extends Document {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'FieldType', required: true }) // Reference to FieldType
+  @Prop({ type: Types.ObjectId, ref: 'FieldType', required: true })
   type: Types.ObjectId;
 
   @Prop({ default: false })

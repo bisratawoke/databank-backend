@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { FieldType } from './field-type.schema'; // Adjust the import path as necessary
+import { FieldType } from './field-type.schema';
+import { CreateFieldTypeDto } from './dto/create-field-type.dto';
+import { UpdateFieldTypeDto } from './dto/update-field-type.dto';
 
 @Injectable()
 export class FieldTypeService {
@@ -10,8 +12,8 @@ export class FieldTypeService {
   ) {}
 
   // Create a new FieldType
-  async create(fieldTypeData: Partial<FieldType>): Promise<FieldType> {
-    const createdFieldType = new this.fieldTypeModel(fieldTypeData);
+  async create(createFieldTypeDto: CreateFieldTypeDto): Promise<FieldType> {
+    const createdFieldType = new this.fieldTypeModel(createFieldTypeDto);
     return createdFieldType.save();
   }
 
@@ -22,6 +24,38 @@ export class FieldTypeService {
 
   // Retrieve a FieldType by ID
   async findById(id: string): Promise<FieldType> {
-    return this.fieldTypeModel.findById(id).exec();
+    const fieldType = await this.fieldTypeModel.findById(id).exec();
+    if (!fieldType) {
+      throw new NotFoundException(`FieldType with ID ${id} not found`);
+    }
+    return fieldType;
+  }
+
+  // Update a FieldType by ID
+  async update(
+    id: string,
+    updateFieldTypeDto: UpdateFieldTypeDto,
+  ): Promise<FieldType> {
+    const updatedFieldType = await this.fieldTypeModel
+      .findByIdAndUpdate(id, updateFieldTypeDto, {
+        new: true,
+        useFindAndModify: false,
+      })
+      .exec();
+    if (!updatedFieldType) {
+      throw new NotFoundException(`FieldType with ID ${id} not found`);
+    }
+    return updatedFieldType;
+  }
+
+  // Delete a FieldType by ID
+  async delete(id: string): Promise<FieldType> {
+    const deletedFieldType = await this.fieldTypeModel
+      .findByIdAndDelete(id)
+      .exec();
+    if (!deletedFieldType) {
+      throw new NotFoundException(`FieldType with ID ${id} not found`);
+    }
+    return deletedFieldType;
   }
 }
