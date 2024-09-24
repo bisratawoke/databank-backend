@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PrismaModule } from './prisma/prisma.module';
-import { FieldTypeModule } from './field-type/field-type.module';
-import { FieldModule } from './field/field.module';
+import { ReportModule } from './modules/report/report.module';
+import { DataModule } from './modules/data/data.module';
+import { FieldTypeModule } from './modules/field-type/field-type.module';
+import { FieldModule } from './modules/field/field.module';
 
 @Module({
   imports: [
@@ -18,8 +20,10 @@ import { FieldModule } from './field/field.module';
       },
     }),
     PrismaModule,
+    ReportModule,
+    DataModule,
     FieldTypeModule,
     FieldModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
