@@ -1,7 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Field } from 'src/modules/field/schemas/field.schema';
 import { Data } from 'src/modules/data/schemas/data.schema';
+import { Field } from 'src/modules/field/field.schema';
 
 @Schema()
 export class Report extends Document {

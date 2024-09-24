@@ -4,22 +4,26 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PrismaModule } from './prisma/prisma.module';
 import { ReportModule } from './modules/report/report.module';
 import { DataModule } from './modules/data/data.module';
+import { FieldTypeModule } from './modules/field-type/field-type.module';
+import { FieldModule } from './modules/field/field.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
-      }),
-      inject: [ConfigService],
+    MongooseModule.forRoot(process.env.DATABASE_URI, {
+      dbName: process.env.DATABASE_NAME,
+      auth: {
+        username: process.env.DATABASE_USER,
+        password: process.env.DATABASE_PASS,
+      },
     }),
     PrismaModule,
     ReportModule,
     DataModule,
+    FieldTypeModule,
+    FieldModule,
   ],
 })
 export class AppModule { }
