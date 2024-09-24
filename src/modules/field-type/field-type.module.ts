@@ -12,4 +12,4 @@ import { FieldType, FieldTypeSchema } from './field-type.schema';
   controllers: [FieldTypeController],
   providers: [FieldTypeService],
 })
-export class FieldTypeModule {}
+export class FieldTypeModule { }

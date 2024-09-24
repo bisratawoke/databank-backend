@@ -1,5 +1,5 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { Data } from 'src/modules/data/schemas/data.schema';
 import { Field } from 'src/modules/field/field.schema';
 
@@ -17,10 +17,10 @@ export class Report extends Document {
   @Prop({ required: true })
   end_date: Date;
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Field' }] })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Field.name })
   fields: Types.ObjectId[];
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: Data.name }] })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Data.name })
   data: Types.ObjectId[];
 }
 
