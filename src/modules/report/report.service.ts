@@ -7,42 +7,45 @@ import { Report } from './schemas/report.schema';
 
 @Injectable()
 export class ReportService {
-    constructor(
-        @InjectModel(Report.name) private readonly reportModel: Model<Report>,
-    ) { }
+  constructor(
+    @InjectModel(Report.name) private readonly reportModel: Model<Report>,
+  ) {}
 
-    async create(createReportDto: CreateReportDto): Promise<Report> {
-        const createdReport = new this.reportModel(createReportDto);
-        return createdReport.save();
-    }
+  async create(createReportDto: CreateReportDto): Promise<Report> {
+    const createdReport = new this.reportModel(createReportDto);
+    return createdReport.save();
+  }
 
-    async findAll(): Promise<Report[]> {
-        return this.reportModel.find().populate('fields data').exec();
-    }
+  async findAll(): Promise<Report[]> {
+    return this.reportModel.find().populate('fields').populate('data').exec();
+  }
 
-    async findOne(id: string): Promise<Report> {
-        const report = await this.reportModel.findById(id).populate('fields data').exec();
-        if (!report) {
-            throw new NotFoundException(`Report with ID ${id} not found`);
-        }
-        return report;
+  async findOne(id: string): Promise<Report> {
+    const report = await this.reportModel
+      .findById(id)
+      .populate('fields data')
+      .exec();
+    if (!report) {
+      throw new NotFoundException(`Report with ID ${id} not found`);
     }
+    return report;
+  }
 
-    async update(id: string, updateReportDto: UpdateReportDto): Promise<Report> {
-        const updatedReport = await this.reportModel
-            .findByIdAndUpdate(id, updateReportDto, { new: true })
-            .populate('fields data')
-            .exec();
-        if (!updatedReport) {
-            throw new NotFoundException(`Report with ID ${id} not found`);
-        }
-        return updatedReport;
+  async update(id: string, updateReportDto: UpdateReportDto): Promise<Report> {
+    const updatedReport = await this.reportModel
+      .findByIdAndUpdate(id, updateReportDto, { new: true })
+      .populate('fields data')
+      .exec();
+    if (!updatedReport) {
+      throw new NotFoundException(`Report with ID ${id} not found`);
     }
+    return updatedReport;
+  }
 
-    async remove(id: string): Promise<void> {
-        const result = await this.reportModel.findByIdAndDelete(id).exec();
-        if (!result) {
-            throw new NotFoundException(`Report with ID ${id} not found`);
-        }
+  async remove(id: string): Promise<void> {
+    const result = await this.reportModel.findByIdAndDelete(id).exec();
+    if (!result) {
+      throw new NotFoundException(`Report with ID ${id} not found`);
     }
+  }
 }

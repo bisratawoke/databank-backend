@@ -9,18 +9,15 @@ import { UpdateFieldDto } from './dto/update-field.dto';
 export class FieldService {
   constructor(@InjectModel(Field.name) private fieldModel: Model<Field>) {}
 
-  // Create a new Field
   async create(createFieldDto: CreateFieldDto): Promise<Field> {
     const createdField = new this.fieldModel(createFieldDto);
     return createdField.save();
   }
 
-  // Retrieve all Fields
   async findAll(): Promise<Field[]> {
     return this.fieldModel.find().populate('type').exec();
   }
 
-  // Retrieve a Field by ID
   async findById(id: string): Promise<Field> {
     const field = await this.fieldModel.findById(id).populate('type').exec();
     if (!field) {
@@ -29,7 +26,6 @@ export class FieldService {
     return field;
   }
 
-  // Update a Field by ID
   async update(id: string, updateFieldDto: UpdateFieldDto): Promise<Field> {
     const updatedField = await this.fieldModel
       .findByIdAndUpdate(id, updateFieldDto, {
@@ -43,7 +39,6 @@ export class FieldService {
     return updatedField;
   }
 
-  // Delete a Field by ID
   async delete(id: string): Promise<Field> {
     const deletedField = await this.fieldModel.findByIdAndDelete(id).exec();
     if (!deletedField) {

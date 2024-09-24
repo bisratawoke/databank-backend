@@ -17,4 +17,4 @@ import { Field, FieldSchema } from '../field/field.schema';
   controllers: [ReportController],
   providers: [ReportService],
 })
-export class ReportModule { }
+export class ReportModule {}
