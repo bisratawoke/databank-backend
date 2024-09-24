@@ -1,24 +1,43 @@
-import { IsNotEmpty, IsString, IsDate, IsArray } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { ReportDto } from './report.dto';
+import { Type } from 'class-transformer';
 
-export class CreateReportDto {
-    @IsNotEmpty()
-    @IsString()
+export class CreateReportDto extends ReportDto {
+    @ApiProperty({
+        description: 'Name of the report',
+        example: 'Updated Annual Sales Report',
+    })
     readonly name: string;
 
-    @IsString()
+    @ApiProperty({
+        description: 'Description of the report',
+        example: 'An updated report on annual sales performance.',
+    })
     readonly description: string;
 
-    @IsNotEmpty()
-    @IsDate()
+    @ApiProperty({
+        description: 'Start date of the report',
+        example: '2023-01-01T00:00:00Z',
+    })
+    @Type(() => Date)
     readonly start_date: Date;
 
-    @IsNotEmpty()
-    @IsDate()
+    @ApiProperty({
+        description: 'End date of the report',
+        example: '2023-12-31T00:00:00Z',
+    })
+    @Type(() => Date)
     readonly end_date: Date;
 
-    @IsArray()
-    readonly fields: string[];  // List of IDs
+    @ApiProperty({
+        description: 'List of field IDs associated with the report',
+        example: ['66f2a95d647374ca369dd24d', '66f2b098edd4bbb56ab3db2e'],
+    })
+    readonly fields: string[];
 
-    @IsArray()
-    readonly data: string[];   // List of IDs
+    @ApiProperty({
+        description: 'List of data IDs associated with the report',
+        example: ['66f2a1f4f7e8da23c52f392f'],
+    })
+    readonly data: string[];
 }
