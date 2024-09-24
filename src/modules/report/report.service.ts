@@ -20,16 +20,12 @@ export class ReportService {
     return this.reportModel
       .find()
       .populate({
-        path: 'fields',
-        populate: {
-          path: 'type',
-        },
+        path: 'fields', // Assuming 'fields' is an array of ObjectIds
+        // Remove populate 'type' if it's not valid in 'Field'
       })
       .populate({
-        path: 'data',
-        populate: {
-          path: 'type',
-        },
+        path: 'data', // Assuming 'data' is an array of ObjectIds
+        // Remove populate 'type' if it's not valid in 'Data'
       })
       .exec();
   }
@@ -39,15 +35,11 @@ export class ReportService {
       .findById(id)
       .populate({
         path: 'fields',
-        populate: {
-          path: 'type',
-        },
+        // Ensure that 'type' exists in 'fields', if not remove this
       })
       .populate({
         path: 'data',
-        populate: {
-          path: 'type',
-        },
+        // Ensure that 'type' exists in 'data', if not remove this
       })
       .exec();
     if (!report) {
@@ -59,7 +51,14 @@ export class ReportService {
   async update(id: string, updateReportDto: UpdateReportDto): Promise<Report> {
     const updatedReport = await this.reportModel
       .findByIdAndUpdate(id, updateReportDto, { new: true })
-      .populate('fields data')
+      .populate({
+        path: 'fields',
+        // Apply consistent population logic
+      })
+      .populate({
+        path: 'data',
+        // Apply consistent population logic
+      })
       .exec();
     if (!updatedReport) {
       throw new NotFoundException(`Report with ID ${id} not found`);

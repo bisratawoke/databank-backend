@@ -17,10 +17,10 @@ export class Report extends Document {
   @Prop({ required: true })
   end_date: Date;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Field.name })
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Field' }] })
   fields: Types.ObjectId[];
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Data.name })
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Data' }] })
   data: Types.ObjectId[];
 }
 
