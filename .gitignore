@@ -57,7 +57,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Docker
 docker-compose.override.yml
-Dockerfile.dev
+# Dockerfile.dev
 .dockerignore
 
 # Docker volumes

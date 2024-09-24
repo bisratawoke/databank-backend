@@ -1,8 +1,13 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - '3016:3016'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     depends_on:
       - mongo
       - postgres
@@ -30,7 +35,7 @@ services:
   postgres:
     image: postgres:latest
     ports:
-      - '5433:5433'
+      - '5433:5432'
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
