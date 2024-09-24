@@ -1,12 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { FieldType } from '../field-type/field-type.schema';
 
 @Schema()
 export class Field extends Document {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'FieldType', required: true })
+  @Prop({ type: Types.ObjectId, ref: FieldType.name, required: true })
   type: Types.ObjectId;
 
   @Prop({ default: false })

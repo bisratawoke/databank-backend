@@ -10,4 +10,4 @@ import { Field, FieldSchema } from './field.schema';
   controllers: [FieldController],
   providers: [FieldService],
 })
-export class FieldModule {}
+export class FieldModule { }

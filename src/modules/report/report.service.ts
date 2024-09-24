@@ -17,11 +17,37 @@ export class ReportService {
     }
 
     async findAll(): Promise<Report[]> {
-        return this.reportModel.find().populate('fields data').exec();
+        return this.reportModel.find()
+            .populate({
+                path: 'fields',
+                populate: {
+                    path: 'type'
+                }
+            })
+            .populate({
+                path: 'data',
+                populate: {
+                    path: 'type'
+                }
+            })
+            .exec();
     }
 
     async findOne(id: string): Promise<Report> {
-        const report = await this.reportModel.findById(id).populate('fields data').exec();
+        const report = await this.reportModel.findById(id)
+            .populate({
+                path: 'fields',
+                populate: {
+                    path: 'type'
+                }
+            })
+            .populate({
+                path: 'data',
+                populate: {
+                    path: 'type'
+                }
+            })
+            .exec();
         if (!report) {
             throw new NotFoundException(`Report with ID ${id} not found`);
         }
