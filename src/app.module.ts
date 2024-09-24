@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PrismaModule } from './prisma/prisma.module';
+import { ReportModule } from './modules/report/report.module';
+import { DataModule } from './modules/data/data.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { PrismaModule } from './prisma/prisma.module';
       inject: [ConfigService],
     }),
     PrismaModule,
+    ReportModule,
+    DataModule,
   ],
 })
 export class AppModule { }
