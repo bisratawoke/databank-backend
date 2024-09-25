@@ -15,11 +15,23 @@ export class DataService {
     }
 
     async findAll(): Promise<Data[]> {
-        return this.dataModel.find().populate('type').exec();
+        return this.dataModel.find().populate({
+            path: 'type',
+            populate: {
+                path: 'type',
+                model: 'FieldType',
+            }
+        }).exec()
     }
 
     async findOne(id: string): Promise<Data> {
-        const data = await this.dataModel.findById(id).populate('type').exec();
+        const data = await this.dataModel.findById(id).populate({
+            path: 'type',
+            populate: {
+                path: 'type',
+                model: 'FieldType',
+            }
+        }).exec();
         if (!data) {
             throw new NotFoundException(`Data with ID ${id} not found`);
         }
@@ -29,7 +41,13 @@ export class DataService {
     async update(id: string, updateDataDto: UpdateDataDto): Promise<Data> {
         const updatedData = await this.dataModel
             .findByIdAndUpdate(id, updateDataDto, { new: true })
-            .populate('type')
+            .populate({
+                path: 'type',
+                populate: {
+                    path: 'type',
+                    model: 'FieldType',
+                }
+            })
             .exec();
         if (!updatedData) {
             throw new NotFoundException(`Data with ID ${id} not found`);

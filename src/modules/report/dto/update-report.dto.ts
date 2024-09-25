@@ -30,12 +30,14 @@ export class UpdateReportDto extends PartialType(CreateReportDto) {
     @ApiPropertyOptional({
         description: 'List of field IDs associated with the report (optional)',
         example: ['66f2a95d647374ca369dd24d', '66f2b098edd4bbb56ab3db2e'],
+        type: [String]
     })
     readonly fields?: string[];
 
     @ApiPropertyOptional({
         description: 'List of data IDs associated with the report (optional)',
         example: ['66f2a1f4f7e8da23c52f392f'],
+        type: [String]
     })
     readonly data?: string[];
 }

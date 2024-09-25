@@ -5,7 +5,7 @@ export class CreateDataDto {
     @ApiProperty({ description: 'The value of the data entry' })
     @IsNotEmpty()
     @IsString()
-    readonly value: string;
+    readonly name: string;
 
     @ApiProperty({ description: 'The ID of the FieldType associated with this data entry' })
     @IsNotEmpty()

@@ -6,6 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors();
   // Enable global validation for DTOs
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true, // Automatically strip non-whitelisted properties
@@ -13,6 +14,7 @@ async function bootstrap() {
     transform: true, // Automatically transform payloads to be objects typed according to their DTO classes
   }));
   setupSwagger(app)
+
 
 
   const port = process.env.PORT || 3016;
