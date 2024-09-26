@@ -16,7 +16,7 @@ export class DataService {
 
     async findAll(): Promise<Data[]> {
         return this.dataModel.find().populate({
-            path: 'type',
+            path: 'field',
             populate: {
                 path: 'type',
                 model: 'FieldType',
@@ -26,7 +26,7 @@ export class DataService {
 
     async findOne(id: string): Promise<Data> {
         const data = await this.dataModel.findById(id).populate({
-            path: 'type',
+            path: 'field',
             populate: {
                 path: 'type',
                 model: 'FieldType',
@@ -42,7 +42,7 @@ export class DataService {
         const updatedData = await this.dataModel
             .findByIdAndUpdate(id, updateDataDto, { new: true })
             .populate({
-                path: 'type',
+                path: 'field',
                 populate: {
                     path: 'type',
                     model: 'FieldType',

@@ -1,14 +1,16 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateDataDto {
-    @ApiProperty({ description: 'The value of the data entry' })
-    @IsNotEmpty()
-    @IsString()
-    readonly name: string;
 
     @ApiProperty({ description: 'The ID of the FieldType associated with this data entry' })
     @IsNotEmpty()
     @IsString()
-    readonly type: string;
+    readonly field: string;
+
+    @ApiProperty({ description: 'The actual value of the data entry', required: false })
+    @IsOptional()
+    @IsString()
+    readonly value?: string;
+
 }
