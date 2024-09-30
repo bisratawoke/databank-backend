@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { FieldType } from './field-type.schema';
@@ -13,8 +18,15 @@ export class FieldTypeService {
 
   // Create a new FieldType
   async create(createFieldTypeDto: CreateFieldTypeDto): Promise<FieldType> {
-    const createdFieldType = new this.fieldTypeModel(createFieldTypeDto);
-    return createdFieldType.save();
+    try {
+      const createdFieldType = new this.fieldTypeModel(createFieldTypeDto);
+      return await createdFieldType.save();
+    } catch (err) {
+      if (err.code == 11000) {
+        throw new BadRequestException('Fieldtype already exists');
+      } else
+        throw new InternalServerErrorException('Failed to create field type');
+    }
   }
 
   // Retrieve all FieldTypes
