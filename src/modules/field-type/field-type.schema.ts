@@ -5,6 +5,10 @@ import { Document } from 'mongoose';
 export class FieldType extends Document {
   @Prop({ required: true })
   name: string;
+  @Prop({ required: false })
+  description: string;
+  @Prop({ required: false })
+  exampleValue: string;
 }
 
 export const FieldTypeSchema = SchemaFactory.createForClass(FieldType);
