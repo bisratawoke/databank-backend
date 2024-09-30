@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { FieldType } from '../field-type/field-type.schema';
+import { FieldType } from 'src/modules/field-type/schemas/field-type.schema';
 
 @Schema()
 export class Field extends Document {

@@ -1,12 +1,14 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swager';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
+  const logger = new Logger();
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
+
   // Enable global validation for DTOs
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true, // Automatically strip non-whitelisted properties

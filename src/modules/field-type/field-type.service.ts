@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { FieldType } from './field-type.schema';
+import { FieldType } from './schemas/field-type.schema';
 import { CreateFieldTypeDto } from './dto/create-field-type.dto';
 import { UpdateFieldTypeDto } from './dto/update-field-type.dto';
 
@@ -14,7 +14,7 @@ import { UpdateFieldTypeDto } from './dto/update-field-type.dto';
 export class FieldTypeService {
   constructor(
     @InjectModel(FieldType.name) private fieldTypeModel: Model<FieldType>,
-  ) {}
+  ) { }
 
   // Create a new FieldType
   async create(createFieldTypeDto: CreateFieldTypeDto): Promise<FieldType> {
