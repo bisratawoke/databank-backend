@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { DataService } from './data.service';
 import { DataController } from './data.controller';
 import { Data, DataSchema } from './schemas/data.schema';
-import { Field, FieldSchema } from '../field/field.schema';
+import { Field, FieldSchema } from '../field/schemas/field.schema';
 
 
 @Module({

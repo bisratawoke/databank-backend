@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Field } from './field.schema';
 import { CreateFieldDto } from './dto/create-field.dto';
 import { UpdateFieldDto } from './dto/update-field.dto';
+import { Field } from './schemas/field.schema';
 
 @Injectable()
 export class FieldService {
-  constructor(@InjectModel(Field.name) private fieldModel: Model<Field>) {}
+  constructor(@InjectModel(Field.name) private fieldModel: Model<Field>) { }
 
   async create(createFieldDto: CreateFieldDto): Promise<Field> {
     const createdField = new this.fieldModel(createFieldDto);

@@ -4,8 +4,8 @@ import { ReportService } from './report.service';
 import { ReportController } from './report.controller';
 import { Report, ReportSchema } from './schemas/report.schema';
 import { Data, DataSchema } from '../data/schemas/data.schema';
-import { Field, FieldSchema } from '../field/field.schema';
-import { FieldType, FieldTypeSchema } from '../field-type/field-type.schema';
+import { FieldType, FieldTypeSchema } from '../field-type/schemas/field-type.schema';
+import { Field, FieldSchema } from '../field/schemas/field.schema';
 
 @Module({
   imports: [
@@ -19,4 +19,4 @@ import { FieldType, FieldTypeSchema } from '../field-type/field-type.schema';
   controllers: [ReportController],
   providers: [ReportService],
 })
-export class ReportModule {}
+export class ReportModule { }

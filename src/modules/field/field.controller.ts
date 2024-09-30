@@ -1,9 +1,10 @@
 import { Controller, Get, Post, Body, Param, Delete, Put, HttpStatus } from '@nestjs/common';
 import { FieldService } from './field.service';
-import { Field } from './field.schema';
 import { CreateFieldDto } from './dto/create-field.dto';
 import { UpdateFieldDto } from './dto/update-field.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { FieldDto } from './dto/field.dto';
+import { Field } from './schemas/field.schema';
 
 @ApiTags('Fields')
 @Controller('fields')
@@ -13,7 +14,7 @@ export class FieldController {
   @Post()
   @ApiOperation({ summary: 'Create a new field' })
   @ApiBody({ type: CreateFieldDto })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Field successfully created.', type: Field })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Field successfully created.', type: FieldDto })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data.' })
   async create(@Body() createFieldDto: CreateFieldDto): Promise<Field> {
     return this.fieldService.create(createFieldDto);
@@ -21,7 +22,7 @@ export class FieldController {
 
   @Get()
   @ApiOperation({ summary: 'Get all fields' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Fields successfully retrieved.', type: [Field] })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Fields successfully retrieved.', type: [FieldDto] })
   async findAll(): Promise<Field[]> {
     return this.fieldService.findAll();
   }
@@ -29,7 +30,7 @@ export class FieldController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a field by ID' })
   @ApiParam({ name: 'id', type: String, description: 'Field ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Field successfully retrieved.', type: Field })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Field successfully retrieved.', type: FieldDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Field not found.' })
   async findById(@Param('id') id: string): Promise<Field> {
     return this.fieldService.findById(id);
@@ -39,7 +40,7 @@ export class FieldController {
   @ApiOperation({ summary: 'Update a field by ID' })
   @ApiParam({ name: 'id', type: String, description: 'Field ID' })
   @ApiBody({ type: UpdateFieldDto })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Field successfully updated.', type: Field })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Field successfully updated.', type: FieldDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Field not found.' })
   async update(
     @Param('id') id: string,

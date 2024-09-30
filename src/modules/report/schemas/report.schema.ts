@@ -1,7 +1,5 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Types } from 'mongoose';
-import { Data } from 'src/modules/data/schemas/data.schema';
-import { Field } from 'src/modules/field/field.schema';
 
 @Schema()
 export class Report extends Document {

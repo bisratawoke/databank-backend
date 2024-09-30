@@ -4,6 +4,7 @@ import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Report } from './schemas/report.schema';
+import { ReportDto } from './dto/report.dto';
 
 @ApiTags('Reports')
 @Controller('reports')
@@ -13,7 +14,7 @@ export class ReportController {
     @Post()
     @ApiOperation({ summary: 'Create a new report' })
     @ApiBody({ type: CreateReportDto })
-    @ApiResponse({ status: HttpStatus.CREATED, description: 'Report successfully created.', type: Report })
+    @ApiResponse({ status: HttpStatus.CREATED, description: 'Report successfully created.', type: ReportDto })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data.' })
     async create(@Body() createReportDto: CreateReportDto) {
         return this.reportService.create(createReportDto);
@@ -21,7 +22,7 @@ export class ReportController {
 
     @Get()
     @ApiOperation({ summary: 'Get all reports' })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Reports successfully retrieved.', type: [Report] })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Reports successfully retrieved.', type: [ReportDto] })
     async findAll() {
         return this.reportService.findAll();
     }
@@ -29,7 +30,7 @@ export class ReportController {
     @Get(':id')
     @ApiOperation({ summary: 'Get a report by ID' })
     @ApiParam({ name: 'id', type: String, description: 'Report ID' }) // Swagger doc for URL param
-    @ApiResponse({ status: HttpStatus.OK, description: 'Report successfully retrieved.', type: Report })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Report successfully retrieved.', type: ReportDto })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Report not found.' })
 
     async findOne(@Param('id') id: string) {
@@ -40,7 +41,7 @@ export class ReportController {
     @ApiOperation({ summary: 'Update a report by ID' })
     @ApiParam({ name: 'id', type: String, description: 'Report ID' })
     @ApiBody({ type: UpdateReportDto })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Report successfully updated.', type: Report })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Report successfully updated.', type: ReportDto })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Report not found.' })
     async update(@Param('id') id: string, @Body() updateReportDto: UpdateReportDto) {
         return this.reportService.update(id, updateReportDto);
