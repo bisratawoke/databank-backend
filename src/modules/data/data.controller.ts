@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, HttpStatus, Patch } from '@nestjs/common';
 import { DataService } from './data.service';
-import { CreateDataDto } from './dto/create-data.dto';
-import { UpdateDataDto } from './dto/update-data.dto';
+import { CreateDataDto, CreateMultipleDataDto } from './dto/create-data.dto';
+import { UpdateDataDto, UpdateMultipleDataDto } from './dto/update-data.dto';
 import { ApiOperation, ApiBody, ApiResponse, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Data } from './schemas/data.schema';
 import { DataDto } from './dto/data.dto';
@@ -22,6 +22,15 @@ export class DataController {
         return this.dataService.create(createDataDto);
     }
 
+    @Post('bulk')
+    @ApiOperation({ summary: 'Create multiple data entries' })
+    @ApiBody({ type: CreateMultipleDataDto })
+    @ApiResponse({ status: HttpStatus.CREATED, description: 'Data entries successfully created.' })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data.' })
+    async createMultiple(@Body() createMultipleDataDto: CreateMultipleDataDto) {
+        return this.dataService.createMultiple(createMultipleDataDto.dataEntries);
+    }
+
     @Get()
     @ApiOperation({ summary: 'Get all data entries' })
     @ApiResponse({ status: HttpStatus.OK, description: 'Data entries successfully retrieved.', type: [DataDto] })
@@ -37,6 +46,16 @@ export class DataController {
     async findOne(@Param('id') id: string) {
         return this.dataService.findOne(id);
     }
+
+    // @Patch(':id')
+    // @ApiOperation({ summary: 'Update data entries for a specific report' })
+    // @ApiParam({ name: 'id', type: String, description: 'Report ID' })
+    // @ApiBody({ type: UpdateMultipleDataDto })
+    // @ApiResponse({ status: HttpStatus.OK, description: 'Data entry successfully updated.', type: [DataDto] })
+    // @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Report not found.' })
+    // async update(@Param('id') id: string, @Body() updateMultipleDataDto: UpdateMultipleDataDto) {
+    //     return this.dataService.update(id, updateMultipleDataDto);
+    // }
 
     @Put(':id')
     @ApiOperation({ summary: 'Update a data entry by ID' })
