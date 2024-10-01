@@ -6,7 +6,9 @@ import { ReportModule } from './modules/report/report.module';
 import { DataModule } from './modules/data/data.module';
 import { FieldTypeModule } from './modules/field-type/field-type.module';
 import { FieldModule } from './modules/field/field.module';
-
+import { DepartmentModule } from './modules/department/department.module';
+import { CategoryModule } from './modules/category/category.module';
+import { SubCategoryModule } from './modules/sub-category/sub-category.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,6 +26,9 @@ import { FieldModule } from './modules/field/field.module';
     DataModule,
     FieldTypeModule,
     FieldModule,
+    DepartmentModule,
+    CategoryModule,
+    SubCategoryModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}
