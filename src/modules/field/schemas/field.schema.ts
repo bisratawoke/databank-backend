@@ -12,6 +12,15 @@ export class Field extends Document {
 
   @Prop({ default: false })
   filtered: boolean;
+
+  @Prop({ required: false })
+  required: boolean;
+
+  @Prop({ required: false })
+  description: string;
+
+  @Prop({ required: false })
+  defaultValue: string;
 }
 
 export const FieldSchema = SchemaFactory.createForClass(Field);
