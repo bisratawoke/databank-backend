@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateDataDto {
 
@@ -14,3 +15,13 @@ export class CreateDataDto {
     readonly value?: string;
 
 }
+
+
+export class CreateMultipleDataDto {
+    @ApiProperty({ description: 'An arry of CreateDataDto', type: [CreateDataDto] })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateDataDto)
+    readonly dataEntries: CreateDataDto[];
+}
+
