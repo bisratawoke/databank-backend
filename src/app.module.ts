@@ -6,6 +6,7 @@ import { ReportModule } from './modules/report/report.module';
 import { DataModule } from './modules/data/data.module';
 import { FieldTypeModule } from './modules/field-type/field-type.module';
 import { FieldModule } from './modules/field/field.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { FieldModule } from './modules/field/field.module';
     DataModule,
     FieldTypeModule,
     FieldModule,
+    UsersModule,
   ],
 })
 export class AppModule { }

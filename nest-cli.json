@@ -3,6 +3,22 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "plugins": ["@nestjs/swagger"]
+  },
+  "generateOptions": {
+    "spec": true,
+    "flat": false
+  },
+  "projects": {
+    "modules": {
+      "type": "application",
+      "root": "src/modules",
+      "entryFile": "main",
+      "sourceRoot": "src/modules",
+      "compilerOptions": {
+        "tsConfigPath": "tsconfig.app.json"
+      }
+    }
   }
 }

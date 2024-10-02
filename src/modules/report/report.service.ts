@@ -9,7 +9,7 @@ import { Report } from './schemas/report.schema';
 export class ReportService {
   constructor(
     @InjectModel(Report.name) private readonly reportModel: Model<Report>,
-  ) {}
+  ) { }
 
   async create(createReportDto: CreateReportDto): Promise<Report> {
     const createdReport = new this.reportModel(createReportDto);
@@ -28,6 +28,11 @@ export class ReportService {
       })
       .populate({
         path: 'data',
+        populate: {
+          path: 'field',
+          model: 'Field',
+
+        }
       })
       .exec();
   }
@@ -44,6 +49,11 @@ export class ReportService {
       })
       .populate({
         path: 'data',
+        populate: {
+          path: 'field',
+          model: 'Field',
+
+        }
       })
       .exec();
     if (!report) {
@@ -62,22 +72,22 @@ export class ReportService {
 
     const updatedFields = fields
       ? [
-          ...new Set([
-            ...existingReport.fields.map((field: Types.ObjectId) =>
-              field.toString(),
-            ),
-            ...fields,
-          ]),
-        ].map((field) => new Types.ObjectId(field))
+        ...new Set([
+          ...existingReport.fields.map((field: Types.ObjectId) =>
+            field.toString(),
+          ),
+          ...fields,
+        ]),
+      ].map((field) => new Types.ObjectId(field))
       : existingReport.fields;
 
     const updatedData = data
       ? [
-          ...new Set([
-            ...existingReport.data.map((d: Types.ObjectId) => d.toString()),
-            ...data,
-          ]),
-        ].map((d) => new Types.ObjectId(d))
+        ...new Set([
+          ...existingReport.data.map((d: Types.ObjectId) => d.toString()),
+          ...data,
+        ]),
+      ].map((d) => new Types.ObjectId(d))
       : existingReport.data;
 
     const updatedReport = await this.reportModel
