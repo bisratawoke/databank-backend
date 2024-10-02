@@ -8,7 +8,7 @@ export class SubCategory extends Document {
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Report' }],
   })
-  category: Types.ObjectId[];
+  report: Types.ObjectId[];
 }
 
 export const SubCategorySchema = SchemaFactory.createForClass(SubCategory);

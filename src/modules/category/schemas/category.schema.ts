@@ -6,9 +6,9 @@ export class Category extends Document {
   @Prop({ required: true, unique: true, type: String })
   name: string;
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subcategory' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory' }],
   })
-  category: Types.ObjectId[];
+  subcategory: Types.ObjectId[];
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);

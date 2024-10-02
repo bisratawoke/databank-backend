@@ -24,9 +24,7 @@ export class SubCategoryService {
   ): Promise<SubCategory> {
     const createdSubCategory = new this.subCategoryModel({
       ...createSubCategoryDto,
-      category: createSubCategoryDto.category.map(
-        (id) => new Types.ObjectId(id),
-      ),
+      category: createSubCategoryDto.report.map((id) => new Types.ObjectId(id)),
     });
     return createdSubCategory.save();
   }
@@ -41,7 +39,7 @@ export class SubCategoryService {
     if (searchDto?.name) {
       filter['name'] = { $regex: searchDto.name, $options: 'i' }; // Case-insensitive search
     }
-    return this.subCategoryModel.find(filter).populate('category').exec();
+    return this.subCategoryModel.find(filter).populate('report').exec();
   }
 
   /**
@@ -57,7 +55,7 @@ export class SubCategoryService {
 
     const subCategory = await this.subCategoryModel
       .findById(id)
-      .populate('category')
+      .populate('report')
       .exec();
     if (!subCategory) {
       throw new NotFoundException(`SubCategory with id ${id} not found`);
@@ -81,15 +79,15 @@ export class SubCategoryService {
       ...updateSubCategoryDto,
     };
 
-    if (updateSubCategoryDto.category) {
-      updateData.category = updateSubCategoryDto.category.map(
+    if (updateSubCategoryDto.report) {
+      updateData.category = updateSubCategoryDto.report.map(
         (id) => new Types.ObjectId(id),
       );
     }
 
     const updatedSubCategory = await this.subCategoryModel
       .findByIdAndUpdate(id, updateData, { new: true })
-      .populate('category')
+      .populate('report')
       .exec();
 
     if (!updatedSubCategory) {

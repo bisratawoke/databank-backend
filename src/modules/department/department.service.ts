@@ -38,7 +38,18 @@ export class DepartmentService {
     if (searchDto?.name) {
       filter['name'] = { $regex: searchDto.name, $options: 'i' }; // Case-insensitive search
     }
-    return this.departmentModel.find(filter).populate('category').exec();
+    return this.departmentModel
+      .find(filter)
+      .populate({
+        path: 'category',
+        populate: {
+          path: 'subcategory',
+          populate: {
+            path: 'report',
+          },
+        },
+      })
+      .exec();
   }
 
   /**

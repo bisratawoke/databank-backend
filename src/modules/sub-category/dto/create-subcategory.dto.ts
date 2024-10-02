@@ -6,6 +6,7 @@ import {
   IsArray,
   ArrayNotEmpty,
   IsMongoId,
+  IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -26,10 +27,10 @@ export class CreateSubCategoryDto {
     required: false, // Assuming it's optional; adjust as needed
   })
   @IsArray({ message: 'Category must be an array of ObjectIds.' })
-  @ArrayNotEmpty({ message: 'Category array cannot be empty.' })
   @IsMongoId({
     each: true,
     message: 'Each category ID must be a valid MongoDB ObjectId.',
   })
-  readonly category: string[]; // Array of Report ObjectIds as strings
+  @IsOptional()
+  readonly report: string[]; // Array of Report ObjectIds as strings
 }

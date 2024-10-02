@@ -25,5 +25,5 @@ export class UpdateSubCategoryDto {
     each: true,
     message: 'Each category ID must be a valid MongoDB ObjectId.',
   })
-  readonly category?: string[]; // Array of Report ObjectIds as strings
+  readonly report?: string[]; // Array of Report ObjectIds as strings
 }
