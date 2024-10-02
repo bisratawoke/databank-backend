@@ -39,8 +39,6 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "@angular-devkit/core": "^18.2.6",
-    "@angular-devkit/schematics": "^18.2.6",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
