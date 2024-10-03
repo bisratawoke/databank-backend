@@ -22,7 +22,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 
-@ApiTags('departments') // Tag for grouping in Swagger UI
+@ApiTags('Department') // Tag for grouping in Swagger UI
 @Controller('departments')
 export class DepartmentController {
   constructor(private readonly departmentsService: DepartmentService) {}
