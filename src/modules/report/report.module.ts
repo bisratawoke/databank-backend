@@ -6,6 +6,7 @@ import { Report, ReportSchema } from './schemas/report.schema';
 import { Data, DataSchema } from '../data/schemas/data.schema';
 import { FieldType, FieldTypeSchema } from '../field-type/schemas/field-type.schema';
 import { Field, FieldSchema } from '../field/schemas/field.schema';
+import { DataService } from '../data/data.service';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import { Field, FieldSchema } from '../field/schemas/field.schema';
     ]),
   ],
   controllers: [ReportController],
-  providers: [ReportService],
+  providers: [ReportService, DataService],
 })
 export class ReportModule { }

@@ -1,6 +1,8 @@
-import { IsNotEmpty, IsString, IsDate, IsArray } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsArray, ValidateNested, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { CreateDataDto } from 'src/modules/data/dto/create-data.dto';
+import { UpdateDataDto } from 'src/modules/data/dto/update-data.dto';
 
 export class ReportDto {
     @ApiProperty({ description: 'Name of the report', example: 'Annual Sales Report' })
@@ -36,8 +38,8 @@ export class ReportDto {
 
     @ApiProperty({
         description: 'List of data IDs associated with the report',
-        example: ['66f2a1f4f7e8da23c52f392f'],
+        example: ['66f2a95d647374ca369dd24d', '66f2b098edd4bbb56ab3db2e'],
     })
     @IsArray()
-    readonly data: string[];   // List of data IDs
+    readonly dataIds?: string[]; // List of data IDs
 }

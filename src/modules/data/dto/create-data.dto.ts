@@ -3,7 +3,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CreateDataDto {
-
     @ApiProperty({ description: 'The ID of the FieldType associated with this data entry' })
     @IsNotEmpty()
     @IsString()
@@ -18,6 +17,10 @@ export class CreateDataDto {
 
 
 export class CreateMultipleDataDto {
+    @IsNotEmpty()
+    @IsString()
+    readonly reportId: string;
+
     @ApiProperty({ description: 'An arry of CreateDataDto', type: [CreateDataDto] })
     @IsArray()
     @ValidateNested({ each: true })
