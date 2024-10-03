@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ReportDto } from './report.dto';
 import { Type } from 'class-transformer';
+import { UpdateDataDto } from 'src/modules/data/dto/update-data.dto';
+import { IsArray, ValidateNested } from 'class-validator';
+import { CreateDataDto } from 'src/modules/data/dto/create-data.dto';
 
 export class CreateReportDto extends ReportDto {
     @ApiProperty({
@@ -37,7 +40,7 @@ export class CreateReportDto extends ReportDto {
 
     @ApiProperty({
         description: 'List of data IDs associated with the report',
-        example: ['66f2a1f4f7e8da23c52f392f'],
+        example: ['66f2a95d647374ca369dd24d', '66f2b098edd4bbb56ab3db2e'],
     })
-    readonly data: string[];
+    readonly data?: string[];
 }

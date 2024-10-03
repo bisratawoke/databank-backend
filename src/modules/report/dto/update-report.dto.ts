@@ -1,8 +1,30 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateReportDto } from './create-report.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsOptional, IsArray, ValidateNested, IsMongoId } from 'class-validator';
+import { UpdateDataDto } from 'src/modules/data/dto/update-data.dto';
+import { ReportDto } from './report.dto';
 
-export class UpdateReportDto extends PartialType(CreateReportDto) {
+
+export class UpdateReportDataDto {
+    @ApiPropertyOptional({ description: 'ID of the data entry', example: '66fd34f4aee3c5d7a39773ba' })
+    @IsOptional()
+    @IsMongoId()
+    readonly _id?: string;
+
+    @ApiPropertyOptional({ description: 'ID of the FieldType associated with this data entry', example: '66f2a95d647374ca369dd24d' })
+    @IsOptional()
+    @IsMongoId()
+    readonly field?: string;
+
+    @ApiPropertyOptional({ description: 'Value of the data entry', example: 'Updated Value' })
+    @IsOptional()
+    readonly value: string;
+}
+
+
+export class UpdateReportDto {
     @ApiPropertyOptional({
         description: 'Name of the report (optional)',
         example: 'Updated Annual Sales Report',
@@ -35,9 +57,19 @@ export class UpdateReportDto extends PartialType(CreateReportDto) {
     readonly fields?: string[];
 
     @ApiPropertyOptional({
-        description: 'List of data IDs associated with the report (optional)',
-        example: ['66f2a1f4f7e8da23c52f392f'],
-        type: [String]
+        description: 'List of updated data entries',
+        type: [UpdateReportDataDto],
     })
-    readonly data?: string[];
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => UpdateReportDataDto)
+    readonly data?: UpdateReportDataDto[];
+
+    // @ApiPropertyOptional({
+    //     description: 'List of data IDs associated with the report (optional)',
+    //     example: ['66f2a95d647374ca369dd24d', '66f2b098edd4bbb56ab3db2e'],
+    // })
+    // @IsArray()
+    // readonly data?: string[];
 }
+

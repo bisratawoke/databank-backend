@@ -1,14 +1,18 @@
 import { IsNotEmpty, IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class UpdateDataDto {
-    @ApiProperty({ description: 'The ID of the FieldType associated with this data entry' })
+    @ApiPropertyOptional({ description: 'The ID of the data entry' })
+    @IsNotEmpty()
+    @IsString()
+    readonly _id?: string;
+    @ApiPropertyOptional({ description: 'The ID of the FieldType associated with this data entry' })
     @IsOptional()
     @IsString()
     readonly field?: string;
 
-    @ApiProperty({ description: 'The actual value of the data entry', required: false })
+    @ApiPropertyOptional({ description: 'The actual value of the data entry', required: false })
     @IsOptional()
     @IsString()
     readonly value?: string;
@@ -21,3 +25,5 @@ export class UpdateMultipleDataDto {
     @Type(() => UpdateDataDto)
     readonly dataEntries: UpdateDataDto[];
 }
+
+
