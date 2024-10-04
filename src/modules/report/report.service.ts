@@ -18,7 +18,7 @@ export class ReportService {
     @InjectModel(Report.name) private readonly reportModel: Model<Report>,
     @InjectModel(Data.name) private readonly dataModel: Model<Data>,
     private readonly dataService: DataService,
-  ) {}
+  ) { }
 
   async create(createReportDto: CreateReportDto): Promise<Report> {
     const createdReport = new this.reportModel(createReportDto);
@@ -79,6 +79,7 @@ export class ReportService {
 
   // Update report with new and existing data
   async update(id: string, updateReportDto: UpdateReportDto): Promise<Report> {
+    console.log("arguments recieved: ", { id, updateReportDto })
     const { fields, data } = updateReportDto;
 
     const existingReport = await this.reportModel.findById(id).exec();
@@ -88,22 +89,22 @@ export class ReportService {
 
     const updatedFields = fields
       ? [
-          ...new Set([
-            ...existingReport.fields.map((field: Types.ObjectId) =>
-              field.toString(),
-            ),
-            ...fields,
-          ]),
-        ].map((field) => new Types.ObjectId(field))
+        ...new Set([
+          ...existingReport.fields.map((field: Types.ObjectId) =>
+            field.toString(),
+          ),
+          ...fields,
+        ]),
+      ].map((field) => new Types.ObjectId(field))
       : existingReport.fields;
 
     const updatedData = data
       ? [
-          ...new Set([
-            ...existingReport.data.map((d: Types.ObjectId) => d.toString()),
-            ...data,
-          ]),
-        ].map((d) => new Types.ObjectId(d))
+        ...new Set([
+          ...existingReport.data.map((d: Types.ObjectId) => d.toString()),
+          ...data,
+        ]),
+      ].map((d) => new Types.ObjectId(d))
       : existingReport.data;
 
     const updatedReport = await this.reportModel

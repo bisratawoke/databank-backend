@@ -23,7 +23,7 @@ export class UpdateMultipleDataDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => UpdateDataDto)
-    readonly dataEntries: UpdateDataDto[];
+    readonly data: UpdateDataDto[];
 }
 
 

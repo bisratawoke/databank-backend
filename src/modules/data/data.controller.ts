@@ -48,12 +48,13 @@ export class DataController {
         return this.dataService.findOne(id);
     }
 
-    @Patch()
+    @Put('bulkUpdate')
     @ApiOperation({ summary: 'Update data entries for a specific report' })
     @ApiBody({ type: UpdateMultipleDataDto })
     @ApiResponse({ status: HttpStatus.OK, description: 'Data entry successfully updated.', type: [DataDto] })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Report not found.' })
     async update(@Body() updateMultipleDataDto: UpdateMultipleDataDto) {
+        console.log("updateMultipleDataDto:", updateMultipleDataDto);
         return this.dataService.updateMultiple(updateMultipleDataDto);
     }
 

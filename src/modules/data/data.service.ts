@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateDataDto, CreateMultipleDataDto } from './dto/create-data.dto';
@@ -60,29 +60,36 @@ export class DataService {
 
     // Update multiple data entries
     async updateMultiple(updateDataDtos: UpdateMultipleDataDto): Promise<Data[]> {
-        const bulkOps = updateDataDtos.dataEntries.map((entry) => ({
-            updateOne: {
-                filter: {
-                    _id: new Types.ObjectId(entry._id), // Match by data _id
-                    field: new Types.ObjectId(entry.field), // Ensure the field matches
+        try {
+
+            const bulkOps = updateDataDtos.data.map((entry) => ({
+                updateOne: {
+                    filter: {
+                        _id: new Types.ObjectId(entry._id), // Match by data _id
+                        field: new Types.ObjectId(entry.field), // Ensure the field matches
+                    },
+                    update: { $set: { value: entry.value } }, // Update the value
+                    upsert: true, // Insert if not found
                 },
-                update: { $set: { value: entry.value } }, // Update the value
-                upsert: true, // Insert if not found
-            },
-        }));
+            }));
 
-        await this.dataModel.bulkWrite(bulkOps);
+            await this.dataModel.bulkWrite(bulkOps);
 
-        // Return the updated data
-        const updatedData = await this.dataModel
-            .find({ _id: { $in: updateDataDtos.dataEntries.map((e) => e._id) } })
-            .populate({
-                path: 'field',
-                populate: { path: 'type', model: 'FieldType' },
-            })
-            .exec();
+            // Return the updated data
+            const updatedData = await this.dataModel
+                .find({ _id: { $in: updateDataDtos.data.map((e) => e._id) } })
+                .populate({
+                    path: 'field',
+                    populate: { path: 'type', model: 'FieldType' },
+                })
+                .exec();
 
-        return updatedData;
+            console.log("updatedData: ", updatedData)
+            return updatedData;
+        } catch (error) {
+            console.error(error);
+            throw new BadRequestException('Failed to update data');
+        }
     }
 
 
