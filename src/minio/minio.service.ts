@@ -16,6 +16,10 @@ export class MinioService implements OnModuleInit {
         console.log("minio initialized: ", this.minioClient);
     }
 
+    get client(): Minio.Client {
+        return this.minioClient;
+    }
+
     // Add methods for interacting with MinIO (e.g., upload, download)
     async uploadFileFromBuffer(bucketName: string, fileName: string, fileBuffer: Buffer) {
         await this.minioClient.putObject(bucketName, fileName, fileBuffer);
