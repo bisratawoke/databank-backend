@@ -9,6 +9,7 @@ import { FieldModule } from './modules/field/field.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { CategoryModule } from './modules/category/category.module';
 import { SubCategoryModule } from './modules/sub-category/sub-category.module';
+import { MinioModule } from './minio/minio.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,6 +30,7 @@ import { SubCategoryModule } from './modules/sub-category/sub-category.module';
     DepartmentModule,
     CategoryModule,
     SubCategoryModule,
+    MinioModule
   ],
 })
-export class AppModule {}
+export class AppModule { }
