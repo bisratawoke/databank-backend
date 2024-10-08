@@ -79,7 +79,7 @@ export class PublicationService {
 
     // Generate a public URL for a file in the specified bucket
     generatePublicUrl(bucketName: string, filePath: string): string {
-        const minioServerUrl = `http://localhost:9000`; // Change this to your MinIO server URL
+        const minioServerUrl = `${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}`;
         return `${minioServerUrl}/${bucketName}/${filePath}`;
     }
 
