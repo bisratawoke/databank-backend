@@ -10,6 +10,7 @@ import { DepartmentModule } from './modules/department/department.module';
 import { CategoryModule } from './modules/category/category.module';
 import { SubCategoryModule } from './modules/sub-category/sub-category.module';
 import { MinioModule } from './minio/minio.module';
+import { PublicationModule } from './modules/publication/publication.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,7 +31,8 @@ import { MinioModule } from './minio/minio.module';
     DepartmentModule,
     CategoryModule,
     SubCategoryModule,
-    MinioModule
+    MinioModule,
+    PublicationModule
   ],
 })
 export class AppModule { }

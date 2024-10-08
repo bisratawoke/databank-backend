@@ -13,7 +13,7 @@ export class MinioService implements OnModuleInit {
             accessKey: process.env.MINIO_ACCESS_KEY,
             secretKey: process.env.MINIO_SECRET_KEY,
         });
-        console.log("minio initialized: ", this.minioClient);
+        // console.log("minio initialized: ", this.minioClient);
     }
 
     get client(): Minio.Client {
