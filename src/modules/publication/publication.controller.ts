@@ -24,11 +24,6 @@ export class PublicationController {
     private readonly publicationService: PublicationService,
   ) {}
 
-  @Get('vs/:bucketName')
-  async getAll(@Param('bucketName') bucketName: string) {
-    const list = await this.publicationService.listFiles(bucketName);
-    return list;
-  }
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
