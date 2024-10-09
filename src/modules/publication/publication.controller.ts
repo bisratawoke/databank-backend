@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Res, UploadedFile, UseInterceptors, Patch } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MinioService } from 'src/minio/minio.service';
 import { PublicationService } from './publication.service';
@@ -7,38 +7,61 @@ import { Response } from 'express';
 
 @Controller('publications')
 export class PublicationController {
-
     constructor(
         private readonly minioService: MinioService,
         private readonly publicationService: PublicationService
     ) { }
 
-    // Upload a file with optional directory path
     @Post('upload')
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(
         @UploadedFile() file: Multer.File,
-        @Body('metadata') metadata: string, // File metadata from the request body
-        @Body('directory') directory: string // Optional directory to upload file to
+        @Body('metadata') metadata: string,
+        @Body('directory') directory: string
     ) {
         const buckets = await this.minioService.minioClient.listBuckets();
-        const bucketName = buckets[0].name; // Assuming you're using the first bucket
+        const bucketName = buckets[0].name;
 
         const fileBuffer = file.buffer;
         const parsedMetadata = JSON.parse(metadata);
+
         console.log(`Uploading file ${file.originalname} to bucket ${bucketName}`);
 
-        // If directory is provided, create a nested path
         const filePath = directory ? `${directory}/${file.originalname}` : file.originalname;
 
-        // Upload the file to the specified directory
-        await this.minioService.uploadFileFromBuffer(bucketName, filePath, fileBuffer);
+        // Upload the file with metadata
+        await this.publicationService.uploadFileFromBuffer(
+            bucketName,
+            filePath,
+            fileBuffer,
+            parsedMetadata
+        );
 
-        return { message: 'File uploaded successfully', metadata: parsedMetadata };
+        return {
+            message: 'File uploaded successfully',
+            metadata: parsedMetadata
+        };
     }
 
-    // List all files in the first bucket
-    @Get()
+    @Get('metadata/:fileName')
+    async getFileMetadata(@Param('fileName') fileName: string) {
+        const bucketName = 'mybucket';
+        const metadata = await this.publicationService.getFileMetadata(bucketName, fileName);
+        return { metadata };
+    }
+
+    @Patch('metadata/:fileName')
+    async updateFileMetadata(
+        @Param('fileName') fileName: string,
+        @Body('metadata') metadata: string
+    ) {
+        const bucketName = 'mybucket';
+        const parsedMetadata = JSON.parse(metadata);
+        await this.publicationService.updateFileMetadata(bucketName, fileName, parsedMetadata);
+        return { message: 'Metadata updated successfully' };
+    }
+
+    // Other existing methods remain the same...
     @Get()
     async listFiles() {
         const bucketName = 'mybucket';
@@ -51,57 +74,43 @@ export class PublicationController {
     }
 
 
-    // Delete a file by its file name
-    @Delete(':fileName')
-    async deleteFile(@Param('fileName') fileName: string) {
-        const bucketName = 'mybucket'; // Replace with your bucket name logic if needed
-        await this.publicationService.deleteFile(bucketName, fileName);
-        return { message: 'File deleted successfully' };
-    }
 
-    // Generate a pre-signed URL for downloading a file
     @Get('presigned-url')
     async generatePresignedUrl(
-        @Query('fileName') fileName: string,  // Name of the file to generate the link for
-        @Query('directory') directory: string,  // Optional directory where the file is stored
-        @Query('expiry') expiry: number  // Optional expiry time in seconds
+        @Query('fileName') fileName: string,
+        @Query('directory') directory: string,
+        @Query('expiry') expiry: number
     ) {
         const buckets = await this.minioService.minioClient.listBuckets();
         const bucketName = buckets[0].name;
 
-        // Generate the full file path including directory if provided
         const filePath = directory ? `${directory}/${fileName}` : fileName;
-        const presignedUrl = await this.publicationService.generatePresignedUrl(bucketName, filePath, expiry || 3600); // Default to 1 hour expiry
+        const presignedUrl = await this.publicationService.generatePresignedUrl(
+            bucketName,
+            filePath,
+            expiry || 3600
+        );
 
         return { url: presignedUrl };
     }
 
-    // @Get('download/:fileName')
-    // async downloadFile(@Param('fileName') fileName: string, @Res() res: Response) {
-    //     const bucketName = 'mybucket';
-
-    //     try {
-    //         // Generate a presigned URL that expires in 1 hour
-    //         const url = await this.minioService.generatePresignedUrl(bucketName, fileName, 3600);
-    //         return res.redirect(url); // Redirect to the presigned URL
-    //     } catch (err) {
-    //         res.status(500).json({ error: 'Error generating download link' });
-    //     }
-    // }
     @Get('download/:fileName')
     async downloadFile(@Param('fileName') fileName: string, @Res() res: Response) {
         const bucketName = 'mybucket';
 
         try {
-            // Generate a presigned URL that expires in 1 hour
             const url = await this.minioService.generatePublicUrl(bucketName, fileName);
-            console.log(
-                "url: " + url
-            )
-            return res.redirect(url); // Redirect to the presigned URL
+            console.log("url: " + url);
+            return res.redirect(url);
         } catch (err) {
             res.status(500).json({ error: 'Error generating download link' });
         }
     }
 
+    @Delete(':fileName')
+    async deleteFile(@Param('fileName') fileName: string) {
+        const bucketName = 'mybucket';
+        await this.publicationService.deleteFile(bucketName, fileName);
+        return { message: 'File deleted successfully' };
+    }
 }
