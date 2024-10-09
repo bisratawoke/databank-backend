@@ -5,6 +5,6 @@ import { MinioService } from 'src/minio/minio.service';
 
 @Module({
   controllers: [PublicationController],
-  providers: [PublicationService, MinioService],
+  providers: [PublicationService, MinioService]
 })
-export class PublicationModule {}
+export class PublicationModule { }
