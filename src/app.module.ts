@@ -32,7 +32,7 @@ import { PublicationModule } from './modules/publication/publication.module';
     CategoryModule,
     SubCategoryModule,
     MinioModule,
-    PublicationModule
+    PublicationModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}
