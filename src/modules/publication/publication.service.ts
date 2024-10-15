@@ -60,7 +60,7 @@ export class PublicationService {
     return `${minioServerUrl}/${bucketName}/${filePath}`;
   }
 
-  async listFiles(bucketName: string): Promise<any[]> {
+  async listFiles(bucketName: string, path: string): Promise<any[]> {
     return new Promise(async (resolve, reject) => {
       const objectsList = [];
       try {
@@ -72,7 +72,7 @@ export class PublicationService {
 
         const stream = this.minioService.client.listObjectsV2(
           bucketName,
-          '',
+          path,
           true,
         );
 

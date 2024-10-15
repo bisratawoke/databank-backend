@@ -11,6 +11,7 @@ import { CategoryModule } from './modules/category/category.module';
 import { SubCategoryModule } from './modules/sub-category/sub-category.module';
 import { MinioModule } from './minio/minio.module';
 import { PublicationModule } from './modules/publication/publication.module';
+import { MetastoreModule } from './modules/metastore/metastore.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,6 +34,7 @@ import { PublicationModule } from './modules/publication/publication.module';
     SubCategoryModule,
     MinioModule,
     PublicationModule,
+    MetastoreModule,
   ],
 })
 export class AppModule {}

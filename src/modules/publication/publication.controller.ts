@@ -84,10 +84,11 @@ export class PublicationController {
 
   // Other existing methods remain the same...
   @Get()
-  async listFiles() {
+  async listFiles(@Query('path') path: string) {
     const bucketName = 'mybucket';
     try {
-      const files = await this.publicationService.listFiles(bucketName);
+      console.log(path);
+      const files = await this.publicationService.listFiles(bucketName, path);
       return files;
     } catch (error) {
       throw new Error('Could not retrieve files');
