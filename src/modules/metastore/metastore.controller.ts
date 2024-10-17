@@ -13,11 +13,12 @@ import { MetastoreService } from './metastore.service';
 import { Metastore } from './schemas/metastore.schema'; // Adjust the import according to your project structure
 import { CreateMetastoreDto } from './dto/create-metastore.dto'; // Create DTO files for validation
 import { UpdateMetastoreDto } from './dto/update-metastore.dto'; // Create DTO files for validation
+import { MetastoreDto } from './dto/metastore.dto';
 
 @ApiTags('metastore')
 @Controller('metastore')
 export class MetastoreController {
-  constructor(private readonly metastoreService: MetastoreService) {}
+  constructor(private readonly metastoreService: MetastoreService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new metastore entry' })
@@ -29,7 +30,7 @@ export class MetastoreController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   async create(
     @Body() createMetastoreDto: CreateMetastoreDto,
-  ): Promise<Metastore> {
+  ): Promise<MetastoreDto> {
     return this.metastoreService.create(createMetastoreDto);
   }
 
@@ -52,7 +53,7 @@ export class MetastoreController {
     type: Metastore,
   })
   @ApiResponse({ status: 404, description: 'Metastore not found' })
-  async findOne(@Param('id') id: string): Promise<Metastore> {
+  async findOne(@Param('id') id: string): Promise<MetastoreDto> {
     return this.metastoreService.findOne(id);
   }
 
