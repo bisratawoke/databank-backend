@@ -8,6 +8,9 @@ export type MetastoreDocument = Metastore & Document;
 @Schema({ timestamps: true })
 export class Metastore {
   @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true })
   description: string;
 
   @Prop({ type: [String], required: true })

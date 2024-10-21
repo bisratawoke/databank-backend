@@ -9,6 +9,10 @@ import {
 export class UpdateMetastoreDto {
   @IsOptional()
   @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
   description?: string;
 
   @IsOptional()

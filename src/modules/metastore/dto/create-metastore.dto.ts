@@ -9,6 +9,10 @@ import {
 export class CreateMetastoreDto {
   @IsNotEmpty()
   @IsString()
+  title: string;
+
+  @IsNotEmpty()
+  @IsString()
   description: string;
 
   @IsArray()

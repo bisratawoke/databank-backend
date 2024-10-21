@@ -5,6 +5,10 @@ import { Types } from 'mongoose';
 export class MetastoreDto {
     @IsNotEmpty()
     @IsString()
+    title: string;
+    
+    @IsNotEmpty()
+    @IsString()
     description: string;
 
     @IsArray()

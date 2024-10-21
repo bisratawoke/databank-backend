@@ -45,6 +45,7 @@ export class PublicationService {
 
     // 5. Create metadata in Metastore
     const metastoreDoc = await this.metastoreService.create({
+      title: createPublicationDto.title,
       description: createPublicationDto.description,
       keyword: createPublicationDto.keyword,
       type: file.mimetype,

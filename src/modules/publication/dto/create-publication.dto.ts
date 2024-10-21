@@ -57,6 +57,15 @@ export class CreatePublicationDto {
     // Metastore specific fields
     @ApiProperty({
         type: 'string',
+        description: 'Title of the Publication',
+        example: 'Technical documentation for Project X'
+    })
+    @IsNotEmpty()
+    @IsString()
+    title: string;
+
+    @ApiProperty({
+        type: 'string',
         description: 'Description of the file',
         example: 'Technical documentation for Project X'
     })
