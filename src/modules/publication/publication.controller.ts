@@ -11,6 +11,9 @@ import {
   UseInterceptors,
   Patch,
   BadRequestException,
+  NotFoundException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -307,9 +310,20 @@ export class PublicationController {
     }
 
     try {
-      const url = this.publicationService.generatePublicUrl(publication.bucketName, publication.fileName);
-      return res.redirect(url);
+      // const url = this.publicationService.generatePublicUrl(publication.bucketName, publication.fileName);
+      // console.log("Ppublication URL:", url);
+      // return res.redirect(url);
+      const fileStream = await this.publicationService.minioService.client.getObject(
+        publication.bucketName,
+        publication.fileName
+      );
+
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${publication.fileName.split('/').pop()}"`);
+
+      fileStream.pipe(res);
     } catch (err) {
+      console.log('Error generating download link:', err);
       res.status(500).json({ error: 'Error generating download link' });
     }
   }
@@ -339,14 +353,36 @@ export class PublicationController {
     return { message: 'Metadata updated successfully', metadata: updatedMetadata };
   }
 
+
+
+  // @Delete(':id')
+  // @ApiOperation({ summary: 'Delete a file and associated data' })
+  // @ApiParam({ name: 'id', type: 'string', description: 'Publication ID' })
+  // @ApiParam({ name: 'forceDelete', type: 'boolean', description: 'Force delete flag', required: false })
+  // @ApiResponse({ status: 200, description: 'File and associated data deleted successfully' })
+  // @ApiResponse({ status: 404, description: 'Publication not found' })
+  // @ApiResponse({ status: 500, description: 'Internal server error' })
+  // async deleteFile(@Param('id') id: string, @Param('forceDelete') forceDelete?: boolean): Promise<{ message: string }> {
+  //   await this.publicationService.deletePublication(id, forceDelete);
+  //   return { message: 'File and associated data deleted successfully' };
+  // }
+
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a file' })
-  @ApiParam({ name: 'id', type: 'string' })
-  @ApiResponse({ status: 200, description: 'File deleted successfully' })
+  @ApiOperation({ summary: 'Delete a publication and associated data' })
+  @ApiParam({ name: 'id', type: 'string', description: 'Publication ID' })
+  @ApiQuery({ name: 'forceDelete', type: 'boolean', required: false, description: 'Force delete flag' })
+  @ApiResponse({ status: 200, description: 'Publication and associated data deleted successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - File not found or mismatched' })
   @ApiResponse({ status: 404, description: 'Publication not found' })
-  async deleteFile(@Param('id') id: string) {
-    await this.publicationService.delete(id);
-    return { message: 'File deleted successfully' };
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async deleteFile(
+    @Param('id') id: string,
+    @Query('forceDelete') forceDelete?: string
+  ): Promise<{ message: string }> {
+    const forceDeleteBool = forceDelete === 'true';
+    const result = await this.publicationService.deletePublication(id, forceDeleteBool);
+    return result;
+
   }
 
 }
