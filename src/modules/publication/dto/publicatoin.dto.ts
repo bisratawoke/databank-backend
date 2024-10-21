@@ -1,5 +1,5 @@
-// src/modules/publication/dto/create-publication.dto.ts
 import { IsString, IsOptional, IsDate, IsObject } from 'class-validator';
+import { MetastoreDto } from 'src/modules/metastore/dto/metastore.dto';
 
 export class PublicationDto {
     @IsString()
@@ -16,9 +16,14 @@ export class PublicationDto {
     @IsOptional()
     uploadDate?: Date;
 
+    // Metadata object representing the metastore details
     @IsObject()
     @IsOptional()
     metaStoreId?: string;
+
+    @IsObject()
+    @IsOptional()
+    metadata: any;
 
     @IsOptional()
     _id?: string;

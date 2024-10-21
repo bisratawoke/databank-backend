@@ -8,6 +8,7 @@ import { MetastoreService } from '../metastore/metastore.service';
 import { PublicationDto } from './dto/publicatoin.dto';
 import { CreateMetastoreDto } from '../metastore/dto/create-metastore.dto';
 import { CreatePublicationDto } from './dto/create-publication.dto';
+import { populate } from 'dotenv';
 
 @Injectable()
 export class PublicationService {
@@ -73,21 +74,44 @@ export class PublicationService {
     };
   }
 
-  async findAll(): Promise<Publication[]> {
-    return this.publicationModel.find().exec();
+  async findAll(): Promise<Partial<Publication>[] | Publication[]> {
+    return this.publicationModel.find()
+      .populate({ path: 'metaStoreId' })
+      .exec()
+      .then(publications => publications.map(pub => {
+        const publicationObj = pub.toObject();
+        const { metaStoreId, ...rest } = publicationObj; // Destructure to remove metaStoreId
+        return {
+          ...rest, // All other properties of the publication
+          metadata: metaStoreId  // Return the metaStoreId under metadata
+        };
+      }));
   }
 
-  async findOne(id: string): Promise<Publication> {
+
+  async findOne(id: string): Promise<Partial<PublicationDto>> {
     const publication = await this.publicationModel.findById(id).exec();
+
     if (!publication) {
       throw new NotFoundException('Publication not found');
     }
-    if (publication && publication.metaStoreId) {
+
+    const publicationObj = publication.toObject();
+
+    if (publication.metaStoreId) {
       const metadata = await this.metastoreService.findOne(publication.metaStoreId.toString());
-      return { ...publication.toObject(), metaStoreId: new Types.ObjectId(metadata._id), };
+
+      // Construct the response with metadata instead of metaStoreId
+      return {
+        ...publicationObj,
+        metadata,
+        metaStoreId: undefined, // Explicitly set metaStoreId to undefined to exclude it from the response
+      } as PublicationDto;
     }
-    return publication.toJSON();
+
+    return publicationObj.toJSON();
   }
+
 
   async delete(id: string): Promise<Publication> {
     const publication = await this.publicationModel.findByIdAndDelete(id).exec();
