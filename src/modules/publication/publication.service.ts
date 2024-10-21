@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MinioService } from 'src/minio/minio.service';
@@ -26,7 +26,11 @@ export class PublicationService {
   ): Promise<{ publication: Publication; metadata: any }> {
     // 1. Get bucket name
     const buckets = await this.minioService.client.listBuckets();
-    const bucketName = buckets[0].name;
+
+    if (!buckets.find((bucket) => bucket.name === createPublicationDto.bucketName)) {
+      throw new NotFoundException(`Bucket ${createPublicationDto.bucketName} not found. Create the Bucket first.`);
+    }
+    const bucketName = createPublicationDto.bucketName;
 
     // 2. Prepare file path
     const filePath = createPublicationDto.location
@@ -266,21 +270,90 @@ export class PublicationService {
     await this.uploadFileFromBuffer(bucketName, filePath, fileBuffer, metadata);
   }
 
-  async deleteFile(bucketName: string, fileName: string) {
-    try {
-      await this.minioService.client.removeObject(bucketName, fileName);
-      console.log(`File ${fileName} deleted successfully from MinIO`);
+  // async deleteFile(bucketName: string, fileName: string) {
+  //   try {
+  //     await this.minioService.client.removeObject(bucketName, fileName);
+  //     console.log(`File ${fileName} deleted successfully from MinIO`);
 
-      // Remove from Publication schema and delete associated metadata
-      const publication = await this.publicationModel.findOneAndDelete({ bucketName, fileName });
-      if (publication && publication.metaStoreId) {
-        await this.metastoreService.remove(publication.metaStoreId.toString());
-        console.log(`Metadata for file ${fileName} deleted successfully`);
+  //     // Remove from Publication schema and delete associated metadata
+  //     const publication = await this.publicationModel.findOneAndDelete({ bucketName, fileName });
+  //     if (publication && publication.metaStoreId) {
+  //       await this.metastoreService.remove(publication.metaStoreId.toString());
+  //       console.log(`Metadata for file ${fileName} deleted successfully`);
+  //     }
+  //     console.log(`File ${fileName} deleted successfully from Publication schema`);
+  //   } catch (err) {
+  //     console.error('Error deleting file:', err);
+  //     throw err;
+  //   }
+  // }
+
+  async deletePublication(id: string, forceDelete?: boolean): Promise<{ message: string }> {
+    console.log("forceDelete:", forceDelete);
+    const publication = await this.findOne(id);
+    if (!publication) {
+      throw new NotFoundException(`Publication with id ${id} not found`);
+    }
+
+    const { fileName, bucketName, metadata } = publication;
+
+    try {
+      // Step 1: Check if the file exists in MinIO
+      let fileExists = true;
+      try {
+        await this.minioService.client.statObject(bucketName, fileName);
+      } catch (error) {
+        if (error.code === 'NotFound') {
+          fileExists = false;
+          if (!forceDelete) {
+            throw new BadRequestException(`File ${fileName} not found in bucket ${bucketName}. Use forceDelete to remove database entries.`);
+          }
+        } else {
+          throw error;
+        }
       }
-      console.log(`File ${fileName} deleted successfully from Publication schema`);
-    } catch (err) {
-      console.error('Error deleting file:', err);
-      throw err;
+
+      // Step 2: If file exists, validate publication details
+      if (fileExists) {
+        const minioFileInfo = await this.minioService.client.statObject(bucketName, fileName);
+        console.log
+        if (minioFileInfo.size !== publication.metadata.size || minioFileInfo.lastModified.toISOString() !== publication.metadata.modified_date.toISOString()) {
+          if (!forceDelete) {
+            throw new BadRequestException('File details in MinIO do not match publication record. Use forceDelete to remove anyway.');
+          }
+        }
+      }
+
+      // Step 3: Delete from MinIO if file exists
+      if (fileExists) {
+        await this.minioService.client.removeObject(bucketName, fileName);
+      }
+
+      // Step 4: Delete metadata if exists
+      if (metadata) {
+        await this.metastoreService.remove(metadata._id.toString());
+      }
+
+      // Step 5: Delete from Publication schema
+      const deletedPublication = await this.publicationModel.findByIdAndDelete(id);
+      if (!deletedPublication) {
+        throw new Error('Publication was not found in the database during deletion');
+      }
+
+      console.log(`Publication ${id} and associated data deleted successfully`);
+      return {
+        message: fileExists
+          ? "Publication and associated data deleted successfully"
+          : "Publication database entries deleted successfully. File was already removed from MinIO.",
+      };
+    } catch (error) {
+      console.error(`Error deleting publication ${id}:`, error);
+
+      if (error instanceof BadRequestException) {
+        throw error; // Re-throw validation errors
+      }
+
+      throw new InternalServerErrorException(`Failed to delete publication ${id}. Partial deletion may have occurred.`);
     }
   }
 
