@@ -13,10 +13,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  DEPARTMENT_HEAD
+  DEPARTMENT_EXPERT
+  DISSEMINATION_HEAD
+  DISSEMINATION_EXPERT
+  DEPUTY_DIRECTOR
+}
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
+  id                     Int           @id @default(autoincrement())
+  email                  String        @unique
+  password               String
+  firstName              String
+  lastName               String
+  roles                  Role[]        @default([])
+  isEmailVerified        Boolean       @default(false)
+  emailVerificationToken String?
+  passwordResetToken     String?
+  passwordResetExpires   DateTime?
+  refreshToken           String?
+  isActive               Boolean       @default(false)
+  department             String?
+  lastLogin              DateTime?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  activityLogs           ActivityLog[]
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  details   Json?
+  ipAddress String?
+  userAgent String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }

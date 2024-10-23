@@ -7,8 +7,7 @@ export function setupSwagger(app: INestApplication): void {
         .setTitle('API for Data-bank Backend')
         .setVersion(version)
         .setDescription('This API provides endpoints for managing the Data-bank backend.')
-        .addBearerAuth()
-        .build();
+        .addBearerAuth().build();
 
     const document = SwaggerModule.createDocument(app, options);
 

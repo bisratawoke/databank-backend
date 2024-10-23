@@ -14,6 +14,7 @@ import { PublicationModule } from './modules/publication/publication.module';
 import { MetastoreModule } from './modules/metastore/metastore.module';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { NotifireModule } from './modules/notifire/notifire.module';
+import { AuthModule } from './modules/auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -38,6 +39,7 @@ import { NotifireModule } from './modules/notifire/notifire.module';
     PublicationModule,
     MetastoreModule,
     NotifireModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

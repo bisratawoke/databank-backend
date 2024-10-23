@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swager';
 import { ValidationPipe } from '@nestjs/common';
 import * as bodyParser from 'body-parser';
+import { AuthUserInterceptor } from './interceptors/auth-user.interceptor';
+import { UserService } from './modules/auth/services/user.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -13,6 +15,7 @@ async function bootstrap() {
   // Increase the body size limit
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
 
   // Enable global validation for DTOs
   app.useGlobalPipes(
