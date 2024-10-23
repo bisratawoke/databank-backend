@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
-import { RabbitMqService } from './notifire.service'; // Adjust path accordingly
+import { RabbitMqService } from './notifire.service';
 import { EmailService } from './EmailService';
 
 @Module({
