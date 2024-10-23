@@ -15,7 +15,7 @@ import { CreateMetastoreDto } from './dto/create-metastore.dto'; // Create DTO f
 import { UpdateMetastoreDto } from './dto/update-metastore.dto'; // Create DTO files for validation
 import { MetastoreDto } from './dto/metastore.dto';
 
-@ApiTags('metastore')
+@ApiTags('Metastore')
 @Controller('metastore')
 export class MetastoreController {
   constructor(private readonly metastoreService: MetastoreService) { }

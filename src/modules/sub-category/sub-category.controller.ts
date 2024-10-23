@@ -23,10 +23,10 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 
-@ApiTags('subcategories') // Tag for grouping in Swagger UI
+@ApiTags('Subcategories') // Tag for grouping in Swagger UI
 @Controller('subcategories')
 export class SubCategoryController {
-  constructor(private readonly subCategoriesService: SubCategoryService) {}
+  constructor(private readonly subCategoriesService: SubCategoryService) { }
 
   /**
    * Create a new SubCategory

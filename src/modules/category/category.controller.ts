@@ -21,10 +21,10 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 
-@ApiTags('Category')
+@ApiTags('Categories')
 @Controller('categories')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(private readonly categoryService: CategoryService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new category' })

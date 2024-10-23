@@ -12,6 +12,7 @@ import { SubCategoryModule } from './modules/sub-category/sub-category.module';
 import { MinioModule } from './minio/minio.module';
 import { PublicationModule } from './modules/publication/publication.module';
 import { MetastoreModule } from './modules/metastore/metastore.module';
+import { AuthModule } from './modules/auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -35,6 +36,7 @@ import { MetastoreModule } from './modules/metastore/metastore.module';
     MinioModule,
     PublicationModule,
     MetastoreModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

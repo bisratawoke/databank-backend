@@ -25,7 +25,7 @@ import { PublicationDto } from './dto/publicatoin.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 
-@ApiTags("publications")
+@ApiTags("Publications")
 @Controller('publications')
 export class PublicationController {
   constructor(
