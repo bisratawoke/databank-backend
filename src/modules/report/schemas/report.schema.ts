@@ -1,6 +1,12 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Types } from 'mongoose';
 
+export enum Status {
+  Pending = 'pending',
+  Approved = 'approved',
+  Rejected = 'rejected',
+}
+
 @Schema()
 export class Report extends Document {
   @Prop({ required: true })
@@ -20,6 +26,12 @@ export class Report extends Document {
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Data' }] })
   data: Types.ObjectId[];
+
+  @Prop({ enum: Status, default: Status.Pending })
+  status: Status;
+
+  @Prop({ enum: Status, default: Status.Pending })
+  data_status: Status;
 }
 
 export const ReportSchema = SchemaFactory.createForClass(Report);

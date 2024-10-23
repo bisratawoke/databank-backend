@@ -24,7 +24,7 @@ import { ReportDto } from './dto/report.dto';
 @ApiTags('Reports')
 @Controller('reports')
 export class ReportController {
-  constructor(private readonly reportService: ReportService) { }
+  constructor(private readonly reportService: ReportService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new report' })
@@ -86,8 +86,8 @@ export class ReportController {
     @Param('id') id: string,
     @Body() updateReportDto: UpdateReportDto,
   ) {
-    console.log("id:", id);
-    console.log("updateReportDto:", updateReportDto);
+    console.log('id:', id);
+    console.log('updateReportDto:', updateReportDto);
     return this.reportService.update(id, updateReportDto);
   }
 

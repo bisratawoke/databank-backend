@@ -1,15 +1,7 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsDate,
-  IsArray,
-  ValidateNested,
-  IsOptional,
-} from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsArray, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { CreateDataDto } from 'src/modules/data/dto/create-data.dto';
-import { UpdateDataDto } from 'src/modules/data/dto/update-data.dto';
+import { Status } from '../schemas/report.schema'; // Ensure this enum exists
 
 export class ReportDto {
   @ApiProperty({
@@ -50,12 +42,29 @@ export class ReportDto {
     example: ['66f2a95d647374ca369dd24d', '66f2b098edd4bbb56ab3db2e'],
   })
   @IsArray()
-  readonly fields: string[]; // List of field IDs
+  readonly fields: string[];
 
   @ApiProperty({
     description: 'List of data IDs associated with the report',
     example: ['66f2a95d647374ca369dd24d', '66f2b098edd4bbb56ab3db2e'],
   })
   @IsArray()
-  readonly data?: string[]; // List of data IDs
+  readonly data?: string[];
+
+  @ApiProperty({
+    description: 'Status of the report',
+    example: 'pending',
+    enum: Status,
+    default: Status.Pending,
+  })
+  @IsEnum(Status)
+  readonly status: Status = Status.Pending;
+  @ApiProperty({
+    description: 'Status of the data in the report',
+    example: 'pending',
+    enum: Status,
+    default: Status.Pending,
+  })
+  @IsEnum(Status)
+  readonly data_status: Status = Status.Pending;
 }

@@ -4,7 +4,10 @@ import { ReportService } from './report.service';
 import { ReportController } from './report.controller';
 import { Report, ReportSchema } from './schemas/report.schema';
 import { Data, DataSchema } from '../data/schemas/data.schema';
-import { FieldType, FieldTypeSchema } from '../field-type/schemas/field-type.schema';
+import {
+  FieldType,
+  FieldTypeSchema,
+} from '../field-type/schemas/field-type.schema';
 import { Field, FieldSchema } from '../field/schemas/field.schema';
 import { DataService } from '../data/data.service';
 
@@ -20,4 +23,4 @@ import { DataService } from '../data/data.service';
   controllers: [ReportController],
   providers: [ReportService, DataService],
 })
-export class ReportModule { }
+export class ReportModule {}

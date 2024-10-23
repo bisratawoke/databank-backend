@@ -1,6 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateReportDto } from './create-report.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum } from 'class-validator';
+import { Status } from '../schemas/report.schema'; // Ensure this enum exists
 
 export class UpdateReportDto extends PartialType(CreateReportDto) {
   @ApiPropertyOptional({
@@ -40,4 +42,19 @@ export class UpdateReportDto extends PartialType(CreateReportDto) {
     type: [String],
   })
   readonly data?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Status of the report (optional)',
+    example: 'pending',
+    enum: Status,
+  })
+  @IsEnum(Status)
+  readonly status?: Status;
+  @ApiPropertyOptional({
+    description: 'Status of the data in the report (optional)',
+    example: 'pending',
+    enum: Status,
+  })
+  @IsEnum(Status)
+  readonly data_status?: Status;
 }
