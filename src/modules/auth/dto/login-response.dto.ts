@@ -1,10 +1,10 @@
-import { User } from '@prisma/client';
 import { Expose } from "class-transformer";
 import { UserRole } from '../constants/user-role';
+import { User } from "../schemas/user.schema";
 
 export class UserResponseDto {
     @Expose()
-    id: number;
+    _id: string;
 
     @Expose()
     email: string;
@@ -34,7 +34,7 @@ export class UserResponseDto {
 
 export function userToDto(user: User): UserResponseDto {
     return {
-        id: user.id,
+        _id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,

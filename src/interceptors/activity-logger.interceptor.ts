@@ -133,12 +133,15 @@ export class ActivityLoggerInterceptor implements NestInterceptor {
 
         return next.handle().pipe(
             tap(async (responseBody) => {
+                // this.logger.debug("responseBody: ", responseBody)
                 try {
-                    let userId: number | undefined;
+                    let userId: string | undefined;
                     const duration = Date.now() - startTime;
 
                     // Determine user ID from various possible sources
                     userId = this.getUserId(request, responseBody);
+
+                    // this.logger.debug("userId: ", userId)
 
                     // Always log the activity, even for anonymous users
                     const sanitizedBody = this.sanitizeRequestBody(request.body);
@@ -208,13 +211,14 @@ export class ActivityLoggerInterceptor implements NestInterceptor {
         );
     }
 
-    private getUserId(request: any, responseBody?: any): number | undefined {
+    private getUserId(request: any, responseBody?: any): string | undefined {
+        // this.logger.debug("request: ", request)
         // Check multiple possible locations for user ID
         return (
             // From response body (e.g., login response)
-            responseBody?.user?.id ||
+            responseBody?.user?._id ||
             // From request user object
-            request.user?.id ||
+            request.user?._id ||
             // From session
             // request.session?.userId ||
             // From JWT token if available

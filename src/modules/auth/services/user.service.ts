@@ -2,19 +2,24 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../dto/user/create-user.dto';
 import { UpdateUserDto } from '../dto/user/update-user.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { User } from '@prisma/client';
-import { UserDto } from '../dto/user/user.dto';
-import { UserResponseDto, userToDto } from '../dto/login-response.dto';
+// import { PrismaService } from 'src/prisma/prisma.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from '../schemas/user.schema';
+
 
 @Injectable()
 export class UserService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        // private prisma: PrismaService,
+        @InjectModel(User.name) private readonly userModel: Model<User>,
 
-    async create(createUserDto: CreateUserDto) {
-        const existingUser = await this.prisma.user.findUnique({
-            where: { email: createUserDto.email },
-        });
+    ) { }
+
+    async create(createUserDto: CreateUserDto): Promise<User> {
+        const existingUser = await this.userModel.findOne({
+            email: createUserDto.email,
+        }).exec();
 
         if (existingUser) {
             throw new ConflictException('Email already exists');
@@ -22,49 +27,20 @@ export class UserService {
 
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-        return this.prisma.user.create({
-            data: {
-                ...createUserDto,
-                password: hashedPassword,
-            },
-            select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-                roles: true,
-                department: true,
-                isActive: true,
-                createdAt: true,
-            },
+        const createdUser = new this.userModel({
+            ...createUserDto,
+            password: hashedPassword,
         });
+
+        return createdUser.save();
     }
 
-    async findAll() {
-        return this.prisma.user.findMany({
-            select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-                roles: true,
-                department: true,
-                isActive: true,
-                lastLogin: true,
-            },
-        });
+    async findAll(): Promise<User[]> {
+        return this.userModel.find().select('-password').exec();
     }
 
-    async findOne(id: number) {
-        const user = await this.prisma.user.findUnique({
-            where: { id: Number(id) },
-            include: {
-                activityLogs: {
-                    orderBy: { createdAt: 'desc' },
-                    take: 10,
-                },
-            },
-        });
+    async findOne(id: string): Promise<User> {
+        const user = await this.userModel.findById(id).populate('activityLogs').exec();
 
         if (!user) {
             throw new NotFoundException(`User with ID ${id} not found`);
@@ -73,46 +49,58 @@ export class UserService {
         return user;
     }
 
-    async findByEmail(email: string) {
-        return this.prisma.user.findUnique({ where: { email } });
+    async findByEmail(email: string): Promise<User> {
+        return this.userModel.findOne({ email }).exec();
     }
 
-    async findByPasswordResetToken(token: string) {
-        return this.prisma.user.findFirst({
-            where: {
-                passwordResetToken: token,
-                passwordResetExpires: { gt: new Date() },
-            },
-        });
+    async findByPasswordResetToken(token: string): Promise<User> {
+        return this.userModel.findOne({
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: new Date() },
+        }).exec();
     }
 
-    async findByEmailVerificationToken(token: string) {
-        return this.prisma.user.findFirst({
-            where: { emailVerificationToken: token },
-        });
+    async findByEmailVerificationToken(token: string): Promise<User> {
+        return this.userModel.findOne({ emailVerificationToken: token }).exec();
     }
 
-    async update(id: number, updateUserDto: UpdateUserDto) {
+    async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
         const user = await this.findOne(id);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
 
         if (updateUserDto.password) {
             updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
         }
 
-        return this.prisma.user.update({
-            where: { id },
-            data: updateUserDto,
-        })
+        return this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec();
+    }
+
+    // Soft delete (deactivate user)
+    async softRemove(id: string) {
+        const user = await this.findOne(id);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        if (!user.isActive) {
+            throw new NotFoundException('User already deactivated');
+        }
+
+        const deactivateUser = await this.userModel.findByIdAndUpdate(id, {
+            isActive: false,
+        }).exec();
+
+        return deactivateUser;
+
 
     }
 
-    async remove(id: number) {
-        await this.findOne(id);
-        await this.prisma.user.delete({ where: { id } });
+    // Remove a user (hard delete)
+    async remove(id: string): Promise<void> {
+        const user = await this.findOne(id);
+        await this.userModel.findByIdAndDelete(id).exec();
     }
 
-    async softRemove(id: number) {
-        await this.findOne(id);
-        await this.prisma.user.update({ where: { id }, data: { isActive: false } });
-    }
 }

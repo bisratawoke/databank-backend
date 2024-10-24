@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PrismaModule } from './prisma/prisma.module';
+// import { PrismaModule } from './prisma/prisma.module';
 import { ReportModule } from './modules/report/report.module';
 import { DataModule } from './modules/data/data.module';
 import { FieldTypeModule } from './modules/field-type/field-type.module';
@@ -27,7 +27,7 @@ import { AuthModule } from './modules/auth/auth.module';
         password: process.env.DATABASE_PASS,
       },
     }),
-    PrismaModule,
+    // PrismaModule,
     ReportModule,
     DataModule,
     FieldTypeModule,
@@ -42,4 +42,4 @@ import { AuthModule } from './modules/auth/auth.module';
     AuthModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

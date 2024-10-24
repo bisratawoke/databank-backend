@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { plainToClass } from 'class-transformer';
 import { UserResponseDto } from '../dto/login-response.dto';
+import { User } from '../schemas/user.schema';
 
 
 @Injectable()
@@ -22,14 +23,14 @@ export class AuthService {
     private async generateAccessToken(user: any) {
         return this.jwtService.signAsync({
             email: user.email,
-            sub: user.id,
+            sub: user._id,
             roles: user.roles,
         });
     }
 
     private async generateRefreshToken(user: any) {
         return this.jwtService.signAsync(
-            { sub: user.id },
+            { sub: user._id },
             {
                 secret: this.configService.get('JWT_REFRESH_SECRET'),
                 expiresIn: '7d',
@@ -37,13 +38,22 @@ export class AuthService {
         );
     }
 
-    async validateUser(email: string, password: string): Promise<any> {
+    async validateUser(email: string, password: string): Promise<Partial<User>> {
         const user = await this.usersService.findByEmail(email);
-        if (user && await bcrypt.compare(password, user.password)) {
-            const { password, ...result } = user;
-            return result;
+        // if (user && await bcrypt.compare(password, user.password)) {
+        //     const { password, ...result } = user;
+        //     console.log(
+        //         "result: ", result
+        //     )
+        //     return result;
+        // }
+        // return null;
+        // If no user found or password doesn't match, return null
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return null;
         }
-        return null;
+
+        return user;
     }
 
     async login(loginDto: LoginDto) {
@@ -51,6 +61,9 @@ export class AuthService {
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');
         }
+
+        // MongoDB returns ObjectId, so cast it to string
+        const userId = user._id.toString();
 
         if (!user.isEmailVerified) {
             throw new UnauthorizedException('Please verify your email first');
@@ -61,7 +74,7 @@ export class AuthService {
             this.generateRefreshToken(user),
         ]);
 
-        await this.usersService.update(user.id, {
+        await this.usersService.update(userId, {
             lastLogin: new Date(),
             refreshToken: await bcrypt.hash(refreshToken, 10),
         });
@@ -113,7 +126,7 @@ export class AuthService {
         const resetToken = crypto.randomBytes(32).toString('hex');
         const hashedToken = await bcrypt.hash(resetToken, 10);
 
-        await this.usersService.update(user.id, {
+        await this.usersService.update(user._id.toString(), {
             passwordResetToken: hashedToken,
             passwordResetExpires: new Date(Date.now() + 3600000), // 1 hour
         });
@@ -142,7 +155,7 @@ export class AuthService {
             throw new BadRequestException('Invalid verification token');
         }
 
-        await this.usersService.update(user.id, {
+        await this.usersService.update(user._id.toString(), {
             isEmailVerified: true,
             emailVerificationToken: null,
         });

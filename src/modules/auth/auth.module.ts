@@ -9,10 +9,17 @@ import { UserService } from './services/user.service';
 import { UsersController } from './controllers/user.controller';
 import { ActivityLogService } from './services/activity-log.service';
 import { AdminInitializationService } from './services/admin-init.service';
+import { User, UserSchema } from './schemas/user.schema';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ActivityLog, ActivityLogSchema } from './schemas/activity-log.schema';
 
 
 @Module({
     imports: [
+        MongooseModule.forFeature([
+            { name: User.name, schema: UserSchema },
+            { name: ActivityLog.name, schema: ActivityLogSchema },
+        ]),
         ConfigModule.forRoot({ isGlobal: true }),
         PassportModule,
         JwtModule.registerAsync({

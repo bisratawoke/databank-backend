@@ -10,10 +10,10 @@ import { CreateUserDto } from '../dto/user/create-user.dto';
 import { UpdateUserDto } from '../dto/user/update-user.dto';
 import { CurrentUser } from 'src/decorators/current-user.decoratro';
 import { UserDto } from '../dto/user/user.dto';
-import { User } from '@prisma/client';
 import { UserResponseDto, userToDto } from '../dto/login-response.dto';
 import { AuthUserInterceptor } from 'src/interceptors/auth-user.interceptor';
 import { SuccessDto } from 'src/common/dto/success.dto';
+import { User } from '../schemas/user.schema';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -60,7 +60,7 @@ export class UsersController {
     @ApiResponse({ status: 403, description: 'Forbidden.' })
     @Roles(UserRole.ADMIN, UserRole.DEPARTMENT_HEAD)
     @Get(':id')
-    findOne(@Param('id') id: number) {
+    findOne(@Param('id') id: string) {
         return this.userService.findOne(id);
     }
 
@@ -83,7 +83,7 @@ export class UsersController {
     @ApiResponse({ status: 403, description: 'Forbidden.' })
     @Roles(UserRole.ADMIN)
     @Patch(':id')
-    update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+    update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
         return this.userService.update(id, updateUserDto);
     }
 
@@ -94,7 +94,7 @@ export class UsersController {
     @ApiResponse({ status: 403, description: 'Forbidden.' })
     @Roles(UserRole.ADMIN)
     @Delete(':id')
-    async remove(@Param('id') id: number): Promise<SuccessDto> {
+    async remove(@Param('id') id: string): Promise<SuccessDto> {
         await this.userService.remove(id);
         return { success: true };
     }
@@ -106,7 +106,7 @@ export class UsersController {
     @ApiResponse({ status: 403, description: 'Forbidden.' })
     @Roles(UserRole.ADMIN)
     @Delete(':id/soft')
-    async softRemove(@Param('id') id: number): Promise<SuccessDto> {
+    async softRemove(@Param('id') id: string): Promise<SuccessDto> {
         await this.userService.softRemove(id);
         return { success: true };
     }

@@ -21,13 +21,16 @@ export class AuthUserInterceptor implements NestInterceptor {
         const request = context.switchToHttp().getRequest();
         const jwt = <IJwtUser>request.user;
 
+        console.log(
+            "jwt", jwt
+        )
 
 
         if (!jwt) {
             throw new UnauthorizedException('No JWT token found');
         }
 
-        const user = await this.userService.findOne(jwt.id);
+        const user = await this.userService.findOne(jwt._id);
         if (!user) {
             throw new UnauthorizedException('User not found');
         }

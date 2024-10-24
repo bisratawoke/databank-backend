@@ -2,13 +2,17 @@ import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { PrismaService } from 'src/prisma/prisma.service';
+// import { PrismaService } from 'src/prisma/prisma.service';
 import { UserRole } from '../constants/user-role';
+import { User } from '../schemas/user.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class AdminInitializationService implements OnApplicationBootstrap {
     constructor(
-        private readonly prisma: PrismaService,
+        // private readonly prisma: PrismaService,
+        @InjectModel(User.name) private userModel: Model<User>,
         private readonly configService: ConfigService,
     ) { }
 
@@ -17,12 +21,8 @@ export class AdminInitializationService implements OnApplicationBootstrap {
     }
 
     private async initializeAdminIfNeeded() {
-        const adminExists = await this.prisma.user.findFirst({
-            where: {
-                roles: {
-                    has: UserRole.ADMIN,
-                }
-            },
+        const adminExists = await this.userModel.findOne({
+            roles: UserRole.ADMIN,
         });
 
         if (!adminExists) {
@@ -32,7 +32,7 @@ export class AdminInitializationService implements OnApplicationBootstrap {
             if (!adminEmail || !adminPassword) {
                 console.warn(
                     'WARNING: No admin account exists and no admin credentials provided in environment variables. ' +
-                    'System will generate temporary credentials.'
+                    'System will generate temporary credentials.',
                 );
 
                 const tempPassword = crypto.randomBytes(16).toString('hex');
@@ -55,15 +55,16 @@ export class AdminInitializationService implements OnApplicationBootstrap {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        return this.prisma.user.create({
-            data: {
-                email,
-                password: hashedPassword,
-                roles: [UserRole.ADMIN],
-                isEmailVerified: true,
-                firstName: 'System',
-                lastName: 'Administrator',
-            },
+        const newAdmin = new this.userModel({
+            email,
+            password: hashedPassword,
+            roles: [UserRole.ADMIN],
+            isEmailVerified: true,
+            firstName: 'System',
+            lastName: 'Administrator',
+            createdAt: new Date(),
         });
+
+        return newAdmin.save();
     }
 }
