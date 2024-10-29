@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   HttpStatus,
+  Patch,
 } from '@nestjs/common';
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
@@ -20,11 +21,32 @@ import {
 } from '@nestjs/swagger';
 import { Report } from './schemas/report.schema';
 import { ReportDto } from './dto/report.dto';
+import { UpdateStatusDto } from './dto/UpdateStatus.dto';
 
 @ApiTags('Reports')
 @Controller('reports')
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
+
+  @Patch(':id/status')
+  @ApiOperation({ summary: 'Update report status by ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Report ID' })
+  @ApiBody({ type: UpdateStatusDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report status successfully updated.',
+    type: ReportDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid report ID or input data.',
+  })
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() updateStatusDto: UpdateStatusDto,
+  ) {
+    return this.reportService.updateStatus(id, updateStatusDto);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new report' })

@@ -13,6 +13,9 @@ export class DepartmentService {
     @InjectModel(Department.name) private departmentModel: Model<Department>,
   ) {}
 
+  async getDepartmentHead(department: string) {
+    return { email: 'awoke199@gmail.com' };
+  }
   /**
    * Create a new Department
    * @param createDepartmentDto Data for creating a department
