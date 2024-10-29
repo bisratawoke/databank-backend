@@ -12,5 +12,6 @@ import { Department, DepartmentSchema } from './schemas/department.schema';
   ],
   controllers: [DepartmentController],
   providers: [DepartmentService],
+  exports: [DepartmentService],
 })
 export class DepartmentModule {}
