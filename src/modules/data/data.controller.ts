@@ -1,13 +1,16 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, HttpStatus, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, HttpStatus, Patch, UseGuards } from '@nestjs/common';
 import { DataService } from './data.service';
 import { CreateDataDto, CreateMultipleDataDto } from './dto/create-data.dto';
 import { UpdateDataDto, UpdateMultipleDataDto } from './dto/update-data.dto';
-import { ApiOperation, ApiBody, ApiResponse, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiResponse, ApiParam, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Data } from './schemas/data.schema';
 import { DataDto } from './dto/data.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Data')
-
 @Controller('data')
 export class DataController {
     constructor(private readonly dataService: DataService) { }

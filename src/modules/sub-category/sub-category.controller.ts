@@ -9,6 +9,7 @@ import {
   Delete,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { SubCategoryService } from './sub-category.service';
 import { CreateSubCategoryDto } from './dto/create-subcategory.dto';
@@ -21,9 +22,16 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from '../auth/guards/role.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { UserRole } from '../auth/constants/user-role';
 
+@ApiBearerAuth()
 @ApiTags('Subcategories') // Tag for grouping in Swagger UI
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('subcategories')
 export class SubCategoryController {
   constructor(private readonly subCategoriesService: SubCategoryService) { }
@@ -50,6 +58,7 @@ export class SubCategoryController {
    * Retrieve all SubCategories with optional search
    * GET /subcategories
    */
+  @Roles(UserRole.DEPARTMENT_HEAD)
   @Get()
   @ApiOperation({ summary: 'Retrieve all subcategories with optional search' })
   @ApiQuery({

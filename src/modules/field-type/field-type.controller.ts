@@ -7,14 +7,18 @@ import {
   Delete,
   Put,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { FieldTypeService } from './field-type.service';
 import { FieldType } from './schemas/field-type.schema';
 import { CreateFieldTypeDto } from './dto/create-field-type.dto';
 import { UpdateFieldTypeDto } from './dto/update-field-type.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { FieldTypeDto } from './dto/field-type.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Field Types')
 @Controller('field-types')
 export class FieldTypeController {

@@ -10,9 +10,11 @@ import {
 } from '../field-type/schemas/field-type.schema';
 import { Field, FieldSchema } from '../field/schemas/field.schema';
 import { DataService } from '../data/data.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     MongooseModule.forFeature([
       { name: Report.name, schema: ReportSchema },
       { name: Field.name, schema: FieldSchema },
@@ -23,4 +25,4 @@ import { DataService } from '../data/data.service';
   controllers: [ReportController],
   providers: [ReportService, DataService],
 })
-export class ReportModule {}
+export class ReportModule { }

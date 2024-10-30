@@ -12,27 +12,37 @@ import { AdminInitializationService } from './services/admin-init.service';
 import { User, UserSchema } from './schemas/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ActivityLog, ActivityLogSchema } from './schemas/activity-log.schema';
-
+import { JwtAuthGuard } from './guards/jwt.guard';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: User.name, schema: UserSchema },
-            { name: ActivityLog.name, schema: ActivityLogSchema },
-        ]),
-        ConfigModule.forRoot({ isGlobal: true }),
-        PassportModule,
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            useFactory: async (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET'),
-                signOptions: { expiresIn: '1d' },
-            }),
-            inject: [ConfigService],
-        }),
-    ],
-    providers: [AdminInitializationService, AuthService, UserService, ActivityLogService, JwtStrategy],
-    controllers: [AuthController, UsersController],
-    exports: [AuthService, UserService, ActivityLogService],
+  imports: [
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: ActivityLog.name, schema: ActivityLogSchema },
+    ]),
+    ConfigModule.forRoot({ isGlobal: true }),
+    PassportModule.register({}),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: '24h',
+        },
+      }),
+    }),
+  ],
+  providers: [
+    AdminInitializationService,
+    AuthService,
+    UserService,
+    ActivityLogService,
+    JwtStrategy,
+    JwtService,
+    JwtAuthGuard,
+  ],
+  controllers: [AuthController, UsersController],
+  exports: [AuthService, UserService, ActivityLogService, JwtService, JwtAuthGuard],
 })
 export class AuthModule { }

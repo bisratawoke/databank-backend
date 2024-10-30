@@ -15,10 +15,12 @@ import { MetastoreModule } from './modules/metastore/metastore.module';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { NotifireModule } from './modules/notifire/notifire.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { PortalUserModule } from './modules/auth/portal-user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
     MongooseModule.forRoot(process.env.DATABASE_URI, {
       dbName: process.env.DATABASE_NAME,
@@ -28,6 +30,7 @@ import { AuthModule } from './modules/auth/auth.module';
       },
     }),
     // PrismaModule,
+    AuthModule,
     ReportModule,
     DataModule,
     FieldTypeModule,
@@ -39,7 +42,7 @@ import { AuthModule } from './modules/auth/auth.module';
     PublicationModule,
     MetastoreModule,
     NotifireModule,
-    AuthModule,
+    PortalUserModule,
   ],
 })
 export class AppModule { }

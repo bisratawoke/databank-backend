@@ -7,14 +7,18 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { MetastoreService } from './metastore.service';
 import { Metastore } from './schemas/metastore.schema'; // Adjust the import according to your project structure
 import { CreateMetastoreDto } from './dto/create-metastore.dto'; // Create DTO files for validation
 import { UpdateMetastoreDto } from './dto/update-metastore.dto'; // Create DTO files for validation
 import { MetastoreDto } from './dto/metastore.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Metastore')
 @Controller('metastore')
 export class MetastoreController {

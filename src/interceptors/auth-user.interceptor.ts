@@ -1,46 +1,27 @@
-import {
-    CallHandler,
-    ExecutionContext,
-    Injectable,
-    NestInterceptor,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, UnauthorizedException } from '@nestjs/common';
 import { Observable } from 'rxjs';
-
-import { IJwtUser } from '../modules/auth/interfaces/jwt-user.interface';
 import { UserService } from '../modules/auth/services/user.service';
 
 @Injectable()
 export class AuthUserInterceptor implements NestInterceptor {
-    constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) { }
 
-    async intercept(
-        context: ExecutionContext,
-        next: CallHandler,
-    ): Promise<Observable<any>> {
-        const request = context.switchToHttp().getRequest();
-        const jwt = <IJwtUser>request.user;
+  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+    const request = context.switchToHttp().getRequest();
+    console.log("request in interceptor: ", request)
+    const user = request.user;
+    console.log("user in interceptor: ", user)
 
-        console.log(
-            "jwt", jwt
-        )
-
-
-        if (!jwt) {
-            throw new UnauthorizedException('No JWT token found');
-        }
-
-        const user = await this.userService.findOne(jwt._id);
-        if (!user) {
-            throw new UnauthorizedException('User not found');
-        }
-
-        // Logic was inverted - should throw if NOT active
-        if (!user.isActive) {
-            throw new UnauthorizedException('User is suspended');
-        }
-
-        request.user = user;
-        return next.handle();
+    if (!user) {
+      throw new UnauthorizedException('No authenticated user found');
     }
+
+    const fullUser = await this.userService.findOne(user.sub);
+    if (!fullUser || !fullUser.isActive) {
+      throw new UnauthorizedException('User not found or inactive');
+    }
+
+    request.user = fullUser;
+    return next.handle();
+  }
 }

@@ -5,65 +5,70 @@ import { ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import { UserRole } from '../../constants/user-role';
 
 export class UpdateUserDto {
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsEmail()
-    email?: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsEmail()
+  email?: string;
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsString()
-    @MinLength(8)
-    password?: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  password?: string;
 
-    @IsString()
-    firstName?: string;
+  @IsString()
+  firstName?: string;
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsString()
-    lastName?: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  lastName?: string;
 
-    @ApiPropertyOptional()
+  @ApiPropertyOptional()
 
-    @IsArray()
-    @IsOptional()
-    roles?: UserRole[];
+  @IsArray()
+  @IsOptional()
+  roles?: UserRole[];
 
-    @ApiPropertyOptional()
+  @ApiPropertyOptional()
 
-    @IsString()
-    @IsOptional()
-    department?: string;
+  @IsString()
+  @IsOptional()
+  department?: string;
 
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsString()
-    emailVerificationToken?: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  emailVerificationToken?: string;
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsBoolean()
-    isEmailVerified?: boolean;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isEmailVerified?: boolean;
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsDate()
-    lastLogin?: Date;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsString()
-    refreshToken?: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDate()
+  lastLogin?: Date;
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsString()
-    passwordResetToken?: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  refreshToken?: string;
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsDate()
-    passwordResetExpires?: Date;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  passwordResetToken?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDate()
+  passwordResetExpires?: Date;
 }

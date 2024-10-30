@@ -11,9 +11,7 @@ import {
   UseInterceptors,
   Patch,
   BadRequestException,
-  NotFoundException,
-  HttpException,
-  HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -21,11 +19,18 @@ import { PublicationService } from './publication.service';
 import { MetastoreService } from '../metastore/metastore.service';
 import { CreateMetastoreDto } from '../metastore/dto/create-metastore.dto';
 import { UpdateMetastoreDto } from '../metastore/dto/update-metastore.dto';
-import { PublicationDto } from './dto/publicatoin.dto';
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePublicationDto } from './dto/create-publication.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { Roles } from '../../decorators/roles.decorator';
+import { UserRole } from '../auth/constants/user-role';
+import { RolesGuard } from '../auth/guards/role.guard';
+import { AuthUserInterceptor } from 'src/interceptors/auth-user.interceptor';
 
+@ApiBearerAuth()
 @ApiTags("Publications")
+@UseGuards(JwtAuthGuard, RolesGuard)
+@UseInterceptors(AuthUserInterceptor)
 @Controller('publications')
 export class PublicationController {
   constructor(
@@ -207,9 +212,10 @@ export class PublicationController {
   }
 
 
-  @Get()
   @ApiOperation({ summary: 'Get all publications' })
   @ApiResponse({ status: 200, description: 'Return all publications' })
+  @Roles(UserRole.ADMIN, UserRole.DEPARTMENT_HEAD)
+  @Get()
   async findAll() {
     return this.publicationService.findAll();
   }

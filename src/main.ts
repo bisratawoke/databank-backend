@@ -1,10 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swager';
-import { ValidationPipe } from '@nestjs/common';
 import * as bodyParser from 'body-parser';
-import { AuthUserInterceptor } from './interceptors/auth-user.interceptor';
-import { UserService } from './modules/auth/services/user.service';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -16,7 +14,6 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
-
   // Enable global validation for DTOs
   app.useGlobalPipes(
     new ValidationPipe({
@@ -25,6 +22,9 @@ async function bootstrap() {
       transform: true, // Automatically transform payloads to be objects typed according to their DTO classes
     }),
   );
+
+
+
   setupSwagger(app);
 
   const port = process.env.PORT || 3016;

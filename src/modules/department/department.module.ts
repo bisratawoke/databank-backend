@@ -3,9 +3,11 @@ import { DepartmentController } from './department.controller';
 import { DepartmentService } from './department.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Department, DepartmentSchema } from './schemas/department.schema';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     MongooseModule.forFeature([
       { name: Department.name, schema: DepartmentSchema },
     ]),
@@ -13,4 +15,4 @@ import { Department, DepartmentSchema } from './schemas/department.schema';
   controllers: [DepartmentController],
   providers: [DepartmentService],
 })
-export class DepartmentModule {}
+export class DepartmentModule { }

@@ -7,11 +7,13 @@ import {
   Put,
   Delete,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -20,11 +22,14 @@ import {
 } from '@nestjs/swagger';
 import { Report } from './schemas/report.schema';
 import { ReportDto } from './dto/report.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Reports')
 @Controller('reports')
 export class ReportController {
-  constructor(private readonly reportService: ReportService) {}
+  constructor(private readonly reportService: ReportService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new report' })

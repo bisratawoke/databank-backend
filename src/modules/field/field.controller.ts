@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, HttpStatus, UseGuards } from '@nestjs/common';
 import { FieldService } from './field.service';
 import { CreateFieldDto } from './dto/create-field.dto';
 import { UpdateFieldDto } from './dto/update-field.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { FieldDto } from './dto/field.dto';
 import { Field } from './schemas/field.schema';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Fields')
 @Controller('fields')
 export class FieldController {

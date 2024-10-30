@@ -56,8 +56,8 @@ export class User extends Document {
     @Prop({ default: false })
     isActive: boolean;
 
-    @Prop({ type: String, default: null })
-    department?: string;
+    @Prop({ type: [{ type: Types.ObjectId, ref: 'Department' }], default: null })
+    department?: Types.ObjectId;
 
     @Prop({ type: Date, default: null })
     lastLogin?: Date;

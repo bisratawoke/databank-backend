@@ -2,25 +2,24 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from '../services/user.service';
+import { PortalUserService } from '../services/portal-user.service';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class PortalJwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    configService: ConfigService,
-    private userService: UserService,
+    private configService: ConfigService,
+    private portalUserService: PortalUserService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get<string>('JWT_SECRET'),
       ignoreExpiration: false,
+      secretOrKey: configService.get<string>('PORTAL_JWT_SECRET'),
     });
   }
 
-  async validate(payload: any) {
-    console.log("payload: ", payload);
-    const user = await this.userService.findOne(payload.sub);
-    if (!user || !user.isActive) {
+  async validatePortalUser(payload: any) {
+    const user = await this.portalUserService.findOne(payload.sub);
+    if (!user || !user.isVerified) {
       throw new UnauthorizedException();
     }
     return user;

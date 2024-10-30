@@ -41,7 +41,7 @@ export function userToDto(user: User): UserResponseDto {
         roles: user.roles.map((role) => role as UserRole),
         isActive: user.isActive,
         isEmailVerified: user.isEmailVerified,
-        department: user.department,
+        department: user.department ? user.department.toString() : null,
         lastLogin: user.lastLogin,
     };
 }
