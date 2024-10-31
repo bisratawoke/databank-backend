@@ -1,24 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { UserRole } from '../constants/user-role';
+import { Exclude } from 'class-transformer';
 
-// export interface IUser {
-//     _id?: string;
-//     email: string;
-//     password: string;
-//     firstName: string;
-//     lastName: string;
-//     roles: UserRole[];
-//     isEmailVerified: boolean;
-//     emailVerificationToken?: string;
-//     passwordResetToken?: string;
-//     passwordResetExpires?: Date;
-//     refreshToken?: string;
-//     isActive: boolean;
-//     department?: string;
-//     lastLogin?: Date;
-//     activityLogs: Types.ObjectId[];
-// }
 
 
 @Schema({ timestamps: true })
@@ -44,6 +28,7 @@ export class User extends Document {
     @Prop({ type: String, default: null })
     emailVerificationToken?: string;
 
+    @Exclude()
     @Prop({ type: String, default: null })
     passwordResetToken?: string;
 
@@ -56,8 +41,8 @@ export class User extends Document {
     @Prop({ default: false })
     isActive: boolean;
 
-    @Prop({ type: [{ type: Types.ObjectId, ref: 'Department' }], default: null })
-    department?: Types.ObjectId;
+    @Prop({ type: Types.ObjectId, ref: 'Department', default: null })
+    department: Types.ObjectId;
 
     @Prop({ type: Date, default: null })
     lastLogin?: Date;

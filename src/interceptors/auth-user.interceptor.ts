@@ -8,7 +8,6 @@ export class AuthUserInterceptor implements NestInterceptor {
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
-    console.log("request in interceptor: ", request)
     const user = request.user;
     console.log("user in interceptor: ", user)
 

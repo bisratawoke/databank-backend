@@ -11,8 +11,8 @@ import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { plainToClass } from 'class-transformer';
-import { UserResponseDto } from '../dto/login-response.dto';
 import { User } from '../schemas/user.schema';
+import { userToDto } from '../dto/user/user-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,13 +22,10 @@ export class AuthService {
     // private readonly mailService: MailService,
     private readonly configService: ConfigService,
   ) {
-    const secret = this.configService.get<string>('JWT_SECRET');
-    console.log('AuthService Initialization');
-    console.log('JWT_SECRET available:', !!secret);
   }
 
   private async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findOneWithCredentials(email);
     if (user && (await bcrypt.compare(password, user.password))) {
       if (!user.isEmailVerified) {
         throw new UnauthorizedException('Please verify your email first');
@@ -36,6 +33,7 @@ export class AuthService {
       if (!user.isActive) {
         throw new UnauthorizedException('Account is inactive');
       }
+      console.log("user obj: ", user);
       return user;
     }
     return null;
@@ -71,12 +69,10 @@ export class AuthService {
       refreshToken: await bcrypt.hash(refreshToken, 10),
       lastLogin: new Date(),
     });
-    const userResponse = plainToClass(UserResponseDto, user, {
-      excludeExtraneousValues: true,
-    });
+
 
     return {
-      user: userResponse,
+      user: userToDto(user),
       auth: {
         accessToken,
         refreshToken,
@@ -84,51 +80,6 @@ export class AuthService {
     };
   }
 
-  // async login(loginDto: LoginDto) {
-  //   console.log('Login attempt for email:', loginDto.email);
-
-  //   const user = await this.validateUser(loginDto.email, loginDto.password);
-  //   if (!user) {
-  //     throw new UnauthorizedException('Invalid credentials');
-  //   }
-
-  //   const payload = {
-  //     email: user.email,
-  //     sub: user._id.toString(),
-  //   };
-
-  //   console.log('Creating JWT with payload:', payload);
-
-  //   const secret = this.configService.get<string>('JWT_SECRET');
-  //   console.log('JWT_SECRET available during token creation:', !!secret);
-
-  //   const accessToken = await this.jwtService.signAsync(payload, {
-  //     secret: secret,
-  //     expiresIn: '24h',
-  //   });
-
-  //   console.log('JWT created successfully');
-
-  //   // Verify the token immediately after creation as a sanity check
-  //   try {
-  //     const verified = await this.jwtService.verifyAsync(accessToken, {
-  //       secret: secret,
-  //     });
-  //     console.log('Token verification successful:', !!verified);
-  //   } catch (error) {
-  //     console.error('Token verification failed:', error);
-  //     throw new Error('Token verification failed immediately after creation');
-  //   }
-
-  //   return {
-  //     user: {
-  //       id: user._id,
-  //       email: user.email,
-  //       roles: user.roles,
-  //     },
-  //     accessToken,
-  //   };
-  // }
 
 
   async refreshToken(refreshToken: string) {
@@ -137,7 +88,7 @@ export class AuthService {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       });
 
-      const user = await this.usersService.findOne(decoded.sub);
+      const user = await this.usersService.findOneWithCredentials(decoded.sub);
       if (!user || !user.refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
       }

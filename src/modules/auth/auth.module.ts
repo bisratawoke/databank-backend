@@ -13,12 +13,15 @@ import { User, UserSchema } from './schemas/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ActivityLog, ActivityLogSchema } from './schemas/activity-log.schema';
 import { JwtAuthGuard } from './guards/jwt.guard';
+import { Department, DepartmentSchema } from '../department/schemas/department.schema';
+import { RolesGuard } from './guards/role.guard';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: ActivityLog.name, schema: ActivityLogSchema },
+      { name: Department.name, schema: DepartmentSchema }
     ]),
     ConfigModule.forRoot({ isGlobal: true }),
     PassportModule.register({}),
@@ -41,8 +44,9 @@ import { JwtAuthGuard } from './guards/jwt.guard';
     JwtStrategy,
     JwtService,
     JwtAuthGuard,
+    RolesGuard,
   ],
   controllers: [AuthController, UsersController],
-  exports: [AuthService, UserService, ActivityLogService, JwtService, JwtAuthGuard],
+  exports: [AuthService, UserService, ActivityLogService, JwtService, JwtAuthGuard, RolesGuard],
 })
 export class AuthModule { }

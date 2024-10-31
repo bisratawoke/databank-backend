@@ -16,6 +16,8 @@ export class UpdateUserDto {
   @MinLength(8)
   password?: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   firstName?: string;
 
@@ -25,13 +27,11 @@ export class UpdateUserDto {
   lastName?: string;
 
   @ApiPropertyOptional()
-
   @IsArray()
   @IsOptional()
   roles?: UserRole[];
 
   @ApiPropertyOptional()
-
   @IsString()
   @IsOptional()
   department?: string;
