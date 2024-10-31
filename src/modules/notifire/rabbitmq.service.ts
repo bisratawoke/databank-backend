@@ -16,7 +16,7 @@ export class RabbitMqService {
     queue: 'logs_queue',
   })
   public async handleMessage(message: any) {
-    await this.emailService.sendEmail('testing', message.body, message.to);
+    // await this.emailService.sendEmail('testing', message.body, message.to);
     await this.notifireService.create({
       message: message.body,
       seen: false,
