@@ -76,7 +76,7 @@ export class UsersController {
   @ApiResponse({ type: UserResponseDto })
   @Patch('me')
   updateMe(@CurrentUser() user: User, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(user.id, updateUserDto);
+    return this.userService.update(user._id.toString(), updateUserDto);
   }
 
   @ApiOperation({ summary: 'Update a user' })
