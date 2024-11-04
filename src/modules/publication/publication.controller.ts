@@ -42,12 +42,13 @@ export class PublicationController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({
     summary: 'Upload a file with metadata',
-    description: 'Upload a file along with its metadata. Creates both Publication and Metastore records.'
+    description:
+      'Upload a file along with its metadata. Creates both Publication and Metastore records.',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     type: CreatePublicationDto,
-    description: 'File and metadata information'
+    description: 'File and metadata information',
   })
   @ApiResponse({
     status: 201,
@@ -57,83 +58,84 @@ export class PublicationController {
       properties: {
         message: {
           type: 'string',
-          example: 'File uploaded successfully'
+          example: 'File uploaded successfully',
         },
         publication: {
           type: 'object',
           properties: {
             _id: {
               type: 'string',
-              example: '507f1f77bcf86cd799439011'
+              example: '507f1f77bcf86cd799439011',
             },
             fileName: {
               type: 'string',
-              example: 'technical-docs/2024/document.pdf'
+              example: 'technical-docs/2024/document.pdf',
             },
             bucketName: {
               type: 'string',
-              example: 'my-bucket'
+              example: 'my-bucket',
             },
             metaStoreId: {
               type: 'string',
-              example: '507f1f77bcf86cd799439012'
+              example: '507f1f77bcf86cd799439012',
             },
             permanentLink: {
               type: 'string',
-              example: 'http://minio-server/my-bucket/technical-docs/2024/document.pdf'
+              example:
+                'http://minio-server/my-bucket/technical-docs/2024/document.pdf',
             },
             uploadDate: {
               type: 'string',
               format: 'date-time',
-              example: '2024-10-16T10:00:00.000Z'
-            }
-          }
+              example: '2024-10-16T10:00:00.000Z',
+            },
+          },
         },
         metadata: {
           type: 'object',
           properties: {
             _id: {
               type: 'string',
-              example: '507f1f77bcf86cd799439012'
+              example: '507f1f77bcf86cd799439012',
             },
             description: {
               type: 'string',
-              example: 'Technical documentation for Project X'
+              example: 'Technical documentation for Project X',
             },
             keyword: {
               type: 'array',
               items: {
-                type: 'string'
+                type: 'string',
               },
-              example: ['technical', 'documentation', 'guide']
+              example: ['technical', 'documentation', 'guide'],
             },
             type: {
               type: 'string',
-              example: 'application/pdf'
+              example: 'application/pdf',
             },
             size: {
               type: 'number',
-              example: 1024
+              example: 1024,
             },
             location: {
               type: 'string',
-              example: 'technical-docs/2024'
-            }
-          }
-        }
-      }
-    }
+              example: 'technical-docs/2024',
+            },
+          },
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request'
+    description: 'Bad request',
   })
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body() createPublicationDto: CreatePublicationDto
+    @Body() createPublicationDto: CreatePublicationDto,
   ) {
-    console.log("file:", file);
-    console.log("createPublicationDto:", createPublicationDto);
+    console.log('file:', file);
+    console.log('createPublicationDto:', createPublicationDto);
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -145,15 +147,12 @@ export class PublicationController {
       type: file.mimetype,
     };
 
-    const result = await this.publicationService.create(
-      file,
-      combinedData
-    );
+    const result = await this.publicationService.create(file, combinedData);
 
     return {
       message: 'File uploaded successfully',
       publication: result.publication,
-      metadata: result.metadata
+      metadata: result.metadata,
     };
   }
 
@@ -162,9 +161,9 @@ export class PublicationController {
   @ApiBody({
     schema: {
       properties: {
-        bucketName: { type: 'string' }
-      }
-    }
+        bucketName: { type: 'string' },
+      },
+    },
   })
   @ApiResponse({ status: 201, description: 'Bucket created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -180,7 +179,10 @@ export class PublicationController {
     type: CreateMetastoreDto, // Use type instead of schema
     description: 'File upload data for nested directory', // Optional description
   })
-  @ApiResponse({ status: 201, description: 'File uploaded successfully to nested directory' })
+  @ApiResponse({
+    status: 201,
+    description: 'File uploaded successfully to nested directory',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async uploadFileToNestedDirectory(
     @UploadedFile() file: Express.Multer.File,
@@ -192,7 +194,8 @@ export class PublicationController {
     }
 
     if (!bucketName) {
-      const buckets = await this.publicationService.minioService.client.listBuckets();
+      const buckets =
+        await this.publicationService.minioService.client.listBuckets();
       bucketName = buckets[0].name;
     }
 
@@ -205,7 +208,7 @@ export class PublicationController {
       createMetastoreDto.location,
       file.originalname,
       file.buffer,
-      createMetastoreDto
+      createMetastoreDto,
     );
 
     return { message: 'File uploaded successfully to nested directory' };
@@ -239,7 +242,9 @@ export class PublicationController {
     if (!publication) {
       throw new Error('Publication not found');
     }
-    const metadata = await this.metastoreService.findOne(publication.metaStoreId.toString());
+    const metadata = await this.metastoreService.findOne(
+      publication.metaStoreId.toString(),
+    );
     return { metadata };
   }
 
@@ -262,9 +267,13 @@ export class PublicationController {
   @ApiQuery({ name: 'path', required: false, type: 'string' })
   @ApiQuery({ name: 'bucketName', required: false, type: 'string' })
   @ApiResponse({ status: 200, description: 'Return the list of files' })
-  async listFiles(@Query('path') @Query('bucketName') bucketName: string, path?: string,) {
+  async listFiles(
+    @Query('path') @Query('bucketName') bucketName: string,
+    path?: string,
+  ) {
     if (!bucketName) {
-      const buckets = await this.publicationService.minioService.client.listBuckets();
+      const buckets =
+        await this.publicationService.minioService.client.listBuckets();
       bucketName = buckets[0].name;
     }
     try {
@@ -287,7 +296,8 @@ export class PublicationController {
     @Query('expiry') expiry: number,
   ) {
     if (!bucketName) {
-      const buckets = await this.publicationService.minioService.client.listBuckets();
+      const buckets =
+        await this.publicationService.minioService.client.listBuckets();
       bucketName = buckets[0].name;
     }
 
@@ -306,10 +316,7 @@ export class PublicationController {
   @ApiResponse({ status: 200, description: 'File download' })
   @ApiResponse({ status: 404, description: 'Publication not found' })
   @ApiResponse({ status: 500, description: 'Error generating download link' })
-  async downloadFile(
-    @Param('id') id: string,
-    @Res() res: Response,
-  ) {
+  async downloadFile(@Param('id') id: string, @Res() res: Response) {
     const publication = await this.publicationService.findOne(id);
     if (!publication) {
       throw new Error('Publication not found');
@@ -319,13 +326,17 @@ export class PublicationController {
       // const url = this.publicationService.generatePublicUrl(publication.bucketName, publication.fileName);
       // console.log("Ppublication URL:", url);
       // return res.redirect(url);
-      const fileStream = await this.publicationService.minioService.client.getObject(
-        publication.bucketName,
-        publication.fileName
-      );
+      const fileStream =
+        await this.publicationService.minioService.client.getObject(
+          publication.bucketName,
+          publication.fileName,
+        );
 
       res.setHeader('Content-Type', 'application/octet-stream');
-      res.setHeader('Content-Disposition', `attachment; filename="${publication.fileName.split('/').pop()}"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${publication.fileName.split('/').pop()}"`,
+      );
 
       fileStream.pipe(res);
     } catch (err) {
@@ -335,7 +346,9 @@ export class PublicationController {
   }
 
   @Patch('metadata/:id')
-  @ApiOperation({ summary: 'Update metadata for a publication by publication id' })
+  @ApiOperation({
+    summary: 'Update metadata for a publication by publication id',
+  })
   @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({ type: UpdateMetastoreDto })
   @ApiResponse({ status: 200, description: 'Metadata updated successfully' })
@@ -354,12 +367,13 @@ export class PublicationController {
       {
         ...updateMetadataDto,
         modified_date: new Date(),
-      }
+      },
     );
-    return { message: 'Metadata updated successfully', metadata: updatedMetadata };
+    return {
+      message: 'Metadata updated successfully',
+      metadata: updatedMetadata,
+    };
   }
-
-
 
   // @Delete(':id')
   // @ApiOperation({ summary: 'Delete a file and associated data' })
@@ -376,19 +390,31 @@ export class PublicationController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a publication and associated data' })
   @ApiParam({ name: 'id', type: 'string', description: 'Publication ID' })
-  @ApiQuery({ name: 'forceDelete', type: 'boolean', required: false, description: 'Force delete flag' })
-  @ApiResponse({ status: 200, description: 'Publication and associated data deleted successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request - File not found or mismatched' })
+  @ApiQuery({
+    name: 'forceDelete',
+    type: 'boolean',
+    required: false,
+    description: 'Force delete flag',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Publication and associated data deleted successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - File not found or mismatched',
+  })
   @ApiResponse({ status: 404, description: 'Publication not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async deleteFile(
     @Param('id') id: string,
-    @Query('forceDelete') forceDelete?: string
+    @Query('forceDelete') forceDelete?: string,
   ): Promise<{ message: string }> {
     const forceDeleteBool = forceDelete === 'true';
-    const result = await this.publicationService.deletePublication(id, forceDeleteBool);
+    const result = await this.publicationService.deletePublication(
+      id,
+      forceDeleteBool,
+    );
     return result;
-
   }
-
 }

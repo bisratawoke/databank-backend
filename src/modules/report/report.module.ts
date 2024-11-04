@@ -11,10 +11,23 @@ import {
 import { Field, FieldSchema } from '../field/schemas/field.schema';
 import { DataService } from '../data/data.service';
 import { AuthModule } from '../auth/auth.module';
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { DepartmentModule } from '../department/department.module';
 
 @Module({
   imports: [
     AuthModule,
+    DepartmentModule,
+    RabbitMQModule.forRoot(RabbitMQModule, {
+      exchanges: [
+        {
+          name: 'logs_exchange',
+          type: 'topic',
+        },
+      ],
+      uri: 'amqp://localhost:5672',
+      connectionInitOptions: { wait: false },
+    }),
     MongooseModule.forFeature([
       { name: Report.name, schema: ReportSchema },
       { name: Field.name, schema: FieldSchema },

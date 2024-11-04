@@ -1,18 +1,52 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { EmailService } from './EmailService';
+// notifire.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { CreateNotifireDto } from './dto/create-notifire.dto';
+import { UpdateNotifireDto } from './dto/update-notifire.dto';
+import { Notifire } from './schemas/notifire.schema';
 
 @Injectable()
-export class RabbitMqService {
-  private readonly logger = new Logger(RabbitMqService.name);
-  constructor(private readonly emailService: EmailService) {}
-  @RabbitSubscribe({
-    exchange: 'logs_exchange',
-    routingKey: 'email',
-    queue: 'logs_queue',
-  })
-  public async handleMessage(message: any) {
-    await this.emailService.sendEmail('testing', message.body, message.to);
-    this.logger.log(`Received message: ${JSON.stringify(message)}`);
+export class NotifireService {
+  constructor(
+    @InjectModel(Notifire.name) private readonly notifireModel: Model<Notifire>,
+  ) {}
+
+  async create(createNotifireDto: CreateNotifireDto): Promise<Notifire> {
+    const notifire = new this.notifireModel(createNotifireDto);
+    return notifire.save();
+  }
+
+  async findAll(): Promise<Notifire[]> {
+    return this.notifireModel.find().exec();
+  }
+
+  async findOne(id: string): Promise<Notifire> {
+    const notifire = await this.notifireModel.findById(id).exec();
+    if (!notifire) {
+      throw new NotFoundException(`Notification with ID "${id}" not found`);
+    }
+    return notifire;
+  }
+
+  async update(
+    id: string,
+    updateNotifireDto: UpdateNotifireDto,
+  ): Promise<Notifire> {
+    const notifire = await this.notifireModel
+      .findByIdAndUpdate(id, updateNotifireDto, { new: true })
+      .exec();
+    if (!notifire) {
+      throw new NotFoundException(`Notification with ID "${id}" not found`);
+    }
+    return notifire;
+  }
+
+  async remove(id: string): Promise<Notifire> {
+    const notifire = await this.notifireModel.findByIdAndDelete(id).exec();
+    if (!notifire) {
+      throw new NotFoundException(`Notification with ID "${id}" not found`);
+    }
+    return notifire;
   }
 }
