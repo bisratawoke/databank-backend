@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MinioService } from 'src/minio/minio.service';
@@ -13,22 +18,25 @@ import { populate } from 'dotenv';
 @Injectable()
 export class PublicationService {
   constructor(
-    @InjectModel(Publication.name) private publicationModel: Model<PublicationDocument>,
+    @InjectModel(Publication.name)
+    private publicationModel: Model<PublicationDocument>,
     public readonly minioService: MinioService,
-    private readonly metastoreService: MetastoreService
-  ) { }
-
-
+    private readonly metastoreService: MetastoreService,
+  ) {}
 
   async create(
     file: Express.Multer.File,
-    createPublicationDto: CreatePublicationDto
+    createPublicationDto: CreatePublicationDto,
   ): Promise<{ publication: Publication; metadata: any }> {
     // 1. Get bucket name
     const buckets = await this.minioService.client.listBuckets();
 
-    if (!buckets.find((bucket) => bucket.name === createPublicationDto.bucketName)) {
-      throw new NotFoundException(`Bucket ${createPublicationDto.bucketName} not found. Create the Bucket first.`);
+    if (
+      !buckets.find((bucket) => bucket.name === createPublicationDto.bucketName)
+    ) {
+      throw new NotFoundException(
+        `Bucket ${createPublicationDto.bucketName} not found. Create the Bucket first.`,
+      );
     }
     const bucketName = createPublicationDto.bucketName;
 
@@ -42,7 +50,7 @@ export class PublicationService {
       bucketName,
       filePath,
       file.buffer,
-      file.mimetype
+      file.mimetype,
     );
 
     // 4. Generate permanent link
@@ -57,7 +65,7 @@ export class PublicationService {
       size: file.size,
       location: filePath,
       modified_date: createPublicationDto.modified_date,
-      created_date: createPublicationDto.created_date
+      created_date: createPublicationDto.created_date,
     });
 
     // 6. Create publication document
@@ -66,7 +74,8 @@ export class PublicationService {
       bucketName: bucketName,
       metaStoreId: metastoreDoc._id,
       permanentLink: permanentLink,
-      uploadDate: new Date()
+      uploadDate: new Date(),
+      publicationType: createPublicationDto.publicationType,
     });
 
     const savedPublication = await newPublication.save();
@@ -74,24 +83,26 @@ export class PublicationService {
     // 7. Return both publication and metadata
     return {
       publication: savedPublication,
-      metadata: metastoreDoc
+      metadata: metastoreDoc,
     };
   }
 
   async findAll(): Promise<Partial<Publication>[] | Publication[]> {
-    return this.publicationModel.find()
+    return this.publicationModel
+      .find()
       .populate({ path: 'metaStoreId' })
       .exec()
-      .then(publications => publications.map(pub => {
-        const publicationObj = pub.toObject();
-        const { metaStoreId, ...rest } = publicationObj; // Destructure to remove metaStoreId
-        return {
-          ...rest, // All other properties of the publication
-          metadata: metaStoreId  // Return the metaStoreId under metadata
-        };
-      }));
+      .then((publications) =>
+        publications.map((pub) => {
+          const publicationObj = pub.toObject();
+          const { metaStoreId, ...rest } = publicationObj; // Destructure to remove metaStoreId
+          return {
+            ...rest, // All other properties of the publication
+            metadata: metaStoreId, // Return the metaStoreId under metadata
+          };
+        }),
+      );
   }
-
 
   async findOne(id: string): Promise<Partial<PublicationDto>> {
     const publication = await this.publicationModel.findById(id).exec();
@@ -103,11 +114,14 @@ export class PublicationService {
     const publicationObj = publication.toObject();
 
     if (publication.metaStoreId) {
-      const metadata = await this.metastoreService.findOne(publication.metaStoreId.toString());
+      const metadata = await this.metastoreService.findOne(
+        publication.metaStoreId.toString(),
+      );
 
       // Construct the response with metadata instead of metaStoreId
       return {
         ...publicationObj,
+        department: undefined,
         metadata,
         metaStoreId: undefined, // Explicitly set metaStoreId to undefined to exclude it from the response
       } as PublicationDto;
@@ -116,11 +130,15 @@ export class PublicationService {
     return publicationObj.toJSON();
   }
 
-
   async delete(id: string): Promise<Publication> {
-    const publication = await this.publicationModel.findByIdAndDelete(id).exec();
+    const publication = await this.publicationModel
+      .findByIdAndDelete(id)
+      .exec();
     if (publication) {
-      await this.minioService.client.removeObject(publication.bucketName, publication.fileName);
+      await this.minioService.client.removeObject(
+        publication.bucketName,
+        publication.fileName,
+      );
       if (publication.metaStoreId) {
         await this.metastoreService.remove(publication.metaStoreId.toString());
       }
@@ -132,7 +150,8 @@ export class PublicationService {
 
   async createBucket(bucketName: string) {
     try {
-      const bucketExists = await this.minioService.client.bucketExists(bucketName);
+      const bucketExists =
+        await this.minioService.client.bucketExists(bucketName);
       if (!bucketExists) {
         await this.minioService.client.makeBucket(bucketName, 'us-east-1');
         console.log(`Bucket ${bucketName} created successfully.`);
@@ -149,9 +168,17 @@ export class PublicationService {
     const buckets = await this.minioService.client.listBuckets();
     return buckets;
   }
-  async generatePresignedUrl(bucketName: string, filePath: string, expirySeconds: number = 3600) {
+  async generatePresignedUrl(
+    bucketName: string,
+    filePath: string,
+    expirySeconds: number = 3600,
+  ) {
     try {
-      const url = await this.minioService.client.presignedGetObject(bucketName, filePath, expirySeconds);
+      const url = await this.minioService.client.presignedGetObject(
+        bucketName,
+        filePath,
+        expirySeconds,
+      );
       console.log(`Generated presigned URL: ${url}`);
       return url;
     } catch (err) {
@@ -169,7 +196,8 @@ export class PublicationService {
     return new Promise(async (resolve, reject) => {
       const objectsList = [];
       try {
-        const bucketExists = await this.minioService.client.bucketExists(bucketName);
+        const bucketExists =
+          await this.minioService.client.bucketExists(bucketName);
         if (!bucketExists) {
           return reject(new Error(`Bucket ${bucketName} does not exist.`));
         }
@@ -177,7 +205,11 @@ export class PublicationService {
         if (!path) {
           path = '';
         }
-        const stream = this.minioService.client.listObjectsV2(bucketName, path, true);
+        const stream = this.minioService.client.listObjectsV2(
+          bucketName,
+          path,
+          true,
+        );
 
         stream.on('data', async (obj) => {
           objectsList.push(obj);
@@ -196,7 +228,11 @@ export class PublicationService {
     const locations = new Set<string>();
 
     for (const bucket of buckets) {
-      const stream = this.minioService.client.listObjects(bucket.name, '', true);
+      const stream = this.minioService.client.listObjects(
+        bucket.name,
+        '',
+        true,
+      );
 
       for await (const item of stream) {
         const key = item.name;
@@ -213,13 +249,23 @@ export class PublicationService {
     return Array.from(locations).sort();
   }
 
-  async uploadFileFromBuffer(bucketName: string, fileName: string, fileBuffer: Buffer, metadata: any) {
+  async uploadFileFromBuffer(
+    bucketName: string,
+    fileName: string,
+    fileBuffer: Buffer,
+    metadata: any,
+  ) {
     try {
       const stream = new Readable();
       stream.push(fileBuffer);
       stream.push(null);
 
-      await this.minioService.client.putObject(bucketName, fileName, stream, fileBuffer.length);
+      await this.minioService.client.putObject(
+        bucketName,
+        fileName,
+        stream,
+        fileBuffer.length,
+      );
       console.log('File uploaded successfully.');
 
       // Create metadata in Metastore
@@ -235,7 +281,7 @@ export class PublicationService {
           uploadDate: new Date(),
           metastoreId,
         },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
     } catch (err) {
       console.error('Error uploading file:', err);
@@ -243,15 +289,25 @@ export class PublicationService {
     }
   }
 
-  async updateFileMetadata(bucketName: string, fileName: string, newMetadata: any) {
+  async updateFileMetadata(
+    bucketName: string,
+    fileName: string,
+    newMetadata: any,
+  ) {
     try {
-      const publication = await this.publicationModel.findOne({ bucketName, fileName });
+      const publication = await this.publicationModel.findOne({
+        bucketName,
+        fileName,
+      });
       if (!publication) {
         throw new Error('Publication not found');
       }
 
       if (publication.metaStoreId) {
-        await this.metastoreService.update(publication.metaStoreId.toString(), newMetadata);
+        await this.metastoreService.update(
+          publication.metaStoreId.toString(),
+          newMetadata,
+        );
       } else {
         const newMetastore = await this.metastoreService.create(newMetadata);
         publication.metaStoreId = new Types.ObjectId(newMetastore._id);
@@ -265,7 +321,13 @@ export class PublicationService {
     }
   }
 
-  async uploadFileToNestedDirectory(bucketName: string, directory: string, fileName: string, fileBuffer: Buffer, metadata: any) {
+  async uploadFileToNestedDirectory(
+    bucketName: string,
+    directory: string,
+    fileName: string,
+    fileBuffer: Buffer,
+    metadata: any,
+  ) {
     const filePath = `${directory}/${fileName}`;
     await this.uploadFileFromBuffer(bucketName, filePath, fileBuffer, metadata);
   }
@@ -288,8 +350,11 @@ export class PublicationService {
   //   }
   // }
 
-  async deletePublication(id: string, forceDelete?: boolean): Promise<{ message: string }> {
-    console.log("forceDelete:", forceDelete);
+  async deletePublication(
+    id: string,
+    forceDelete?: boolean,
+  ): Promise<{ message: string }> {
+    console.log('forceDelete:', forceDelete);
     const publication = await this.findOne(id);
     if (!publication) {
       throw new NotFoundException(`Publication with id ${id} not found`);
@@ -306,7 +371,9 @@ export class PublicationService {
         if (error.code === 'NotFound') {
           fileExists = false;
           if (!forceDelete) {
-            throw new BadRequestException(`File ${fileName} not found in bucket ${bucketName}. Use forceDelete to remove database entries.`);
+            throw new BadRequestException(
+              `File ${fileName} not found in bucket ${bucketName}. Use forceDelete to remove database entries.`,
+            );
           }
         } else {
           throw error;
@@ -315,11 +382,20 @@ export class PublicationService {
 
       // Step 2: If file exists, validate publication details
       if (fileExists) {
-        const minioFileInfo = await this.minioService.client.statObject(bucketName, fileName);
-        console.log
-        if (minioFileInfo.size !== publication.metadata.size || minioFileInfo.lastModified.toISOString() !== publication.metadata.modified_date.toISOString()) {
+        const minioFileInfo = await this.minioService.client.statObject(
+          bucketName,
+          fileName,
+        );
+        console.log;
+        if (
+          minioFileInfo.size !== publication.metadata.size ||
+          minioFileInfo.lastModified.toISOString() !==
+            publication.metadata.modified_date.toISOString()
+        ) {
           if (!forceDelete) {
-            throw new BadRequestException('File details in MinIO do not match publication record. Use forceDelete to remove anyway.');
+            throw new BadRequestException(
+              'File details in MinIO do not match publication record. Use forceDelete to remove anyway.',
+            );
           }
         }
       }
@@ -335,16 +411,19 @@ export class PublicationService {
       }
 
       // Step 5: Delete from Publication schema
-      const deletedPublication = await this.publicationModel.findByIdAndDelete(id);
+      const deletedPublication =
+        await this.publicationModel.findByIdAndDelete(id);
       if (!deletedPublication) {
-        throw new Error('Publication was not found in the database during deletion');
+        throw new Error(
+          'Publication was not found in the database during deletion',
+        );
       }
 
       console.log(`Publication ${id} and associated data deleted successfully`);
       return {
         message: fileExists
-          ? "Publication and associated data deleted successfully"
-          : "Publication database entries deleted successfully. File was already removed from MinIO.",
+          ? 'Publication and associated data deleted successfully'
+          : 'Publication database entries deleted successfully. File was already removed from MinIO.',
       };
     } catch (error) {
       console.error(`Error deleting publication ${id}:`, error);
@@ -353,14 +432,26 @@ export class PublicationService {
         throw error; // Re-throw validation errors
       }
 
-      throw new InternalServerErrorException(`Failed to delete publication ${id}. Partial deletion may have occurred.`);
+      throw new InternalServerErrorException(
+        `Failed to delete publication ${id}. Partial deletion may have occurred.`,
+      );
     }
   }
 
-  private async uploadFileToMinio(bucketName: string, fileName: string, fileBuffer: Buffer, contentType: string): Promise<void> {
+  private async uploadFileToMinio(
+    bucketName: string,
+    fileName: string,
+    fileBuffer: Buffer,
+    contentType: string,
+  ): Promise<void> {
     const stream = new Readable();
     stream.push(fileBuffer);
     stream.push(null);
-    await this.minioService.client.putObject(bucketName, fileName, stream, fileBuffer.length);
+    await this.minioService.client.putObject(
+      bucketName,
+      fileName,
+      stream,
+      fileBuffer.length,
+    );
   }
 }
