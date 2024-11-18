@@ -1,4 +1,5 @@
 // src/departments/dto/update-department.dto.ts
+
 import { IsOptional, IsString, IsArray, IsMongoId } from 'class-validator';
 
 export class UpdateDepartmentDto {
@@ -9,5 +10,8 @@ export class UpdateDepartmentDto {
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  readonly category?: string[]; // Array of Category ObjectIds as strings
+  readonly category?: string[];
+  @IsOptional()
+  @IsMongoId({ message: 'Head must be a valid MongoDB ObjectId.' })
+  readonly head?: string;
 }

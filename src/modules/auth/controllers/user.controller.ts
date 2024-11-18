@@ -1,5 +1,24 @@
-import { Request, Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  Request,
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  UseInterceptors,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 
 import { UserService } from '../services/user.service';
 
@@ -24,10 +43,7 @@ import { PaginationQueryDto } from '../dto/user/paginated-user.dto';
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly userService: UserService,
-  ) { }
-
+  constructor(private readonly userService: UserService) {}
 
   @ApiOperation({ summary: 'Retrieve a current logged in user' })
   @ApiResponse({ status: 200, description: 'User retrieved successfully.' })
@@ -66,7 +82,6 @@ export class UsersController {
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
-
 
   @ApiOperation({ summary: 'Update my profile' })
   @ApiResponse({ status: 200, description: 'User updated successfully.' })

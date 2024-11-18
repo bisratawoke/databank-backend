@@ -1,5 +1,3 @@
-// src/subcategories/dto/update-subcategory.dto.ts
-
 import { IsOptional, IsString, IsArray, IsMongoId } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -25,5 +23,5 @@ export class UpdateSubCategoryDto {
     each: true,
     message: 'Each category ID must be a valid MongoDB ObjectId.',
   })
-  readonly report?: string[]; // Array of Report ObjectIds as strings
+  readonly report?: string[];
 }

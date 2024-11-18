@@ -45,4 +45,8 @@ export class PublicationDto {
   @IsString()
   @IsOptional()
   department?: string;
+
+  @IsString()
+  @IsOptional()
+  category?: string;
 }

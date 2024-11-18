@@ -1,5 +1,3 @@
-// src/subcategories/dto/search-subcategory.dto.ts
-
 import { IsOptional, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 

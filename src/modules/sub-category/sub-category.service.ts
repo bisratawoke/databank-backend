@@ -1,5 +1,3 @@
-// src/subcategories/subcategories.service.ts
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -14,11 +12,6 @@ export class SubCategoryService {
     @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategory>,
   ) {}
 
-  /**
-   * Create a new SubCategory
-   * @param createSubCategoryDto Data for creating a subcategory
-   * @returns The created SubCategory
-   */
   async create(
     createSubCategoryDto: CreateSubCategoryDto,
   ): Promise<SubCategory> {
@@ -29,11 +22,6 @@ export class SubCategoryService {
     return createdSubCategory.save();
   }
 
-  /**
-   * Retrieve all SubCategories with optional search
-   * @param searchDto Optional search parameters
-   * @returns Array of SubCategories
-   */
   async findAll(searchDto?: SearchSubCategoryDto): Promise<SubCategory[]> {
     const filter: any = {};
     if (searchDto?.name) {
@@ -42,12 +30,6 @@ export class SubCategoryService {
     return this.subCategoryModel.find(filter).populate('report').exec();
   }
 
-  /**
-   * Retrieve a single SubCategory by ID
-   * @param id SubCategory ID
-   * @returns The found SubCategory
-   * @throws NotFoundException if SubCategory not found
-   */
   async findOne(id: string): Promise<SubCategory> {
     if (!this.isValidObjectId(id)) {
       throw new NotFoundException(`SubCategory with id ${id} not found`);
@@ -63,18 +45,10 @@ export class SubCategoryService {
     return subCategory;
   }
 
-  /**
-   * Update a SubCategory by ID
-   * @param id SubCategory ID
-   * @param updateSubCategoryDto Data for updating the subcategory
-   * @returns The updated SubCategory
-   * @throws NotFoundException if SubCategory not found
-   */
   async update(
     id: string,
     updateSubCategoryDto: UpdateSubCategoryDto,
   ): Promise<SubCategory> {
-    // Create a new object to avoid mutating the DTO
     const updateData: Partial<UpdateSubCategoryDto> | any = {
       ...updateSubCategoryDto,
     };
@@ -96,12 +70,6 @@ export class SubCategoryService {
     return updatedSubCategory;
   }
 
-  /**
-   * Delete a SubCategory by ID
-   * @param id SubCategory ID
-   * @returns Void
-   * @throws NotFoundException if SubCategory not found
-   */
   async remove(id: string): Promise<void> {
     const result = await this.subCategoryModel.findByIdAndDelete(id).exec();
     if (!result) {
@@ -109,11 +77,6 @@ export class SubCategoryService {
     }
   }
 
-  /**
-   * Utility method to check if a string is a valid MongoDB ObjectId
-   * @param id The id string to validate
-   * @returns Boolean indicating validity
-   */
   private isValidObjectId(id: string): boolean {
     return Types.ObjectId.isValid(id);
   }

@@ -6,31 +6,95 @@ import { Department } from './schemas/department.schema';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { SearchDepartmentDto } from './dto/search-department.dto';
-
+import { User } from '../auth/schemas/user.schema';
+import { UserRole } from '../auth/constants/user-role';
 @Injectable()
 export class DepartmentService {
   constructor(
     @InjectModel(Department.name) private departmentModel: Model<Department>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
-  async getDepartmentHead(department: string) {
-    return { email: 'awoke199@gmail.com' };
+  public async isDepartmentHead(userId: string) {
+    const departmentHead = await this.getDepartmentHead(userId);
+    return userId == departmentHead._id;
+  }
+
+  public async getDepartmentHeadByDepartmentId(deptId: string) {
+    const department = await this.departmentModel
+      .findById(deptId)
+      .populate('head')
+      .exec();
+
+    return department.head;
+  }
+
+  public async getDepartmentHead(userId: string) {
+    const user = await this.userModel
+      .findById(userId)
+      .populate('department')
+      .exec();
+
+    if (!user || !user.department) {
+      throw new Error('User or department not found');
+    }
+
+    const departmentHead = await this.userModel.findOne({
+      department: user.department._id.toString(),
+      roles: { $in: [UserRole.DEPARTMENT_HEAD] },
+    });
+
+    return departmentHead
+      ? { email: departmentHead.email, _id: departmentHead._id.toString() }
+      : null;
   }
   /**
    * Create a new Department
    * @param createDepartmentDto Data for creating a department
    * @returns The created Department
    */
+  // async create(createDepartmentDto: CreateDepartmentDto): Promise<Department> {
+  //   const createdDepartment = new this.departmentModel({
+  //     ...createDepartmentDto,
+  //     category: createDepartmentDto.category.map(
+  //       (id) => new Types.ObjectId(id),
+  //     ),
+  //   });
+  //   return createdDepartment.save();
+  // }
+
   async create(createDepartmentDto: CreateDepartmentDto): Promise<Department> {
-    const createdDepartment = new this.departmentModel({
+    const departmentData: Partial<Department> | any = {
       ...createDepartmentDto,
-      category: createDepartmentDto.category.map(
+      category: createDepartmentDto.category?.map(
         (id) => new Types.ObjectId(id),
       ),
-    });
+    };
+
+    if (createDepartmentDto.head) {
+      departmentData.head = new Types.ObjectId(createDepartmentDto.head);
+    }
+
+    const createdDepartment = new this.departmentModel(departmentData);
     return createdDepartment.save();
   }
 
+  async setDepartmentHead(
+    departmentId: string,
+    headId: string,
+  ): Promise<Department> {
+    const department = await this.departmentModel.findById(departmentId);
+
+    if (!department) {
+      throw new NotFoundException(
+        `Department with ID ${departmentId} not found`,
+      );
+    }
+
+    department.head = new Types.ObjectId(headId);
+    await department.save();
+    return department;
+  }
   /**
    * Retrieve all Departments
    * @param searchDto Optional search parameters

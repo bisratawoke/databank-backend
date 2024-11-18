@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../dto/user/create-user.dto';
 import { UpdateUserDto } from '../dto/user/update-user.dto';
@@ -6,23 +11,27 @@ import { UpdateUserDto } from '../dto/user/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../schemas/user.schema';
-import { UserResponseDto, UsersResponseDto, userToDto } from '../dto/user/user-response.dto';
+import {
+  UserResponseDto,
+  UsersResponseDto,
+  userToDto,
+} from '../dto/user/user-response.dto';
 import { PaginationQueryDto } from '../dto/user/paginated-user.dto';
-
+import { UserRole } from '../constants/user-role';
 
 @Injectable()
 export class UserService {
   constructor(
     // private prisma: PrismaService,
     @InjectModel(User.name) private readonly userModel: Model<User>,
-
-  ) { }
-
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
-    const existingUser = await this.userModel.findOne({
-      email: createUserDto.email,
-    }).exec();
+    const existingUser = await this.userModel
+      .findOne({
+        email: createUserDto.email,
+      })
+      .exec();
 
     if (existingUser) {
       throw new ConflictException('Email already exists');
@@ -35,7 +44,9 @@ export class UserService {
       password: hashedPassword,
     });
 
-    const savedUser = await (await createdUser.save()).populate({
+    const savedUser = await (
+      await createdUser.save()
+    ).populate({
       path: 'department',
       populate: { path: 'category' },
     });
@@ -44,10 +55,13 @@ export class UserService {
   }
 
   async findAll(): Promise<UserResponseDto[] | null> {
-    const users = this.userModel.find().populate({
-      path: 'department',
-      populate: { path: 'category' },
-    }).exec();
+    const users = this.userModel
+      .find()
+      .populate({
+        path: 'department',
+        populate: { path: 'category' },
+      })
+      .exec();
     return userToDto(await users) as UserResponseDto[];
   }
 
@@ -57,7 +71,7 @@ export class UserService {
       limit = 10,
       search = '',
       sortBy = 'createdAt',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
     } = query;
 
     // Calculate skip value for pagination
@@ -69,7 +83,7 @@ export class UserService {
       searchFilter.$or = [
         { email: { $regex: search, $options: 'i' } },
         { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } }
+        { lastName: { $regex: search, $options: 'i' } },
       ];
     }
 
@@ -87,10 +101,10 @@ export class UserService {
           .limit(limit)
           .populate({
             path: 'department',
-            populate: { path: 'category' }
+            populate: { path: 'category' },
           })
           .exec(),
-        this.userModel.countDocuments(searchFilter)
+        this.userModel.countDocuments(searchFilter),
       ]);
 
       // Calculate pagination metadata
@@ -107,8 +121,8 @@ export class UserService {
           pageSize: limit,
           totalCount: total,
           hasNextPage,
-          hasPreviousPage
-        }
+          hasPreviousPage,
+        },
       };
     } catch (error) {
       console.error('Error in findAllPaginated:', error);
@@ -116,13 +130,23 @@ export class UserService {
     }
   }
 
-
+  async findDissimenationHead(): Promise<User[] | null> {
+    const user = await this.userModel
+      .find({ roles: UserRole.DISSEMINATION_HEAD })
+      .exec();
+    console.log('=========== in find dissimenation head =================');
+    console.log(user);
+    return user;
+  }
 
   async findOne(id: string): Promise<UserResponseDto> {
-    const user = await this.userModel.findById(id).populate({
-      path: 'department',
-      populate: { path: 'category' },
-    }).exec();
+    const user = await this.userModel
+      .findById(id)
+      .populate({
+        path: 'department',
+        populate: { path: 'category' },
+      })
+      .exec();
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -132,40 +156,45 @@ export class UserService {
   }
 
   async findOneWithCredentials(email: string): Promise<User | null> {
-    const user = await this.userModel.findOne({ email })
+    const user = await this.userModel
+      .findOne({ email })
       .populate({
         path: 'department',
         populate: { path: 'category' },
       })
       .exec();
-    return user
+    return user;
   }
-
 
   async findByEmail(email: string): Promise<UserResponseDto | null> {
-    const user = await this.userModel.findOne({ email })
+    const user = await this.userModel
+      .findOne({ email })
       .populate({
         path: 'department',
         populate: { path: 'category' },
       })
       .exec();
 
-    return user ? userToDto(user) as UserResponseDto : null;
+    return user ? (userToDto(user) as UserResponseDto) : null;
   }
 
-
   async findByPasswordResetToken(token: string): Promise<User | null> {
-    return this.userModel.findOne({
-      passwordResetToken: token,
-      passwordResetExpires: { $gt: new Date() },
-    }).exec();
+    return this.userModel
+      .findOne({
+        passwordResetToken: token,
+        passwordResetExpires: { $gt: new Date() },
+      })
+      .exec();
   }
 
   async findByEmailVerificationToken(token: string): Promise<User | null> {
     return this.userModel.findOne({ emailVerificationToken: token }).exec();
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
     const user = await this.findOne(id);
 
     if (!user) {
@@ -176,11 +205,8 @@ export class UserService {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      id,
-      updateUserDto,
-      { new: true }
-    )
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(id, updateUserDto, { new: true })
       .populate({
         path: 'department',
         populate: { path: 'category' },
@@ -200,11 +226,11 @@ export class UserService {
       throw new NotFoundException('User already deactivated');
     }
 
-    await this.userModel.findByIdAndUpdate(id, {
-      isActive: false,
-    }).exec();
-
-
+    await this.userModel
+      .findByIdAndUpdate(id, {
+        isActive: false,
+      })
+      .exec();
   }
 
   // Remove a user (hard delete)
@@ -212,5 +238,4 @@ export class UserService {
     const user = await this.findOne(id);
     await this.userModel.findByIdAndDelete(id).exec();
   }
-
 }

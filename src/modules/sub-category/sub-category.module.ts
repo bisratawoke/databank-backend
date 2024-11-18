@@ -15,4 +15,4 @@ import { AuthModule } from '../auth/auth.module';
   controllers: [SubCategoryController],
   providers: [SubCategoryService],
 })
-export class SubCategoryModule { }
+export class SubCategoryModule {}

@@ -9,6 +9,7 @@ import {
   HttpStatus,
   UseGuards,
   Patch,
+  Request,
 } from '@nestjs/common';
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
@@ -31,7 +32,7 @@ import { UpdateStatusDto } from './dto/UpdateStatus.dto';
 @ApiTags('Reports')
 @Controller('reports')
 export class ReportController {
-  constructor(private readonly reportService: ReportService) { }
+  constructor(private readonly reportService: ReportService) {}
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update report status by ID' })
@@ -65,8 +66,10 @@ export class ReportController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid input data.',
   })
-  async create(@Body() createReportDto: CreateReportDto) {
-    return this.reportService.create(createReportDto);
+  async create(@Body() createReportDto: CreateReportDto, @Request() req) {
+    return this.reportService.create({
+      report: { ...createReportDto, author: req.user.sub },
+    });
   }
 
   @Get()
@@ -76,7 +79,8 @@ export class ReportController {
     description: 'Reports successfully retrieved.',
     type: [ReportDto],
   })
-  async findAll() {
+  async findAll(@Request() req) {
+    console.log(req.user.sub);
     return this.reportService.findAll();
   }
 
@@ -131,5 +135,189 @@ export class ReportController {
   })
   async remove(@Param('id') id: string) {
     return this.reportService.remove(id);
+  }
+
+  @Post('/is-head/:reportId')
+  @ApiOperation({ summary: 'Request to verify if i am head' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully submitted',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async IsDepartmentHead(@Param('reportId') reportId: string, @Request() req) {
+    console.log('hit');
+    console.log(req.user);
+    const result = await this.reportService.isReportDepartmentHead({
+      reportId,
+      from: req.user.sub,
+    });
+    return {
+      result,
+    };
+  }
+
+  @Post('/request-initial-approval/:reportId')
+  @ApiOperation({ summary: 'Request initial approval' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully submitted',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async RequestInitialApproval(
+    @Param('reportId') reportId: string,
+    @Request() req,
+  ) {
+    return this.reportService.requestInitialApproval({
+      reportId,
+      from: req.user.sub,
+    });
+  }
+
+  @Post('/initial-request-response/:reportId')
+  @ApiOperation({ summary: 'Response to inital appoval request' })
+  @ApiBody({ type: UpdateStatusDto })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async InitialRequestResponse(
+    @Request() req,
+    @Body('status') status: string,
+    @Param('reportId') reportId: string,
+  ) {
+    const result = await this.reportService.initialRequestResponse(
+      status,
+      reportId,
+      req.user.sub,
+    );
+
+    return;
+  }
+
+  @Post('/request-second-approval/:reportId')
+  @ApiOperation({ summary: 'Request second approval' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async requestSecondApproval(
+    @Param('reportId') reportId: string,
+    @Request() req,
+  ) {
+    const result = await this.reportService.requestSecondApproval({
+      reportId,
+      from: req.user.sub,
+    });
+    return result;
+  }
+
+  @Post('/dissmeniation-dept-response/:reportId')
+  @ApiOperation({
+    summary: 'Status update notification sent to department head',
+  })
+  @ApiBody({ type: UpdateStatusDto })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report Id' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async dissmenationDeptResponse(
+    @Request() req,
+    @Body('status') status: string,
+    @Param('reportId') reportId: string,
+  ) {
+    return this.reportService.dissmenationDeptResponse(
+      reportId,
+      status,
+      req.user.sub,
+    );
+  }
+
+  @Patch('/approve/:reportId')
+  @ApiOperation({ summary: 'Update a report by ID' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report successfully updated.',
+    type: ReportDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async Approve(@Param('reportId') reportId: string) {
+    return this.reportService.approve(reportId);
+  }
+  @Patch('/reject/:reportId')
+  @ApiOperation({ summary: 'Reject a report by ID' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report successfully updated.',
+    type: ReportDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async Reject(@Param('reportId') reportId: string) {
+    return this.reportService.reject(reportId);
+  }
+
+  @Patch('/publish/:reportId')
+  @ApiOperation({ summary: 'Publish a report by ID' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report successfully updated.',
+    type: ReportDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async Publish(@Param('reportId') reportId: string) {
+    console.log('========= in publish ========');
+    console.log(reportId);
+
+    return this.reportService.publish(reportId);
+  }
+
+  @Get('/department/:reportId')
+  @ApiOperation({ summary: 'Get department by report ID' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report successfully updated.',
+    type: ReportDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async GetDepartment(@Param('reportId') reportId: string) {
+    return this.reportService.getReportParentDepartment(reportId);
   }
 }

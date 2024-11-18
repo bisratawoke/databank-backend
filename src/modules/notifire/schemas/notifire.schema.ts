@@ -8,7 +8,7 @@ export class Notifire extends Document {
     description: 'Message of the notifire',
     example: 'Notification message',
   })
-  @Prop({ required: true, unique: true, type: String })
+  @Prop({ required: true, type: String })
   message: string;
 
   @ApiProperty({

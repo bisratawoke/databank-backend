@@ -1,5 +1,3 @@
-// src/subcategories/dto/create-subcategory.dto.ts
-
 import {
   IsNotEmpty,
   IsString,
@@ -24,7 +22,7 @@ export class CreateSubCategoryDto {
     description: 'Array of Report ObjectIds associated with the subcategory',
     example: ['60d5f483f8d2e024dcf1e9a5', '60d5f483f8d2e024dcf1e9a6'],
     type: [String],
-    required: false, // Assuming it's optional; adjust as needed
+    required: false,
   })
   @IsArray({ message: 'Category must be an array of ObjectIds.' })
   @IsMongoId({
@@ -32,5 +30,5 @@ export class CreateSubCategoryDto {
     message: 'Each category ID must be a valid MongoDB ObjectId.',
   })
   @IsOptional()
-  readonly report: string[]; // Array of Report ObjectIds as strings
+  readonly report: string[];
 }

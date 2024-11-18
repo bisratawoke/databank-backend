@@ -1,3 +1,4 @@
+// dto/update-report.dto.ts
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateReportDto } from './create-report.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
@@ -5,6 +6,12 @@ import { IsEnum } from 'class-validator';
 import { Status } from '../schemas/report.schema'; // Ensure this enum exists
 
 export class UpdateReportDto extends PartialType(CreateReportDto) {
+  @ApiPropertyOptional({
+    description: 'Author of the report',
+    example: 'user123',
+  })
+  readonly author: string;
+
   @ApiPropertyOptional({
     description: 'Name of the report (optional)',
     example: 'Updated Annual Sales Report',

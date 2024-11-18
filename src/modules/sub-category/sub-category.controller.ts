@@ -1,5 +1,3 @@
-// src/subcategories/subcategories.controller.ts
-
 import {
   Controller,
   Get,
@@ -30,16 +28,12 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from '../auth/constants/user-role';
 
 @ApiBearerAuth()
-@ApiTags('Subcategories') // Tag for grouping in Swagger UI
-@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('Subcategories')
+// @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('subcategories')
 export class SubCategoryController {
-  constructor(private readonly subCategoriesService: SubCategoryService) { }
+  constructor(private readonly subCategoriesService: SubCategoryService) {}
 
-  /**
-   * Create a new SubCategory
-   * POST /subcategories
-   */
   @Post()
   @ApiOperation({ summary: 'Create a new subcategory' })
   @ApiResponse({
@@ -54,10 +48,6 @@ export class SubCategoryController {
     return this.subCategoriesService.create(createSubCategoryDto);
   }
 
-  /**
-   * Retrieve all SubCategories with optional search
-   * GET /subcategories
-   */
   @Roles(UserRole.DEPARTMENT_HEAD)
   @Get()
   @ApiOperation({ summary: 'Retrieve all subcategories with optional search' })
@@ -78,10 +68,6 @@ export class SubCategoryController {
     return this.subCategoriesService.findAll(searchSubCategoryDto);
   }
 
-  /**
-   * Retrieve a single SubCategory by ID
-   * GET /subcategories/:id
-   */
   @Get(':id')
   @ApiOperation({ summary: 'Retrieve a subcategory by ID' })
   @ApiParam({ name: 'id', description: 'SubCategory ID' })
@@ -95,10 +81,6 @@ export class SubCategoryController {
     return this.subCategoriesService.findOne(id);
   }
 
-  /**
-   * Update a SubCategory by ID
-   * PUT /subcategories/:id
-   */
   @Put(':id')
   @ApiOperation({ summary: 'Update a subcategory by ID' })
   @ApiParam({ name: 'id', description: 'SubCategory ID' })
@@ -115,10 +97,6 @@ export class SubCategoryController {
     return this.subCategoriesService.update(id, updateSubCategoryDto);
   }
 
-  /**
-   * Delete a SubCategory by ID
-   * DELETE /subcategories/:id
-   */
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a subcategory by ID' })
   @ApiParam({ name: 'id', description: 'SubCategory ID' })

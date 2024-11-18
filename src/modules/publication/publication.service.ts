@@ -40,12 +40,10 @@ export class PublicationService {
     }
     const bucketName = createPublicationDto.bucketName;
 
-    // 2. Prepare file path
     const filePath = createPublicationDto.location
       ? `${createPublicationDto.location}/${file.originalname}`
       : file.originalname;
 
-    // 3. Upload file to MinIO
     await this.uploadFileToMinio(
       bucketName,
       filePath,
@@ -53,10 +51,8 @@ export class PublicationService {
       file.mimetype,
     );
 
-    // 4. Generate permanent link
     const permanentLink = this.generatePublicUrl(bucketName, filePath);
 
-    // 5. Create metadata in Metastore
     const metastoreDoc = await this.metastoreService.create({
       title: createPublicationDto.title,
       description: createPublicationDto.description,
@@ -68,19 +64,19 @@ export class PublicationService {
       created_date: createPublicationDto.created_date,
     });
 
-    // 6. Create publication document
     const newPublication = new this.publicationModel({
       fileName: filePath,
       bucketName: bucketName,
       metaStoreId: metastoreDoc._id,
       permanentLink: permanentLink,
       uploadDate: new Date(),
+      department: createPublicationDto.department,
+      category: createPublicationDto.category,
       publicationType: createPublicationDto.publicationType,
     });
 
     const savedPublication = await newPublication.save();
 
-    // 7. Return both publication and metadata
     return {
       publication: savedPublication,
       metadata: metastoreDoc,
@@ -91,14 +87,16 @@ export class PublicationService {
     return this.publicationModel
       .find()
       .populate({ path: 'metaStoreId' })
+      .populate('department')
+      .populate('category')
       .exec()
       .then((publications) =>
         publications.map((pub) => {
           const publicationObj = pub.toObject();
-          const { metaStoreId, ...rest } = publicationObj; // Destructure to remove metaStoreId
+          const { metaStoreId, ...rest } = publicationObj;
           return {
-            ...rest, // All other properties of the publication
-            metadata: metaStoreId, // Return the metaStoreId under metadata
+            ...rest,
+            metadata: metaStoreId,
           };
         }),
       );
@@ -118,13 +116,12 @@ export class PublicationService {
         publication.metaStoreId.toString(),
       );
 
-      // Construct the response with metadata instead of metaStoreId
       return {
         ...publicationObj,
         department: undefined,
         metadata,
-        metaStoreId: undefined, // Explicitly set metaStoreId to undefined to exclude it from the response
-      } as PublicationDto;
+        metaStoreId: undefined,
+      } as unknown as PublicationDto;
     }
 
     return publicationObj.toJSON();
@@ -145,8 +142,6 @@ export class PublicationService {
     }
     return publication;
   }
-
-  //! Minio Related Methods
 
   async createBucket(bucketName: string) {
     try {
@@ -238,7 +233,6 @@ export class PublicationService {
         const key = item.name;
         const parts = key.split('/');
         if (parts.length > 1) {
-          // Add all intermediate "directories"
           for (let i = 1; i < parts.length; i++) {
             locations.add(parts.slice(0, i).join('/'));
           }
@@ -268,10 +262,8 @@ export class PublicationService {
       );
       console.log('File uploaded successfully.');
 
-      // Create metadata in Metastore
       const metastoreId = await this.metastoreService.create(metadata);
 
-      // Create or update Publication document
       await this.publicationModel.findOneAndUpdate(
         { bucketName, fileName },
         {
@@ -332,24 +324,6 @@ export class PublicationService {
     await this.uploadFileFromBuffer(bucketName, filePath, fileBuffer, metadata);
   }
 
-  // async deleteFile(bucketName: string, fileName: string) {
-  //   try {
-  //     await this.minioService.client.removeObject(bucketName, fileName);
-  //     console.log(`File ${fileName} deleted successfully from MinIO`);
-
-  //     // Remove from Publication schema and delete associated metadata
-  //     const publication = await this.publicationModel.findOneAndDelete({ bucketName, fileName });
-  //     if (publication && publication.metaStoreId) {
-  //       await this.metastoreService.remove(publication.metaStoreId.toString());
-  //       console.log(`Metadata for file ${fileName} deleted successfully`);
-  //     }
-  //     console.log(`File ${fileName} deleted successfully from Publication schema`);
-  //   } catch (err) {
-  //     console.error('Error deleting file:', err);
-  //     throw err;
-  //   }
-  // }
-
   async deletePublication(
     id: string,
     forceDelete?: boolean,
@@ -363,7 +337,6 @@ export class PublicationService {
     const { fileName, bucketName, metadata } = publication;
 
     try {
-      // Step 1: Check if the file exists in MinIO
       let fileExists = true;
       try {
         await this.minioService.client.statObject(bucketName, fileName);
@@ -380,7 +353,6 @@ export class PublicationService {
         }
       }
 
-      // Step 2: If file exists, validate publication details
       if (fileExists) {
         const minioFileInfo = await this.minioService.client.statObject(
           bucketName,
@@ -400,17 +372,14 @@ export class PublicationService {
         }
       }
 
-      // Step 3: Delete from MinIO if file exists
       if (fileExists) {
         await this.minioService.client.removeObject(bucketName, fileName);
       }
 
-      // Step 4: Delete metadata if exists
       if (metadata) {
         await this.metastoreService.remove(metadata._id.toString());
       }
 
-      // Step 5: Delete from Publication schema
       const deletedPublication =
         await this.publicationModel.findByIdAndDelete(id);
       if (!deletedPublication) {
@@ -429,7 +398,7 @@ export class PublicationService {
       console.error(`Error deleting publication ${id}:`, error);
 
       if (error instanceof BadRequestException) {
-        throw error; // Re-throw validation errors
+        throw error;
       }
 
       throw new InternalServerErrorException(

@@ -17,8 +17,8 @@ export class NotifireService {
     return notifire.save();
   }
 
-  async findAll(): Promise<Notifire[]> {
-    return this.notifireModel.find().exec();
+  async findAll(userId: string): Promise<Notifire[]> {
+    return this.notifireModel.find({ user: userId }).exec();
   }
 
   async findOne(id: string): Promise<Notifire> {

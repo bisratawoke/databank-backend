@@ -13,6 +13,15 @@ import { DataService } from '../data/data.service';
 import { AuthModule } from '../auth/auth.module';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { DepartmentModule } from '../department/department.module';
+import {
+  Department,
+  DepartmentSchema,
+} from '../department/schemas/department.schema';
+import { Category, CategorySchema } from '../category/schemas/category.schema';
+import {
+  SubCategory,
+  SubCategorySchema,
+} from '../sub-category/schemas/sub-category.schema';
 
 @Module({
   imports: [
@@ -33,9 +42,12 @@ import { DepartmentModule } from '../department/department.module';
       { name: Field.name, schema: FieldSchema },
       { name: Data.name, schema: DataSchema },
       { name: FieldType.name, schema: FieldTypeSchema },
+      { name: Department.name, schema: DepartmentSchema },
+      { name: Category.name, schema: CategorySchema },
+      { name: SubCategory.name, schema: SubCategorySchema },
     ]),
   ],
   controllers: [ReportController],
   providers: [ReportService, DataService],
 })
-export class ReportModule { }
+export class ReportModule {}

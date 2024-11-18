@@ -7,14 +7,24 @@ import {
   Put,
   Delete,
   UseInterceptors,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { NotifireService } from './notifire.service';
 import { CreateNotifireDto } from './dto/create-notifire.dto';
 import { UpdateNotifireDto } from './dto/update-notifire.dto';
 import { Notifire } from './schemas/notifire.schema';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthUserInterceptor } from 'src/interceptors/auth-user.interceptor';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('notifire')
 @Controller('notifire')
 export class NotifireController {
@@ -40,8 +50,8 @@ export class NotifireController {
     description: 'List of notifires',
     type: [Notifire],
   })
-  async findAll(): Promise<Notifire[]> {
-    return this.notifiresService.findAll();
+  async findAll(@Request() req): Promise<Notifire[]> {
+    return this.notifiresService.findAll(req.user.sub);
   }
 
   @Get(':id')

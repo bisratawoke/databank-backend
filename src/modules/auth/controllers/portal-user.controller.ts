@@ -11,7 +11,12 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import {
   CreatePortalUserDto,
   PortalUserLoginDto,
@@ -23,7 +28,7 @@ import { PortalUserService } from '../services/portal-user.service';
 @ApiTags('Portal-Users')
 @Controller('portal-users')
 export class PortalUserController {
-  constructor(private readonly portalUserService: PortalUserService) { }
+  constructor(private readonly portalUserService: PortalUserService) {}
 
   @Post('register')
   @UseInterceptors(FileInterceptor('authorizationLetter'))

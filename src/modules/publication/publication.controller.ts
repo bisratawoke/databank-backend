@@ -19,7 +19,16 @@ import { PublicationService } from './publication.service';
 import { MetastoreService } from '../metastore/metastore.service';
 import { CreateMetastoreDto } from '../metastore/dto/create-metastore.dto';
 import { UpdateMetastoreDto } from '../metastore/dto/update-metastore.dto';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { Roles } from '../../decorators/roles.decorator';
@@ -28,15 +37,16 @@ import { RolesGuard } from '../auth/guards/role.guard';
 import { AuthUserInterceptor } from 'src/interceptors/auth-user.interceptor';
 
 @ApiBearerAuth()
-@ApiTags("Publications")
-@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('Publications')
+@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(AuthUserInterceptor)
 @Controller('publications')
 export class PublicationController {
   constructor(
     private readonly publicationService: PublicationService,
     private readonly metastoreService: MetastoreService,
-  ) { }
+  ) {}
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
@@ -140,7 +150,6 @@ export class PublicationController {
       throw new BadRequestException('No file uploaded');
     }
 
-    // Combine the file information with the DTO
     const combinedData = {
       ...createPublicationDto,
       size: file.size,
@@ -176,8 +185,8 @@ export class PublicationController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Upload a file to a nested directory' })
   @ApiBody({
-    type: CreateMetastoreDto, // Use type instead of schema
-    description: 'File upload data for nested directory', // Optional description
+    type: CreateMetastoreDto,
+    description: 'File upload data for nested directory',
   })
   @ApiResponse({
     status: 201,
@@ -186,7 +195,7 @@ export class PublicationController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   async uploadFileToNestedDirectory(
     @UploadedFile() file: Express.Multer.File,
-    @Body() createMetastoreDto: CreateMetastoreDto, // Use DTO directly here
+    @Body() createMetastoreDto: CreateMetastoreDto,
     @Body('bucketName') bucketName: string,
   ) {
     if (!file) {
@@ -213,7 +222,6 @@ export class PublicationController {
 
     return { message: 'File uploaded successfully to nested directory' };
   }
-
 
   @ApiOperation({ summary: 'Get all publications' })
   @ApiResponse({ status: 200, description: 'Return all publications' })
@@ -323,9 +331,6 @@ export class PublicationController {
     }
 
     try {
-      // const url = this.publicationService.generatePublicUrl(publication.bucketName, publication.fileName);
-      // console.log("Ppublication URL:", url);
-      // return res.redirect(url);
       const fileStream =
         await this.publicationService.minioService.client.getObject(
           publication.bucketName,
@@ -374,18 +379,6 @@ export class PublicationController {
       metadata: updatedMetadata,
     };
   }
-
-  // @Delete(':id')
-  // @ApiOperation({ summary: 'Delete a file and associated data' })
-  // @ApiParam({ name: 'id', type: 'string', description: 'Publication ID' })
-  // @ApiParam({ name: 'forceDelete', type: 'boolean', description: 'Force delete flag', required: false })
-  // @ApiResponse({ status: 200, description: 'File and associated data deleted successfully' })
-  // @ApiResponse({ status: 404, description: 'Publication not found' })
-  // @ApiResponse({ status: 500, description: 'Internal server error' })
-  // async deleteFile(@Param('id') id: string, @Param('forceDelete') forceDelete?: boolean): Promise<{ message: string }> {
-  //   await this.publicationService.deletePublication(id, forceDelete);
-  //   return { message: 'File and associated data deleted successfully' };
-  // }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a publication and associated data' })

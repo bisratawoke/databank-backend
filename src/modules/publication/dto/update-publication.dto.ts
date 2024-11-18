@@ -84,4 +84,13 @@ export class UpdatePublicationDto {
   @IsString()
   @IsOptional()
   department?: string;
+
+  @ApiPropertyOptional({
+    type: 'string',
+    description: 'Department ID',
+    example: '60c72b2f4f1a4e4fbc1a3d1e',
+  })
+  @IsString()
+  @IsOptional()
+  category?: string;
 }

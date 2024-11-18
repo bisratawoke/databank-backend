@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+//dto/create-report-dto.ts
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ReportDto } from './report.dto';
 import { Type } from 'class-transformer';
 import { IsEnum } from 'class-validator';
@@ -60,4 +61,10 @@ export class CreateReportDto extends ReportDto {
   })
   @IsEnum(Status)
   readonly data_status: Status = Status.Pending;
+
+  @ApiPropertyOptional({
+    description: 'Author of the report',
+    example: 'user123',
+  })
+  readonly author: string;
 }

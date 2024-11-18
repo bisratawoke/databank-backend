@@ -1,9 +1,16 @@
+// dto/report.dto.ts
 import { IsNotEmpty, IsString, IsDate, IsArray, IsEnum } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Status } from '../schemas/report.schema'; // Ensure this enum exists
 
 export class ReportDto {
+  @ApiPropertyOptional({
+    description: 'Author of the report',
+    example: 'user123',
+  })
+  readonly author: string;
+
   @ApiProperty({
     description: 'Name of the report',
     example: 'Annual Sales Report',

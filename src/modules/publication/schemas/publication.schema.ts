@@ -45,6 +45,9 @@ export class Publication {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Department' })
   department: Types.ObjectId;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Category' })
+  category: Types.ObjectId;
 }
 
 export const PublicationSchema = SchemaFactory.createForClass(Publication);

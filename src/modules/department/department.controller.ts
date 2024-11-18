@@ -9,6 +9,8 @@ import {
   Put,
   Query,
   UseGuards,
+  NotFoundException,
+  Patch,
 } from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
@@ -24,13 +26,14 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { SetDepartmentHeadDto } from './dto/set-department-head.dto';
 
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+// @ApiBearerAuth()
+// @UseGuards(JwtAuthGuard)
 @ApiTags('Departments') // Tag for grouping in Swagger UI
 @Controller('departments')
 export class DepartmentController {
-  constructor(private readonly departmentsService: DepartmentService) { }
+  constructor(private readonly departmentsService: DepartmentService) {}
 
   /**
    * Create a new Department
@@ -49,6 +52,19 @@ export class DepartmentController {
     return this.departmentsService.create(createDepartmentDto);
   }
 
+  // New method to set the department head
+  @Patch(':id/set-head')
+  @ApiOperation({ summary: 'Set the department head' })
+  @ApiResponse({ status: 200, type: Department })
+  setDepartmentHead(
+    @Param('id') departmentId: string,
+    @Body() setDepartmentHeadDto: SetDepartmentHeadDto,
+  ): Promise<Department> {
+    return this.departmentsService.setDepartmentHead(
+      departmentId,
+      setDepartmentHeadDto.headId,
+    );
+  }
   /**
    * Retrieve all Departments with optional search
    * GET /departments

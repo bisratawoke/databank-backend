@@ -1,5 +1,3 @@
-// src/departments/dto/create-department.dto.ts
-
 import {
   IsNotEmpty,
   IsString,
@@ -31,5 +29,15 @@ export class CreateDepartmentDto {
     each: true,
     message: 'Each category ID must be a valid MongoDB ObjectId.',
   })
-  readonly category: string[]; // Array of Category ObjectIds as strings
+  readonly category?: string[];
+
+  @ApiProperty({
+    description: 'ObjectId of the department head',
+    example: '60d5f483f8d2e024dcf1e9a7',
+    type: String,
+    required: false,
+  })
+  @IsOptional()
+  @IsMongoId({ message: 'Head ID must be a valid MongoDB ObjectId.' })
+  readonly head?: string;
 }
