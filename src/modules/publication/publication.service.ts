@@ -24,6 +24,14 @@ export class PublicationService {
     private readonly metastoreService: MetastoreService,
   ) {}
 
+  async findPublicationsByDepartmentAndCategory({ departmentId, categoryId }) {
+    return this.publicationModel
+      .find({
+        department: departmentId,
+        category: categoryId,
+      })
+      .exec();
+  }
   async create(
     file: Express.Multer.File,
     createPublicationDto: CreatePublicationDto,

@@ -12,6 +12,7 @@ import {
   Patch,
   BadRequestException,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -35,6 +36,7 @@ import { Roles } from '../../decorators/roles.decorator';
 import { UserRole } from '../auth/constants/user-role';
 import { RolesGuard } from '../auth/guards/role.guard';
 import { AuthUserInterceptor } from 'src/interceptors/auth-user.interceptor';
+import ObjectIdValidationPipe from 'src/pipes/objectIdvalidation.pipe';
 
 @ApiBearerAuth()
 @ApiTags('Publications')
@@ -290,6 +292,22 @@ export class PublicationController {
     } catch (error) {
       throw new Error('Could not retrieve files');
     }
+  }
+
+  @Get('department/:departmentId/category/:categoryId')
+  @UsePipes(new ObjectIdValidationPipe())
+  @ApiOperation({ summary: 'Fetch publications by category and department id' })
+  @ApiParam({ name: 'departmentId', required: true, type: 'string' })
+  @ApiParam({ name: 'categoryId', required: true, type: 'string' })
+  @ApiResponse({ status: 200, description: 'Return the presigned URL' })
+  async findPublicationsByDepartmentAndCategory(
+    @Param('departmentId') departmentId: string,
+    @Param('categoryId') categoryId: string,
+  ) {
+    return this.publicationService.findPublicationsByDepartmentAndCategory({
+      departmentId,
+      categoryId,
+    });
   }
 
   @Get('presigned-url')
