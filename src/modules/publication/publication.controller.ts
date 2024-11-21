@@ -13,6 +13,8 @@ import {
   BadRequestException,
   UseGuards,
   UsePipes,
+  HttpStatus,
+  Request,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -42,7 +44,7 @@ import ObjectIdValidationPipe from 'src/pipes/objectIdvalidation.pipe';
 @ApiTags('Publications')
 @UseGuards(JwtAuthGuard)
 // @UseGuards(JwtAuthGuard, RolesGuard)
-@UseInterceptors(AuthUserInterceptor)
+// @UseInterceptors(AuthUserInterceptor)
 @Controller('publications')
 export class PublicationController {
   constructor(
@@ -145,6 +147,7 @@ export class PublicationController {
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() createPublicationDto: CreatePublicationDto,
+    @Request() req,
   ) {
     console.log('file:', file);
     console.log('createPublicationDto:', createPublicationDto);
@@ -156,6 +159,7 @@ export class PublicationController {
       ...createPublicationDto,
       size: file.size,
       type: file.mimetype,
+      author: req.user.sub,
     };
 
     const result = await this.publicationService.create(file, combinedData);
@@ -225,6 +229,98 @@ export class PublicationController {
     return { message: 'File uploaded successfully to nested directory' };
   }
 
+  @Patch('/approve/:publicationId')
+  @ApiOperation({ summary: 'Approve publication by ID' })
+  @ApiParam({
+    name: 'publicationId',
+    type: String,
+    description: 'Publication ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Publication successfully updated.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Publication not found.',
+  })
+  @UsePipes(new ObjectIdValidationPipe())
+  async Approve(@Param('publicationId') publicationId: string) {
+    return this.publicationService.approve(publicationId);
+  }
+
+  @Post('/initial-request-response/:publicationId')
+  @ApiOperation({ summary: 'Response to inital appoval request' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  @UsePipes(new ObjectIdValidationPipe())
+  async InitialRequestResponse(
+    @Request() req,
+    @Body('status') status: string,
+    @Param('publicationId') publicationId: string,
+  ) {
+    const result = await this.publicationService.initialRequestResponse(
+      status,
+      publicationId,
+      req.user.sub,
+    );
+
+    return;
+  }
+
+  @Post('/request-inital-approval/:publicationId')
+  @ApiOperation({ summary: 'Request inital approval' })
+  @ApiParam({
+    name: 'publicationId',
+    type: String,
+    description: 'Publication ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async requestSecondApproval(
+    @Param('publicationId') publicationId: string,
+    @Request() req,
+  ) {
+    const result = await this.publicationService.requestInitalApproval({
+      publicationId,
+      from: req.user.sub,
+    });
+    return result;
+  }
+
+  @Patch('/publish/:publicationId')
+  @ApiOperation({ summary: 'Publish a publish by ID' })
+  @ApiParam({
+    name: 'publicationId',
+    type: String,
+    description: 'Publication ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report successfully updated.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async Publish(@Param('publicationId') publicationId: string) {
+    console.log('========= in publish ========');
+    console.log(publicationId);
+    return this.publicationService.publish(publicationId);
+  }
   @ApiOperation({ summary: 'Get all publications' })
   @ApiResponse({ status: 200, description: 'Return all publications' })
   @Roles(UserRole.ADMIN, UserRole.DEPARTMENT_HEAD)

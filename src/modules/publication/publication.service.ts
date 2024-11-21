@@ -8,13 +8,18 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MinioService } from 'src/minio/minio.service';
 import { Readable } from 'stream';
-import { Publication, PublicationDocument } from './schemas/publication.schema';
+import {
+  Publication,
+  PublicationDocument,
+  Status,
+} from './schemas/publication.schema';
 import { MetastoreService } from '../metastore/metastore.service';
 import { PublicationDto } from './dto/publicatoin.dto';
 import { CreateMetastoreDto } from '../metastore/dto/create-metastore.dto';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { populate } from 'dotenv';
-
+import { UserService } from '../auth/services/user.service';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 @Injectable()
 export class PublicationService {
   constructor(
@@ -22,6 +27,8 @@ export class PublicationService {
     private publicationModel: Model<PublicationDocument>,
     public readonly minioService: MinioService,
     private readonly metastoreService: MetastoreService,
+    private readonly userService: UserService,
+    private readonly amqpConnection: AmqpConnection,
   ) {}
 
   async findPublicationsByDepartmentAndCategory({ departmentId, categoryId }) {
@@ -32,11 +39,112 @@ export class PublicationService {
       })
       .exec();
   }
+  public async getDissimenationHead() {
+    const user = await this.userService.findDissimenationHead();
+    return user;
+  }
+
+  private async publishToInappQueue(message: { body: string; to: string }) {
+    await this.amqpConnection.publish(
+      'logs_exchange',
+      'inapp_notification_queue',
+      message,
+    );
+  }
+
+  async getReportAuthor(reportId: string): Promise<Types.ObjectId | null> {
+    const report = await this.publicationModel
+      .findById(reportId)
+      .select('author')
+      .populate('author')
+      .exec();
+
+    return report ? report.author : null;
+  }
+
+  public async initialRequestResponse(
+    status: string,
+    reportId: string,
+    from: string,
+  ) {
+    try {
+      console.log(
+        '================== in initial request response =====================',
+      );
+      console.log(status);
+
+      const author = await this.getReportAuthor(reportId);
+      await this.publishToInappQueue({
+        to: author._id.toString(),
+        body: `report ${reportId} status has been updated to ${status}`,
+      });
+      return author;
+    } catch (err) {
+      throw err;
+    } finally {
+    }
+  }
+
+  async publish(publicationId: string) {
+    try {
+      const updatedReport = await this.publicationModel.findByIdAndUpdate(
+        new Types.ObjectId(publicationId),
+        { status: Status.Published },
+        { new: true },
+      );
+
+      console.log('=========== in publish service =================');
+      console.log(updatedReport);
+      if (!updatedReport) {
+        throw new NotFoundException(
+          `Report with ID ${publicationId} not found`,
+        );
+      }
+
+      return updatedReport;
+    } catch (err) {
+      throw err;
+    } finally {
+    }
+  }
+
+  public async approve(publicationId: string) {
+    const updatedPublication = await this.publicationModel.findByIdAndUpdate(
+      new Types.ObjectId(publicationId),
+      { status: Status.Approved },
+      { new: true },
+    );
+
+    if (!updatedPublication) {
+      throw new NotFoundException(
+        `Publication with ID ${publicationId} not found`,
+      );
+    }
+
+    return updatedPublication;
+  }
+  public async requestInitalApproval({
+    publicationId,
+    from,
+  }: {
+    publicationId: string;
+    from: string;
+  }) {
+    try {
+      const dissmenationHeads = await this.getDissimenationHead();
+      dissmenationHeads.forEach(async (dissmenationHead) => {
+        await this.publishToInappQueue({
+          body: `publication ${publicationId} has been uploaded by dpertment head and requires your final say!`,
+          to: dissmenationHead._id.toString(),
+        });
+      });
+      return {};
+    } catch (error) {}
+  }
   async create(
     file: Express.Multer.File,
     createPublicationDto: CreatePublicationDto,
   ): Promise<{ publication: Publication; metadata: any }> {
-    // 1. Get bucket name
     const buckets = await this.minioService.client.listBuckets();
 
     if (

@@ -1,6 +1,7 @@
 // src/modules/publication/schemas/publication.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Schema as MongooseSchema, Types } from 'mongoose';
+import { User } from 'src/modules/auth/schemas/user.schema';
 
 export type PublicationDocument = Publication & Document;
 
@@ -10,8 +11,18 @@ enum PUBLICATION_TYPE {
   FOR_SALE,
 }
 
+export enum Status {
+  Pending = 'Pending',
+  Rejected = 'Rejected',
+  Published = 'Published',
+  Approved = 'Approved',
+}
+
 @Schema({ timestamps: true })
 export class Publication {
+  @Prop({ enum: Status, default: Status.Pending })
+  status: Status;
+
   @Prop({ required: true })
   fileName: string;
 
@@ -37,9 +48,6 @@ export class Publication {
   @Prop()
   updatedAt?: Date;
 
-  @Prop()
-  author?: string;
-
   @Prop({ type: String, enum: PUBLICATION_TYPE, required: true })
   publicationType: PUBLICATION_TYPE;
 
@@ -48,6 +56,9 @@ export class Publication {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Category' })
   category: Types.ObjectId;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
+  author: Types.ObjectId;
 }
 
 export const PublicationSchema = SchemaFactory.createForClass(Publication);
