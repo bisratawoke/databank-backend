@@ -179,4 +179,13 @@ export class CreatePublicationDto {
   @IsString()
   @IsOptional()
   category?: string;
+
+  @ApiPropertyOptional({
+    type: 'string',
+    description: 'author Id',
+    example: '60c72b2f4f1a4e4fbc1a3d1e',
+  })
+  @IsString()
+  @IsOptional()
+  author?: string;
 }
