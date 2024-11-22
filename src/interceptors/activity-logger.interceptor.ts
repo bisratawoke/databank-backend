@@ -1,104 +1,3 @@
-// import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
-// import { Observable } from 'rxjs';
-// import { tap } from 'rxjs/operators';
-// import { ActivityLogService } from 'src/modules/auth/services/activity-log.service';
-
-// @Injectable()
-// export class ActivityLoggerInterceptor implements NestInterceptor {
-//     constructor(private readonly activityLogService: ActivityLogService) { }
-
-//     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-//         const request = context.switchToHttp().getRequest();
-//         const user = request.user;
-//         const action = `${request.method} ${request.url}`;
-
-//         return next.handle().pipe(
-//             tap(() => {
-//                 if (user) {
-//                     this.activityLogService.create({
-//                         userId: user.id,
-//                         action,
-//                         details: {
-//                             method: request.method,
-//                             url: request.url,
-//                             body: request.body,
-//                         },
-//                         ipAddress: request.ip,
-//                         userAgent: request.headers['user-agent'],
-//                     });
-//                 }
-//             }),
-//         );
-//     }
-// }
-
-// import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common';
-// import { Observable } from 'rxjs';
-// import { tap, catchError } from 'rxjs/operators';
-// import { ActivityLogService } from 'src/modules/auth/services/activity-log.service';
-
-// @Injectable()
-// export class ActivityLoggerInterceptor implements NestInterceptor {
-//     private readonly logger = new Logger(ActivityLoggerInterceptor.name);
-
-//     constructor(private readonly activityLogService: ActivityLogService) { }
-
-//     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-//         const request = context.switchToHttp().getRequest();
-//         const action = `${request.method} ${request.url}`;
-
-//         this.logger.debug(`Processing request: ${action}`);
-
-//         return next.handle().pipe(
-//             tap(async (response) => {
-//                 try {
-//                     let userId: number | undefined;
-
-//                     // Handle login response
-//                     if (action.includes('/auth/login') && response?.user?.id) {
-//                         userId = response.user.id;
-//                         this.logger.debug(`Login successful for user ${userId}`);
-//                     } else if (request.user?.id) {
-//                         userId = request.user.id;
-//                         this.logger.debug(`Authenticated request from user ${userId}`);
-//                     }
-
-//                     if (userId) {
-//                         // Create sanitized request body
-//                         const sanitizedBody = { ...request.body };
-//                         if (sanitizedBody.password) {
-//                             sanitizedBody.password = '[REDACTED]';
-//                         }
-
-//                         await this.activityLogService.create({
-//                             userId,
-//                             action,
-//                             details: {
-//                                 method: request.method,
-//                                 url: request.url,
-//                                 body: sanitizedBody,
-//                                 statusCode: context.switchToHttp().getResponse().statusCode
-//                             },
-//                             ipAddress: request.ip || request.connection.remoteAddress,
-//                             userAgent: request.headers['user-agent'],
-//                         });
-
-//                         this.logger.debug(`Activity log created for user ${userId}`);
-//                     } else {
-//                         this.logger.debug('No user context available for logging');
-//                     }
-//                 } catch (error) {
-//                     this.logger.error('Error creating activity log:', error);
-//                 }
-//             }),
-//             catchError((error) => {
-//                 this.logger.error('Error in request:', error);
-//                 throw error;
-//             }),
-//         );
-//     }
-// }
-
 import {
   Injectable,
   NestInterceptor,
@@ -117,7 +16,7 @@ export class ActivityLoggerInterceptor implements NestInterceptor {
   // Define routes that should be excluded from logging
   private readonly excludedRoutes = ['/health', '/metrics', '/favicon.ico'];
 
-  constructor(private readonly activityLogService: ActivityLogService) { }
+  constructor(private readonly activityLogService: ActivityLogService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
@@ -173,7 +72,7 @@ export class ActivityLoggerInterceptor implements NestInterceptor {
 
           this.logger.debug(
             `Activity log created - User: ${userId || 'anonymous'}, ` +
-            `Duration: ${duration}ms, Status: ${response.statusCode}`,
+              `Duration: ${duration}ms, Status: ${response.statusCode}`,
           );
         } catch (error) {
           this.logger.error('Error creating activity log:', {
