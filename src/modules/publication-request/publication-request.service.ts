@@ -12,6 +12,20 @@ export class PublicationRequestService {
     private readonly publicationRequestModel: Model<PublicationRequest>,
   ) {}
 
+  async createPublicationRequest(
+    createPublicationRequestDto: CreatePublicationRequestDto,
+    fileUrl?: string[],
+  ): Promise<PublicationRequest> {
+    console.log(
+      '================= in create publication request =================',
+    );
+    console.log(fileUrl);
+    const newPublicationRequest = new this.publicationRequestModel({
+      ...createPublicationRequestDto,
+      attachments: fileUrl ? fileUrl : [],
+    });
+    return newPublicationRequest.save();
+  }
   async create(
     createDto: CreatePublicationRequestDto,
     userId: string,
@@ -24,8 +38,9 @@ export class PublicationRequestService {
   }
 
   async findAll(userId: string): Promise<PublicationRequest[]> {
+    // .find({ author: userId })
     return this.publicationRequestModel
-      .find({ author: userId })
+      .find()
       .populate('author category')
       .exec();
   }

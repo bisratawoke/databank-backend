@@ -38,6 +38,9 @@ export class PublicationRequest extends Document {
 
   @Prop({ enum: ADMIN_UNITS, default: ADMIN_UNITS.NATIONAL })
   adminUnits: ADMIN_UNITS;
+
+  @Prop({ type: [{ required: false, unique: false, type: String }] })
+  attachments: string[];
 }
 
 export const PublicationRequestSchema =

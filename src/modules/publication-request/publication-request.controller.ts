@@ -10,17 +10,22 @@ import {
   UseGuards,
   Req,
   Request,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiTags,
   ApiOperation,
   ApiResponse,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { PublicationRequestService } from './publication-request.service';
 import { CreatePublicationRequestDto } from './dto/create-publication-request.dto';
 import { UpdatePublicationRequestDto } from './dto/update-publication-request.dto';
 import { PublicationRequest } from './schemas/publication-request.schema';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { MinioService } from 'src/minio/minio.service';
 
 @ApiBearerAuth()
 @ApiTags('Publication Request')
@@ -29,6 +34,7 @@ import { PublicationRequest } from './schemas/publication-request.schema';
 export class PublicationRequestController {
   constructor(
     private readonly publicationRequestService: PublicationRequestService,
+    private readonly minioService: MinioService,
   ) {}
 
   @Post()
@@ -38,11 +44,26 @@ export class PublicationRequestController {
     description: 'The publication request has been created.',
   })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
-  async create(
-    @Body() createDto: CreatePublicationRequestDto,
-    @Req() req: any,
-  ): Promise<PublicationRequest> {
-    return this.publicationRequestService.create(createDto, req.user.sub);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async createPublicationRequest(
+    @Body() createPublicationRequestDto: CreatePublicationRequestDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    let fileUrl: string[] | null = [];
+
+    if (file) {
+      const fileName = `publication-requests/${Date.now()}_${file.originalname}`;
+      const result = await this.minioService.portalUploadFile(file, fileName);
+      fileUrl.push(String(result));
+    }
+
+    console.log('======= in this bitch ===============');
+    console.log(typeof fileUrl[0]);
+    return this.publicationRequestService.createPublicationRequest(
+      createPublicationRequestDto,
+      fileUrl,
+    );
   }
 
   @Get()

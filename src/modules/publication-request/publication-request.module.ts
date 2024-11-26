@@ -8,6 +8,8 @@ import {
   PublicationRequest,
   PublicationRequestSchema,
 } from './schemas/publication-request.schema';
+import { MulterModule } from '@nestjs/platform-express';
+import { MinioModule } from 'src/minio/minio.module';
 
 @Module({
   controllers: [PublicationRequestController],
@@ -16,8 +18,14 @@ import {
     MongooseModule.forFeature([
       { name: PublicationRequest.name, schema: PublicationRequestSchema },
     ]),
+    MulterModule.register({
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+    }),
     AuthModule,
     CategoryModule,
+    MinioModule,
   ],
 })
 export class PublicationRequestModule {}
