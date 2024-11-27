@@ -135,7 +135,8 @@ export class PublicationRequestController {
     description: 'Report not found.',
   })
   async initalApproval(
-    @Param('publicationRequestId') publicationRequestId: string,
+    @Param('publicationRequestId', new ObjectIdValidationPipe())
+    publicationRequestId: string,
   ) {
     return this.publicationRequestService.approve(publicationRequestId);
   }
