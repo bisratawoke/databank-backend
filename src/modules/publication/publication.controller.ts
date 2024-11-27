@@ -271,7 +271,7 @@ export class PublicationController {
   async InitialRequestResponse(
     @Request() req,
     @Body('status') status: string,
-    @Param('publicationId') publicationId: string,
+    @Param('publicationId', new ObjectIdValidationPipe()) publicationId: string,
   ) {
     console.log('=========== in initial request response =================');
     const result = await this.publicationService.initialRequestResponse(
