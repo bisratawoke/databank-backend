@@ -245,8 +245,9 @@ export class PublicationController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Publication not found.',
   })
-  @UsePipes(new ObjectIdValidationPipe())
-  async Approve(@Param('publicationId') publicationId: string) {
+  async Approve(
+    @Param('publicationId', new ObjectIdValidationPipe()) publicationId: string,
+  ) {
     return this.publicationService.approve(publicationId);
   }
 
