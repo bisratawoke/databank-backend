@@ -151,8 +151,6 @@ export class PublicationController {
     @Body() createPublicationDto: CreatePublicationDto,
     @Request() req,
   ) {
-    // console.log('file:', file);
-    console.log('=============== in create publicaiton =============');
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
