@@ -10,6 +10,9 @@ import {
 } from './schemas/publication-request.schema';
 import { MulterModule } from '@nestjs/platform-express';
 import { MinioModule } from 'src/minio/minio.module';
+import PublicationPayment, {
+  PublicationPaymentSchema,
+} from './schemas/publication-payment.schema';
 
 @Module({
   controllers: [PublicationRequestController],
@@ -17,6 +20,7 @@ import { MinioModule } from 'src/minio/minio.module';
   imports: [
     MongooseModule.forFeature([
       { name: PublicationRequest.name, schema: PublicationRequestSchema },
+      { name: PublicationPayment.name, schema: PublicationPaymentSchema },
     ]),
     MulterModule.register({
       limits: {

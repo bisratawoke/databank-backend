@@ -1,25 +1,98 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { PublicationRequest } from './schemas/publication-request.schema';
+import {
+  PublicationRequest,
+  Status,
+} from './schemas/publication-request.schema';
 import { UpdatePublicationRequestDto } from './dto/update-publication-request.dto';
 import { CreatePublicationRequestDto } from './dto/create-publication-request.dto';
+import PublicationPayment, {
+  PaymentStatus,
+} from './schemas/publication-payment.schema';
 
 @Injectable()
 export class PublicationRequestService {
   constructor(
     @InjectModel(PublicationRequest.name)
     private readonly publicationRequestModel: Model<PublicationRequest>,
+    @InjectModel(PublicationPayment.name)
+    private readonly publicationPaymentModel: Model<PublicationPayment>,
   ) {}
 
+  async confirmPayment(publicationRequestId: string) {
+    const publicationPayment = await this.publicationRequestModel
+      .findById(publicationRequestId)
+      .populate('paymentData')
+      .exec();
+
+    return await this.publicationPaymentModel.findByIdAndUpdate(
+      {
+        _id: publicationPayment.paymentData._id,
+      },
+      { paymentStatus: PaymentStatus.CONFIRMED },
+    );
+  }
+
+  async paymentSetup(publicationRequestId: string, price: number) {
+    const newPublicationPayment = await this.publicationPaymentModel.create({
+      price: price,
+    });
+
+    return await this.publicationRequestModel.findOneAndUpdate(
+      { _id: publicationRequestId },
+      { paymentData: newPublicationPayment._id },
+      { new: true },
+    );
+  }
+
+  async secondaryApproval(publicationRequestId) {
+    const currentPublicationRequest = await this.publicationRequestModel
+      .findOne({ _id: publicationRequestId })
+      .exec();
+    return await this.publicationRequestModel
+      .findByIdAndUpdate(
+        { _id: publicationRequestId },
+        {
+          status: currentPublicationRequest.paymentRequired
+            ? Status.PAYMENT_PENDING
+            : Status.DEPUTY_APPROVED,
+        },
+        { new: true },
+      )
+      .exec();
+  }
+
+  async approve(publicationRequestId) {
+    return await this.publicationRequestModel
+      .findByIdAndUpdate(
+        { _id: publicationRequestId },
+        { status: Status.INITIAL_APPROVAL },
+        { new: true },
+      )
+      .exec();
+  }
+
+  async reject(publicationRequestId: string) {
+    return await this.publicationRequestModel.findByIdAndUpdate(
+      { _id: publicationRequestId },
+      { status: Status.Rejected },
+      { new: true },
+    );
+  }
+  async assignPublicationToDepartment(deparmentId, publicationRequestId) {
+    return await this.publicationRequestModel
+      .findByIdAndUpdate(
+        { _id: publicationRequestId },
+        { department: deparmentId, status: Status.PENDING_APPROVAL },
+        { new: true },
+      )
+      .exec();
+  }
   async createPublicationRequest(
     createPublicationRequestDto: CreatePublicationRequestDto,
     fileUrl?: string[],
   ): Promise<PublicationRequest> {
-    console.log(
-      '================= in create publication request =================',
-    );
-    console.log(fileUrl);
     const newPublicationRequest = new this.publicationRequestModel({
       ...createPublicationRequestDto,
       attachments: fileUrl ? fileUrl : [],

@@ -12,6 +12,8 @@ import {
   Request,
   UseInterceptors,
   UploadedFile,
+  UsePipes,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -19,6 +21,8 @@ import {
   ApiOperation,
   ApiResponse,
   ApiConsumes,
+  ApiBody,
+  ApiParam,
 } from '@nestjs/swagger';
 import { PublicationRequestService } from './publication-request.service';
 import { CreatePublicationRequestDto } from './dto/create-publication-request.dto';
@@ -26,6 +30,9 @@ import { UpdatePublicationRequestDto } from './dto/update-publication-request.dt
 import { PublicationRequest } from './schemas/publication-request.schema';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MinioService } from 'src/minio/minio.service';
+import ObjectIdValidationPipe from 'src/pipes/objectIdvalidation.pipe';
+import AssginDepartmentDto from './dto/assign-department-dto';
+import PaymentSetupDto from './dto/payment-setup-dto';
 
 @ApiBearerAuth()
 @ApiTags('Publication Request')
@@ -57,13 +64,122 @@ export class PublicationRequestController {
       const result = await this.minioService.portalUploadFile(file, fileName);
       fileUrl.push(String(result));
     }
-
-    console.log('======= in this bitch ===============');
-    console.log(typeof fileUrl[0]);
     return this.publicationRequestService.createPublicationRequest(
       createPublicationRequestDto,
       fileUrl,
     );
+  }
+
+  @Patch('/payment-info-setup/:publicationRequestId')
+  @ApiBody({
+    type: PaymentSetupDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Successfully setup payment info',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid payment info',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Publication request is not found',
+  })
+  async setupPaymentInfo(
+    @Param('publicationRequestId', new ObjectIdValidationPipe())
+    publicationRequestId: string,
+    @Body('price') price: number,
+  ) {
+    return this.publicationRequestService.paymentSetup(
+      publicationRequestId,
+      price,
+    );
+  }
+
+  @Patch('/payment/confirm/:publicationRequestId')
+  @ApiParam({
+    description: 'The publication request Id',
+    type: 'string',
+    required: true,
+    name: 'publicationRequestId',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Payment successfully confirmed',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Publication request not found',
+  })
+  async confirmPayment(
+    @Param('publicationRequestId', new ObjectIdValidationPipe())
+    publicationRequestId: string,
+  ) {
+    return this.publicationRequestService.confirmPayment(publicationRequestId);
+  }
+
+  @Patch('/initial-approval/:publicationRequestId')
+  @ApiOperation({ summary: 'Approve a publication request by ID' })
+  @ApiParam({
+    name: 'publicationRequestId',
+    type: String,
+    description: 'Report ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report successfully updated.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async initalApproval(
+    @Param('publicationRequestId') publicationRequestId: string,
+  ) {
+    return this.publicationRequestService.approve(publicationRequestId);
+  }
+
+  @Patch('/seconday-approval/:publicationRequestId')
+  @ApiOperation({ summary: 'Secondary Approval for publication Request' })
+  @ApiParam({
+    name: 'publicationRequestId',
+    type: String,
+    description: 'Publication Request Id',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Publication successfully approved',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async secondayApproval(
+    @Param('publicationRequestId') publicationRequestId: string,
+  ) {
+    return this.publicationRequestService.secondaryApproval(
+      publicationRequestId,
+    );
+  }
+
+  @Patch('/initial-rejection/:publicationRequestId')
+  @ApiOperation({ summary: 'Reject a publication request by Id' })
+  @ApiParam({
+    name: 'publicationRequestId',
+    type: String,
+    description: 'Publication Request ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report successfully updated.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async Reject(@Param('publicationRequestId') publicationRequestId: string) {
+    return this.publicationRequestService.reject(publicationRequestId);
   }
 
   @Get()
@@ -82,6 +198,31 @@ export class PublicationRequestController {
     @Param('id') id: string,
   ): Promise<PublicationRequest> {
     return this.publicationRequestService.findOne(id, req.user.sub);
+  }
+
+  @Patch('assign-department/:id')
+  @ApiOperation({ summary: 'Assign department to publication request' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Publication request has been successfully assigned to a specific department',
+  })
+  @ApiBody({
+    type: AssginDepartmentDto,
+    description: 'department identifier',
+  })
+  @UsePipes(new ObjectIdValidationPipe())
+  async assignPublicationToDepartment(
+    @Body('departmentId') departmentId: string,
+    @Param('id') publicationRequestId: string,
+  ) {
+    const result =
+      await this.publicationRequestService.assignPublicationToDepartment(
+        departmentId,
+        publicationRequestId,
+      );
+
+    return result;
   }
 
   @Patch(':id')
