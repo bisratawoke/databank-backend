@@ -3,6 +3,6 @@ import { MinioService } from './minio.service';
 
 @Module({
   providers: [MinioService],
-  exports: [MinioService], // Export the service to make it available in other modules
+  exports: [MinioService],
 })
 export class MinioModule {}

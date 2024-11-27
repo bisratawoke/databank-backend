@@ -13,7 +13,6 @@ import { ActivityLogService } from 'src/modules/auth/services/activity-log.servi
 export class ActivityLoggerInterceptor implements NestInterceptor {
   private readonly logger = new Logger(ActivityLoggerInterceptor.name);
 
-  // Define routes that should be excluded from logging
   private readonly excludedRoutes = ['/health', '/metrics', '/favicon.ico'];
 
   constructor(private readonly activityLogService: ActivityLogService) {}
@@ -33,23 +32,17 @@ export class ActivityLoggerInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap(async (responseBody) => {
-        // this.logger.debug("responseBody: ", responseBody)
         try {
-          // let userId: string | undefined;
           const duration = Date.now() - startTime;
 
-          // Determine user ID from various possible sources
           const userId = this.getUserId(request, responseBody);
 
-          // this.logger.debug("userId: ", userId)
-
-          // Always log the activity, even for anonymous users
           const sanitizedBody = this.sanitizeRequestBody(request.body);
           const sanitizedHeaders = this.sanitizeHeaders(request.headers);
           const queryParams = request.query;
 
           await this.activityLogService.create({
-            userId: userId || null, // Allow null for anonymous users
+            userId: userId || null,
             action,
             details: {
               method: request.method,
@@ -66,8 +59,6 @@ export class ActivityLoggerInterceptor implements NestInterceptor {
             },
             ipAddress: this.getClientIp(request),
             userAgent: request.headers['user-agent'],
-            // sessionId: request.session?.id,
-            // referrer: request.headers.referer || request.headers.referrer,
           });
 
           this.logger.debug(
@@ -84,8 +75,6 @@ export class ActivityLoggerInterceptor implements NestInterceptor {
       }),
       catchError((error) => {
         const duration = Date.now() - startTime;
-
-        // Log error details
         this.activityLogService
           .create({
             userId: this.getUserId(request) || null,
@@ -114,17 +103,8 @@ export class ActivityLoggerInterceptor implements NestInterceptor {
   }
 
   private getUserId(request: any, responseBody?: any): string | undefined {
-    // this.logger.debug("request: ", request)
-    // Check multiple possible locations for user ID
     return (
-      // From response body (e.g., login response)
-      responseBody?.user?._id ||
-      // From request user object
-      request.user?._id ||
-      // From session
-      // request.session?.userId ||
-      // From JWT token if available
-      request.token?.userId
+      responseBody?.user?._id || request.user?._id || request.token?.userId
     );
   }
 

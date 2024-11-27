@@ -14,7 +14,6 @@ export class MinioService implements OnModuleInit {
       accessKey: process.env.MINIO_ACCESS_KEY,
       secretKey: process.env.MINIO_SECRET_KEY,
     });
-    // console.log("minio initialized: ", this.minioClient);
     this.bucketName = process.env.MINIO_PORTAL_BUCKET;
   }
 
@@ -22,7 +21,6 @@ export class MinioService implements OnModuleInit {
     return this.minioClient;
   }
 
-  // Add methods for interacting with MinIO (e.g., upload, download)
   async uploadFileFromBuffer(
     bucketName: string,
     fileName: string,
@@ -38,7 +36,6 @@ export class MinioService implements OnModuleInit {
     return `${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}/${bucketName}/${filePath}`;
   }
 
-  //! Portal User Related
   async portalUploadFile(
     file: Express.Multer.File,
     path: string,

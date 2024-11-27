@@ -200,7 +200,7 @@ export class PublicationRequestController {
   @ApiResponse({ status: 404, description: 'Publication request not found.' })
   async findOne(
     @Request() req,
-    @Param('id') id: string,
+    @Param('id', new ObjectIdValidationPipe()) id: string,
   ): Promise<PublicationRequest> {
     return this.publicationRequestService.findOne(id, req.user.sub);
   }
@@ -238,7 +238,7 @@ export class PublicationRequestController {
   })
   @ApiResponse({ status: 404, description: 'Publication request not found.' })
   async update(
-    @Param('id') id: string,
+    @Param('id', new ObjectIdValidationPipe()) id: string,
     @Body() updateDto: UpdatePublicationRequestDto,
     @Request() req,
   ): Promise<PublicationRequest> {
@@ -252,7 +252,10 @@ export class PublicationRequestController {
     description: 'Publication request has been deleted.',
   })
   @ApiResponse({ status: 404, description: 'Publication request not found.' })
-  async remove(@Param('id') id: string, @Request() req): Promise<void> {
+  async remove(
+    @Param('id', new ObjectIdValidationPipe()) id: string,
+    @Request() req,
+  ): Promise<void> {
     return this.publicationRequestService.remove(id, req.user.sub);
   }
 }

@@ -83,13 +83,13 @@ export class UsersController {
     return this.userService.findOne(id);
   }
 
+  @Patch('me')
   @ApiOperation({ summary: 'Update my profile' })
   @ApiResponse({ status: 200, description: 'User updated successfully.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
   @ApiResponse({ type: UserResponseDto })
-  @Patch('me')
   updateMe(@CurrentUser() user: User, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(user._id.toString(), updateUserDto);
   }
