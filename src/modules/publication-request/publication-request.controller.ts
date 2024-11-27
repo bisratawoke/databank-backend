@@ -157,7 +157,8 @@ export class PublicationRequestController {
     description: 'Report not found.',
   })
   async secondayApproval(
-    @Param('publicationRequestId') publicationRequestId: string,
+    @Param('publicationRequestId', new ObjectIdValidationPipe())
+    publicationRequestId: string,
   ) {
     return this.publicationRequestService.secondaryApproval(
       publicationRequestId,
