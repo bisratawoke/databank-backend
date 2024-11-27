@@ -11,9 +11,9 @@ import {
   Patch,
   Request,
 } from '@nestjs/common';
-import { ReportService } from './report.service';
-import { CreateReportDto } from './dto/create-report.dto';
-import { UpdateReportDto } from './dto/update-report.dto';
+import { ReportService } from '../report.service';
+import { CreateReportDto } from '../dto/create-report.dto';
+import { UpdateReportDto } from '../dto/update-report.dto';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -22,17 +22,19 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Report } from './schemas/report.schema';
-import { ReportDto } from './dto/report.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { UpdateStatusDto } from './dto/UpdateStatus.dto';
-
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+import { ReportDto } from '../dto/report.dto';
+import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
+import { UpdateStatusDto } from '../dto/UpdateStatus.dto';
+import { RolesGuard } from 'src/modules/auth/guards/role.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { UserRole } from 'src/modules/auth/constants/user-role';
+import { PortalRoles } from 'src/decorators/portal-roles.decorator';
+import { PortalUserRole } from 'src/modules/auth/constants/portal-user-role';
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Reports')
 @Controller('reports')
 export class ReportController {
-  constructor(private readonly reportService: ReportService) {}
+  constructor(private readonly reportService: ReportService) { }
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update report status by ID' })
@@ -79,6 +81,7 @@ export class ReportController {
     description: 'Reports successfully retrieved.',
     type: [ReportDto],
   })
+  @Roles(UserRole.ADMIN, UserRole.DEPARTMENT_HEAD, UserRole.DISSEMINATION_HEAD, UserRole.PORTAL_USER)
   async findAll(@Request() req) {
     console.log(req.user.sub);
     return this.reportService.findAll();
@@ -229,7 +232,7 @@ export class ReportController {
     return result;
   }
 
-  @Post('/dissmeniation-dept-response/:reportId')
+  @Post('/dissemination-dept-response/:reportId')
   @ApiOperation({
     summary: 'Status update notification sent to department head',
   })
@@ -243,7 +246,7 @@ export class ReportController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Report not found.',
   })
-  async dissmenationDeptResponse(
+  async disseminationDeptResponse(
     @Request() req,
     @Body('status') status: string,
     @Param('reportId') reportId: string,

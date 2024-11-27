@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { PortalUserType } from '../constants/portal-user-type';
+import { PortalUserType } from '../constants/portal-user-role';
 import { UserRole } from '../constants/user-role';
 
 @Schema({ timestamps: true })
@@ -66,8 +66,18 @@ export class PortalUser extends Document {
   @Prop({ default: false })
   isVerified: boolean;
 
-  @Prop({ default: UserRole.PORTAL_USER })
-  role: string;
+  @Prop({
+    type: [String],
+    default: [UserRole.PORTAL_USER],
+    validate: {
+      validator: (roles: UserRole[]) => {
+        return roles.length === 1 && roles.includes(UserRole.PORTAL_USER);
+      },
+      message: 'Only PORTAL_USER role is allowed.',
+    },
+  })
+  roles: UserRole[];
+
 }
 
 export const PortalUserSchema = SchemaFactory.createForClass(PortalUser);

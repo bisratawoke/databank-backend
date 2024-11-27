@@ -13,7 +13,7 @@ import {
 } from '../dto/portal-user/portal-user.dto';
 import { PortalUser } from '../schemas/portal-user.schema';
 import { MinioService } from 'src/minio/minio.service';
-import { PortalUserType } from '../constants/portal-user-type';
+import { PortalUserType } from '../constants/portal-user-role';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class PortalUserService {
   async create(
     createPortalUserDto: CreatePortalUserDto,
     authorizationLetter?: Express.Multer.File,
-  ): Promise<PortalUser> {
+  ): Promise<Partial<PortalUser>> {
     const { password, ...rest } = createPortalUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -68,8 +68,8 @@ export class PortalUserService {
     });
 
     const user = await newPortalUser.save();
-    delete user.password;
-    return user;
+    const { password: omittedPassword, ...userWithoutPassword } = user.toObject();
+    return userWithoutPassword
   }
 
   async login(loginDto: PortalUserLoginDto) {
@@ -91,7 +91,7 @@ export class PortalUserService {
     const payload = {
       sub: user._id,
       email: user.email,
-      role: user.role,
+      roles: user.roles,
       userType: user.userType,
     };
 

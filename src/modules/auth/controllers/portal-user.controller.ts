@@ -28,7 +28,7 @@ import { PortalUserService } from '../services/portal-user.service';
 @ApiTags('Portal-Users')
 @Controller('portal-users')
 export class PortalUserController {
-  constructor(private readonly portalUserService: PortalUserService) {}
+  constructor(private readonly portalUserService: PortalUserService) { }
 
   @Post('register')
   @UseInterceptors(FileInterceptor('authorizationLetter'))
