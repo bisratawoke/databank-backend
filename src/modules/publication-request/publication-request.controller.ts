@@ -180,7 +180,10 @@ export class PublicationRequestController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Report not found.',
   })
-  async Reject(@Param('publicationRequestId') publicationRequestId: string) {
+  async Reject(
+    @Param('publicationRequestId', new ObjectIdValidationPipe())
+    publicationRequestId: string,
+  ) {
     return this.publicationRequestService.reject(publicationRequestId);
   }
 
