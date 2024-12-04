@@ -84,7 +84,10 @@ export class PublicationRequestService {
     return await this.publicationRequestModel
       .findByIdAndUpdate(
         { _id: publicationRequestId },
-        { department: deparmentId, status: Status.PENDING_APPROVAL },
+        {
+          department: new Types.ObjectId(deparmentId),
+          status: Status.PENDING_APPROVAL,
+        },
         { new: true },
       )
       .exec();
@@ -95,6 +98,7 @@ export class PublicationRequestService {
   ): Promise<PublicationRequest> {
     const newPublicationRequest = new this.publicationRequestModel({
       ...createPublicationRequestDto,
+
       attachments: fileUrl ? fileUrl : [],
     });
     return newPublicationRequest.save();
@@ -105,7 +109,7 @@ export class PublicationRequestService {
   ): Promise<PublicationRequest> {
     const createdRequest = new this.publicationRequestModel({
       ...createDto,
-      author: userId,
+      // author: userId,
     });
     return createdRequest.save();
   }
@@ -120,8 +124,12 @@ export class PublicationRequestService {
 
   async findOne(id: string, userId: string): Promise<PublicationRequest> {
     const publication = await this.publicationRequestModel
-      .findOne({ _id: id, author: userId })
+      .findOne({
+        _id: id,
+        //  author: userId
+      })
       .populate('author category')
+      .populate('department')
       .exec();
 
     if (!publication) {
@@ -139,7 +147,14 @@ export class PublicationRequestService {
     userId: string,
   ): Promise<PublicationRequest> {
     const updated = await this.publicationRequestModel
-      .findOneAndUpdate({ _id: id, author: userId }, updateDto, { new: true })
+      .findOneAndUpdate(
+        {
+          _id: id,
+          // author: userId
+        },
+        updateDto,
+        { new: true },
+      )
       .exec();
 
     if (!updated) {
@@ -153,7 +168,10 @@ export class PublicationRequestService {
 
   async remove(id: string, userId: string): Promise<void> {
     const deleted = await this.publicationRequestModel
-      .findOneAndDelete({ _id: id, author: userId })
+      .findOneAndDelete({
+        _id: id,
+        // author: userId
+      })
       .exec();
 
     if (!deleted) {

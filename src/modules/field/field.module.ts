@@ -13,4 +13,4 @@ import { AuthModule } from '../auth/auth.module';
   controllers: [FieldController],
   providers: [FieldService],
 })
-export class FieldModule { }
+export class FieldModule {}
