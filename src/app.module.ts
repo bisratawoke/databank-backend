@@ -16,6 +16,7 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { NotifireModule } from './modules/notifire/notifire.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PortalUserModule } from './modules/auth/portal-user.module';
+import { PublicationRequestModule } from './modules/publication-request/publication-request.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -43,6 +44,7 @@ import { PortalUserModule } from './modules/auth/portal-user.module';
     MetastoreModule,
     NotifireModule,
     PortalUserModule,
+    PublicationRequestModule,
   ],
 })
 export class AppModule { }

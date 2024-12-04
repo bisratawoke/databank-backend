@@ -10,10 +10,7 @@ import { UserService } from '../modules/auth/services/user.service';
 import { PortalUserService } from 'src/modules/auth/services/portal-user.service';
 @Injectable()
 export class AuthUserInterceptor implements NestInterceptor {
-  constructor(
-    private readonly userService: UserService,
-    // private readonly PortalUserService: PortalUserService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   async intercept(
     context: ExecutionContext,

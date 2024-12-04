@@ -31,6 +31,27 @@ export class PublicationService {
     private readonly amqpConnection: AmqpConnection,
   ) {}
 
+  async reject(publicationId: string) {
+    try {
+      const updatedReport = await this.publicationModel.findByIdAndUpdate(
+        new Types.ObjectId(publicationId),
+        { status: Status.Rejected },
+        { new: true },
+      );
+
+      if (!updatedReport) {
+        throw new NotFoundException(
+          `Report with ID ${publicationId} not found`,
+        );
+      }
+
+      return updatedReport;
+    } catch (err) {
+      throw err;
+    } finally {
+    }
+  }
+
   async findPublicationsByDepartmentAndCategory({ departmentId, categoryId }) {
     return this.publicationModel
       .find({
@@ -52,19 +73,21 @@ export class PublicationService {
     );
   }
 
-  async getReportAuthor(reportId: string): Promise<Types.ObjectId | null> {
+  async getReportAuthor(publicationId: string): Promise<Types.ObjectId | null> {
     const report = await this.publicationModel
-      .findById(reportId)
+      .findById(publicationId)
       .select('author')
       .populate('author')
       .exec();
 
+    console.log('============ in get report author =================');
+    console.log(report);
     return report ? report.author : null;
   }
 
   public async initialRequestResponse(
     status: string,
-    reportId: string,
+    publicationId: string,
     from: string,
   ) {
     try {
@@ -73,10 +96,11 @@ export class PublicationService {
       );
       console.log(status);
 
-      const author = await this.getReportAuthor(reportId);
+      const author = await this.getReportAuthor(publicationId);
+      console.log(`the author is ${author}`);
       await this.publishToInappQueue({
         to: author._id.toString(),
-        body: `report ${reportId} status has been updated to ${status}`,
+        body: `publication ${publicationId} status has been updated to ${status}`,
       });
       return author;
     } catch (err) {
@@ -189,6 +213,7 @@ export class PublicationService {
       department: createPublicationDto.department,
       category: createPublicationDto.category,
       publicationType: createPublicationDto.publicationType,
+      author: createPublicationDto.author,
     });
 
     const savedPublication = await newPublication.save();

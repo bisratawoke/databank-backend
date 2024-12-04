@@ -39,6 +39,8 @@ import { UserRole } from '../auth/constants/user-role';
 import { RolesGuard } from '../auth/guards/role.guard';
 import { AuthUserInterceptor } from 'src/interceptors/auth-user.interceptor';
 import ObjectIdValidationPipe from 'src/pipes/objectIdvalidation.pipe';
+import { UpdatePublicationDto } from './dto/update-publication.dto';
+import { UpdatePublicationStatusDto } from './dto/update-publication-status.dto';
 
 @ApiBearerAuth()
 @ApiTags('Publications')
@@ -149,8 +151,6 @@ export class PublicationController {
     @Body() createPublicationDto: CreatePublicationDto,
     @Request() req,
   ) {
-    console.log('file:', file);
-    console.log('createPublicationDto:', createPublicationDto);
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -161,6 +161,7 @@ export class PublicationController {
       type: file.mimetype,
       author: req.user.sub,
     };
+    console.log('createPublicationDto updated:', combinedData);
 
     const result = await this.publicationService.create(file, combinedData);
 
@@ -244,28 +245,35 @@ export class PublicationController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Publication not found.',
   })
-  @UsePipes(new ObjectIdValidationPipe())
-  async Approve(@Param('publicationId') publicationId: string) {
+  async Approve(
+    @Param('publicationId', new ObjectIdValidationPipe()) publicationId: string,
+  ) {
     return this.publicationService.approve(publicationId);
   }
 
   @Post('/initial-request-response/:publicationId')
   @ApiOperation({ summary: 'Response to inital appoval request' })
-  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiParam({
+    name: 'publicationId',
+    type: String,
+    description: 'PublicationId ID',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Request was successfully updated',
   })
+  @ApiBody({ type: UpdatePublicationStatusDto })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Report not found.',
   })
-  @UsePipes(new ObjectIdValidationPipe())
+  // @UsePipes(new ObjectIdValidationPipe('publicationId'))
   async InitialRequestResponse(
     @Request() req,
     @Body('status') status: string,
-    @Param('publicationId') publicationId: string,
+    @Param('publicationId', new ObjectIdValidationPipe()) publicationId: string,
   ) {
+    console.log('=========== in initial request response =================');
     const result = await this.publicationService.initialRequestResponse(
       status,
       publicationId,
@@ -273,6 +281,21 @@ export class PublicationController {
     );
 
     return;
+  }
+
+  @Patch('/reject/:publicationId')
+  @ApiOperation({ summary: 'Reject a report by ID' })
+  @ApiParam({ name: 'publicationId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report successfully updated.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async Reject(@Param('publicationId') publicationId: string) {
+    return this.publicationService.reject(publicationId);
   }
 
   @Post('/request-inital-approval/:publicationId')
