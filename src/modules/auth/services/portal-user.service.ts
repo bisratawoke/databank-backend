@@ -22,8 +22,12 @@ export class PortalUserService {
     @InjectModel(PortalUser.name) private portalUserModel: Model<PortalUser>,
     private jwtService: JwtService,
     private minioService: MinioService,
-  ) { }
+  ) {}
 
+  async getPortalUserInfo(id: string) {
+    const user = await this.findOne(id);
+    return user;
+  }
   async findOne(id: string): Promise<PortalUser> {
     return this.portalUserModel.findById(id);
   }
@@ -73,7 +77,7 @@ export class PortalUserService {
   }
 
   async login(loginDto: PortalUserLoginDto) {
-    console.log("loginDto: ", loginDto);
+    console.log('loginDto: ', loginDto);
     const user = await this.portalUserModel.findOne({ email: loginDto.email });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');

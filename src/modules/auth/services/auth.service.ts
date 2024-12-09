@@ -21,10 +21,12 @@ export class AuthService {
     private readonly jwtService: JwtService,
     // private readonly mailService: MailService,
     private readonly configService: ConfigService,
-  ) {
-  }
+  ) {}
 
-  private async validateUser(email: string, password: string): Promise<User | null> {
+  private async validateUser(
+    email: string,
+    password: string,
+  ): Promise<User | null> {
     const user = await this.usersService.findOneWithCredentials(email);
     if (user && (await bcrypt.compare(password, user.password))) {
       if (!user.isEmailVerified) {
@@ -33,12 +35,11 @@ export class AuthService {
       if (!user.isActive) {
         throw new UnauthorizedException('Account is inactive');
       }
-      console.log("user obj: ", user);
+      console.log('user obj: ', user);
       return user;
     }
     return null;
   }
-
 
   async login(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto.email, loginDto.password);
@@ -51,7 +52,6 @@ export class AuthService {
       sub: user._id.toString(),
       roles: user.roles,
     };
-
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -70,7 +70,6 @@ export class AuthService {
       lastLogin: new Date(),
     });
 
-
     return {
       user: userToDto(user),
       auth: {
@@ -80,22 +79,23 @@ export class AuthService {
     };
   }
 
-
-
   async refreshToken(refreshToken: string) {
     try {
       const decoded = this.jwtService.verify(refreshToken, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       });
 
-      const user = await this.usersService.findOneWithCredentials(decoded.sub);
+      const user = await this.usersService.findOneWithCredentials(
+        decoded.email,
+      );
+
       if (!user || !user.refreshToken) {
-        throw new UnauthorizedException('Invalid refresh token');
+        throw new UnauthorizedException('Invalid refresh token1');
       }
 
       const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
       if (!isValid) {
-        throw new UnauthorizedException('Invalid refresh token');
+        throw new UnauthorizedException('Invalid refresh token2');
       }
 
       const payload = {
@@ -109,8 +109,9 @@ export class AuthService {
         expiresIn: '24h',
       });
       return { access_token: accessToken };
-    } catch {
-      throw new UnauthorizedException('Invalid refresh token');
+    } catch (err) {
+      console.log(err);
+      throw new UnauthorizedException('Invalid refresh token3');
     }
   }
 

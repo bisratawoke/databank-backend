@@ -30,7 +30,10 @@ export class PublicationRequestService {
       {
         _id: publicationPayment.paymentData._id,
       },
-      { paymentStatus: PaymentStatus.CONFIRMED },
+      {
+        paymentStatus: PaymentStatus.CONFIRMED,
+        status: Status.PAYMENT_VERIFIED,
+      },
     );
   }
 
@@ -41,7 +44,7 @@ export class PublicationRequestService {
 
     return await this.publicationRequestModel.findOneAndUpdate(
       { _id: publicationRequestId },
-      { paymentData: newPublicationPayment._id },
+      { paymentData: newPublicationPayment._id, paymentRequired: true },
       { new: true },
     );
   }
