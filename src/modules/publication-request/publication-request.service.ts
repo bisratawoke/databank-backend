@@ -10,6 +10,7 @@ import { CreatePublicationRequestDto } from './dto/create-publication-request.dt
 import PublicationPayment, {
   PaymentStatus,
 } from './schemas/publication-payment.schema';
+import CreatePublicationRequestWithAuthorId from './dto/create-publication-request-with-user-id';
 
 @Injectable()
 export class PublicationRequestService {
@@ -20,6 +21,11 @@ export class PublicationRequestService {
     private readonly publicationPaymentModel: Model<PublicationPayment>,
   ) {}
 
+  async getCurrentPortalUserPublicationRequests(portalUserId: string) {
+    return this.publicationRequestModel.find({
+      author: portalUserId,
+    });
+  }
   async confirmPayment(publicationRequestId: string) {
     const publicationPayment = await this.publicationRequestModel
       .findById(publicationRequestId)
@@ -30,7 +36,10 @@ export class PublicationRequestService {
       {
         _id: publicationPayment.paymentData._id,
       },
-      { paymentStatus: PaymentStatus.CONFIRMED },
+      {
+        paymentStatus: PaymentStatus.CONFIRMED,
+        status: Status.PAYMENT_VERIFIED,
+      },
     );
   }
 
@@ -41,7 +50,7 @@ export class PublicationRequestService {
 
     return await this.publicationRequestModel.findOneAndUpdate(
       { _id: publicationRequestId },
-      { paymentData: newPublicationPayment._id },
+      { paymentData: newPublicationPayment._id, paymentRequired: true },
       { new: true },
     );
   }
@@ -93,7 +102,7 @@ export class PublicationRequestService {
       .exec();
   }
   async createPublicationRequest(
-    createPublicationRequestDto: CreatePublicationRequestDto,
+    createPublicationRequestDto: CreatePublicationRequestWithAuthorId,
     fileUrl?: string[],
   ): Promise<PublicationRequest> {
     const newPublicationRequest = new this.publicationRequestModel({

@@ -30,6 +30,21 @@ import { PortalUserService } from '../services/portal-user.service';
 export class PortalUserController {
   constructor(private readonly portalUserService: PortalUserService) {}
 
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @ApiOperation({ summary: 'Get the current portal user information' })
+  @ApiResponse({
+    status: 200,
+    description: 'The current portal user information is available',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized access to the portal user information',
+  })
+  async getPortalUserInfo(@Request() req) {
+    return this.portalUserService.getPortalUserInfo(req.user.sub);
+  }
+
   @Post('register')
   @UseInterceptors(FileInterceptor('authorizationLetter'))
   @ApiOperation({ summary: 'Register a new portal user' })
