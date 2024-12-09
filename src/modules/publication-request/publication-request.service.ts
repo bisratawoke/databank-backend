@@ -21,6 +21,11 @@ export class PublicationRequestService {
     private readonly publicationPaymentModel: Model<PublicationPayment>,
   ) {}
 
+  async getCurrentPortalUserPublicationRequests(portalUserId: string) {
+    return this.publicationRequestModel.find({
+      author: portalUserId,
+    });
+  }
   async confirmPayment(publicationRequestId: string) {
     const publicationPayment = await this.publicationRequestModel
       .findById(publicationRequestId)

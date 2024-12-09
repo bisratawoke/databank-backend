@@ -59,8 +59,9 @@ export class PublicationRequestController {
       'Unauthorized access to the portal user publication request information',
   })
   async getCurrentPortalUsersPublicationRequests(@Request() req) {
-    console.log(req.user);
-    return req.user;
+    return await this.publicationRequestService.getCurrentPortalUserPublicationRequests(
+      req.user.sub,
+    );
   }
 
   @Post()
