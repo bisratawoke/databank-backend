@@ -10,6 +10,7 @@ import { CreatePublicationRequestDto } from './dto/create-publication-request.dt
 import PublicationPayment, {
   PaymentStatus,
 } from './schemas/publication-payment.schema';
+import CreatePublicationRequestWithAuthorId from './dto/create-publication-request-with-user-id';
 
 @Injectable()
 export class PublicationRequestService {
@@ -96,7 +97,7 @@ export class PublicationRequestService {
       .exec();
   }
   async createPublicationRequest(
-    createPublicationRequestDto: CreatePublicationRequestDto,
+    createPublicationRequestDto: CreatePublicationRequestWithAuthorId,
     fileUrl?: string[],
   ): Promise<PublicationRequest> {
     const newPublicationRequest = new this.publicationRequestModel({

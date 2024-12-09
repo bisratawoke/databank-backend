@@ -44,6 +44,25 @@ export class PublicationRequestController {
     private readonly minioService: MinioService,
   ) {}
 
+  @Get('me')
+  @ApiOperation({
+    summary: 'Get publication requests of the current logged in portal user',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'The publication requests of the current logged in portal user is available',
+  })
+  @ApiResponse({
+    status: 401,
+    description:
+      'Unauthorized access to the portal user publication request information',
+  })
+  async getCurrentPortalUsersPublicationRequests(@Request() req) {
+    console.log(req.user);
+    return req.user;
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create a new publication request' })
   @ApiResponse({
@@ -55,6 +74,7 @@ export class PublicationRequestController {
   @UseInterceptors(FileInterceptor('file'))
   async createPublicationRequest(
     @Body() createPublicationRequestDto: CreatePublicationRequestDto,
+    @Request() req,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     let fileUrl: string[] | null = [];
@@ -65,7 +85,7 @@ export class PublicationRequestController {
       fileUrl.push(String(result));
     }
     return this.publicationRequestService.createPublicationRequest(
-      createPublicationRequestDto,
+      { ...createPublicationRequestDto, author: req.user.sub },
       fileUrl,
     );
   }
