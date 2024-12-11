@@ -244,7 +244,10 @@ export class PublicationService {
   }
 
   async findOne(id: string): Promise<Partial<PublicationDto>> {
-    const publication = await this.publicationModel.findById(id).exec();
+    const publication = await this.publicationModel
+      .findById(id)
+      .populate('category')
+      .exec();
 
     if (!publication) {
       throw new NotFoundException('Publication not found');

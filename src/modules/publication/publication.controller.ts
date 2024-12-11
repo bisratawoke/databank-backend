@@ -45,8 +45,6 @@ import { UpdatePublicationStatusDto } from './dto/update-publication-status.dto'
 @ApiBearerAuth()
 @ApiTags('Publications')
 @UseGuards(JwtAuthGuard)
-// @UseGuards(JwtAuthGuard, RolesGuard)
-// @UseInterceptors(AuthUserInterceptor)
 @Controller('publications')
 export class PublicationController {
   constructor(
@@ -273,7 +271,6 @@ export class PublicationController {
     @Body('status') status: string,
     @Param('publicationId', new ObjectIdValidationPipe()) publicationId: string,
   ) {
-    console.log('=========== in initial request response =================');
     const result = await this.publicationService.initialRequestResponse(
       status,
       publicationId,
