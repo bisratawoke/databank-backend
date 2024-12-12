@@ -38,13 +38,16 @@ export class ReportService {
 
   public async dissmenationDeptResponse(reportId, status, from) {
     try {
+      console.log('========== in dissmenationDeptResponse =================');
       const departmentHead = await this.getDepartmentHead({ reportId });
+      console.log(departmentHead);
       await this.publishToInappQueue({
         body: `report ${reportId} has been updated to ${status}`,
         to: departmentHead._id.toString(),
       });
       return {};
     } catch (err) {
+      console.log(err);
       throw err;
     } finally {
     }
@@ -165,10 +168,12 @@ export class ReportService {
       };
 
       const inAppMessage = {
-        body: `report updated. please update the status!`,
+        body: `Report Created. Please Approve or reject it!`,
         to: departmentHead._id,
       };
 
+      console.log('======= in request initial approval method ======');
+      console.log(departmentHead);
       // await this.amqpConnection.publish('logs_exchange', 'email', message);
       await this.amqpConnection.publish(
         'logs_exchange',
