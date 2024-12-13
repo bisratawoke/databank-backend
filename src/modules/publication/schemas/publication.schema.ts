@@ -8,7 +8,6 @@ export type PublicationDocument = Publication & Document;
 enum PUBLICATION_TYPE {
   PUBLIC,
   INTERNAL,
-  FOR_SALE,
 }
 
 export enum Status {
@@ -39,15 +38,6 @@ export class Publication {
   @Prop({ required: true })
   permanentLink: string;
 
-  @Prop({ required: true })
-  uploadDate: Date;
-
-  @Prop()
-  createdAt?: Date;
-
-  @Prop()
-  updatedAt?: Date;
-
   @Prop({ type: String, enum: PUBLICATION_TYPE, required: true })
   publicationType: PUBLICATION_TYPE;
 
@@ -59,6 +49,24 @@ export class Publication {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
   author: Types.ObjectId;
+
+  @Prop({ type: Boolean, required: true, default: false })
+  paymentRequired: Boolean;
+
+  @Prop({ type: Number, required: false })
+  price: Number;
+
+  @Prop({ type: String, required: false })
+  coverImageLink: string;
+
+  @Prop({ required: true })
+  uploadDate: Date;
+
+  @Prop()
+  createdAt?: Date;
+
+  @Prop()
+  updatedAt?: Date;
 }
 
 export const PublicationSchema = SchemaFactory.createForClass(Publication);

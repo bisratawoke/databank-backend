@@ -9,6 +9,7 @@ import {
   IsNumber,
   IsDateString,
   IsNotEmpty,
+  IsBoolean,
 } from 'class-validator';
 
 enum PUBLICATION_TYPE {
@@ -188,4 +189,30 @@ export class CreatePublicationDto {
   @IsString()
   @IsOptional()
   author?: string;
+
+  @ApiProperty({
+    type: 'boolean',
+    description: 'Where publication requires payment',
+    example: false,
+  })
+  @IsBoolean()
+  paymentRequired?: boolean;
+
+  @ApiPropertyOptional({
+    type: 'number',
+    description: 'Price of publication',
+    example: 2344,
+  })
+  @IsNumber()
+  @IsOptional()
+  price: number;
+
+  @ApiPropertyOptional({
+    type: 'string',
+    description: 'Link to cover image for the publication',
+    example: 'http://localhost:8000/image.png',
+  })
+  @IsString()
+  @IsOptional()
+  coverImageLink: string;
 }
