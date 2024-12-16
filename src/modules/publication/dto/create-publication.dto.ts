@@ -19,9 +19,22 @@ enum PUBLICATION_TYPE {
 }
 
 export class CreatePublicationDto {
-  @ApiProperty({ type: 'string', format: 'binary' })
-  file: Express.Multer.File;
+  // @ApiProperty({ type: 'string', format: 'binary' })
+  // files: Express.Multer.File[];
 
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Cover image file',
+  })
+  coverImage: Express.Multer.File;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Main file to upload',
+  })
+  file: Express.Multer.File;
   @ApiProperty({
     type: 'string',
     description: 'Name of the file including path',
@@ -192,9 +205,10 @@ export class CreatePublicationDto {
 
   @ApiProperty({
     type: 'boolean',
-    description: 'Where publication requires payment',
+    description: 'This specifies if the publication requires payment',
     example: false,
   })
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   paymentRequired?: boolean;
 
@@ -203,16 +217,17 @@ export class CreatePublicationDto {
     description: 'Price of publication',
     example: 2344,
   })
+  @Transform(({ value }) => parseFloat(value))
   @IsNumber()
   @IsOptional()
-  price: number;
+  price?: number;
 
-  @ApiPropertyOptional({
-    type: 'string',
-    description: 'Link to cover image for the publication',
-    example: 'http://localhost:8000/image.png',
-  })
-  @IsString()
-  @IsOptional()
-  coverImageLink: string;
+  // @ApiPropertyOptional({
+  //   type: 'string',
+  //   description: 'Link to cover image for the publication',
+  //   example: 'http://localhost:8000/image.png',
+  // })
+  // @IsString()
+  // @IsOptional()
+  // coverImageLink: string;
 }
