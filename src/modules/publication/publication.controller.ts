@@ -159,11 +159,11 @@ export class PublicationController {
       coverImage = null,
       file,
     }: { coverImage?: Express.Multer.File; file: Express.Multer.File },
-    @Body() createPublicationDto: any,
+    @Body() createPublicationDto: CreatePublicationDto,
     @Request() req,
   ) {
-    console.log(coverImage);
-    console.log(file);
+    console.log('============ in upload file =================');
+    console.log(createPublicationDto);
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -177,7 +177,7 @@ export class PublicationController {
     console.log('createPublicationDto updated:', combinedData);
 
     const result = await this.publicationService.create(
-      coverImage[0],
+      coverImage ? coverImage[0] : null,
       file[0],
       combinedData,
     );

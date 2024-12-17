@@ -238,6 +238,8 @@ export class PublicationService {
       publicationType: createPublicationDto.publicationType,
       author: createPublicationDto.author,
       coverImageLink: coverImageLink,
+      price: createPublicationDto.price,
+      paymentRequired: createPublicationDto.paymentRequired,
     });
 
     const savedPublication = await newPublication.save();

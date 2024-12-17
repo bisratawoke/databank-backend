@@ -13,20 +13,19 @@ import {
 } from 'class-validator';
 
 enum PUBLICATION_TYPE {
-  PUBLIC,
-  INTERNAL,
-  FOR_SALE,
+  PUBLIC = 'PUBLIC',
+  INTERNAL = 'INTERNAL',
+  FOR_SALE = 'FOR_SALE',
 }
 
 export class CreatePublicationDto {
-  // @ApiProperty({ type: 'string', format: 'binary' })
-  // files: Express.Multer.File[];
-
   @ApiProperty({
     type: 'string',
     format: 'binary',
     description: 'Cover image file',
+    required: false,
   })
+  @IsOptional()
   coverImage: Express.Multer.File;
 
   @ApiProperty({
