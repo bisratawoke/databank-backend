@@ -165,10 +165,29 @@ export class PublicationService {
       return {};
     } catch (error) {}
   }
+
+  async uploadPublicationCoverImage(
+    bucketName = 'static',
+    coverImage: Express.Multer.File,
+  ) {
+    const filePath = `${new Date().getTime()}-${coverImage.originalname}`;
+    await this.uploadFileToMinio(
+      bucketName,
+      filePath,
+      coverImage.buffer,
+      coverImage.mimetype,
+    );
+    const link = await this.generatePublicUrl(bucketName, filePath);
+
+    return link;
+  }
   async create(
+    coverImage: Express.Multer.File = null,
     file: Express.Multer.File,
     createPublicationDto: CreatePublicationDto,
   ): Promise<{ publication: Publication; metadata: any }> {
+    const buffer = file.buffer;
+
     const buckets = await this.minioService.client.listBuckets();
 
     if (
@@ -184,12 +203,7 @@ export class PublicationService {
       ? `${createPublicationDto.location}/${file.originalname}`
       : file.originalname;
 
-    await this.uploadFileToMinio(
-      bucketName,
-      filePath,
-      file.buffer,
-      file.mimetype,
-    );
+    await this.uploadFileToMinio(bucketName, filePath, buffer, file.mimetype);
 
     const permanentLink = this.generatePublicUrl(bucketName, filePath);
 
@@ -204,6 +218,15 @@ export class PublicationService {
       created_date: createPublicationDto.created_date,
     });
 
+    let coverImageLink = null;
+    if (coverImage) {
+      coverImageLink = await this.uploadPublicationCoverImage(
+        process.env.STATIC_FILES_MINIO_BUCKET_NAME,
+        coverImage,
+      );
+    }
+
+    console.log(coverImageLink);
     const newPublication = new this.publicationModel({
       fileName: filePath,
       bucketName: bucketName,
@@ -214,6 +237,9 @@ export class PublicationService {
       category: createPublicationDto.category,
       publicationType: createPublicationDto.publicationType,
       author: createPublicationDto.author,
+      coverImageLink: coverImageLink,
+      price: createPublicationDto.price,
+      paymentRequired: createPublicationDto.paymentRequired,
     });
 
     const savedPublication = await newPublication.save();
@@ -363,28 +389,33 @@ export class PublicationService {
   }
 
   async listLocations(): Promise<string[]> {
-    const buckets = await this.minioService.client.listBuckets();
-    const locations = new Set<string>();
+    try {
+      const buckets = await this.minioService.client.listBuckets();
+      const locations = new Set<string>();
 
-    for (const bucket of buckets) {
-      const stream = this.minioService.client.listObjects(
-        bucket.name,
-        '',
-        true,
-      );
+      for (const bucket of buckets) {
+        const stream = this.minioService.client.listObjects(
+          bucket.name,
+          '',
+          true,
+        );
 
-      for await (const item of stream) {
-        const key = item.name;
-        const parts = key.split('/');
-        if (parts.length > 1) {
-          for (let i = 1; i < parts.length; i++) {
-            locations.add(parts.slice(0, i).join('/'));
+        for await (const item of stream) {
+          const key = item.name;
+          const parts = key.split('/');
+          if (parts.length > 1) {
+            for (let i = 1; i < parts.length; i++) {
+              locations.add(parts.slice(0, i).join('/'));
+            }
           }
         }
       }
-    }
 
-    return Array.from(locations).sort();
+      return Array.from(locations).sort();
+    } catch (err) {
+      console.log('============== error is here =================');
+      console.log(err);
+    }
   }
 
   async uploadFileFromBuffer(

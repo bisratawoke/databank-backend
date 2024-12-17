@@ -15,8 +15,12 @@ import {
   UsePipes,
   HttpStatus,
   Request,
+  UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileInterceptor,
+  FileFieldsInterceptor,
+} from '@nestjs/platform-express';
 import { Response } from 'express';
 import { PublicationService } from './publication.service';
 import { MetastoreService } from '../metastore/metastore.service';
@@ -53,7 +57,12 @@ export class PublicationController {
   ) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'coverImage', maxCount: 1 },
+      { name: 'file', maxCount: 1 },
+    ]),
+  )
   @ApiOperation({
     summary: 'Upload a file with metadata',
     description:
@@ -145,10 +154,16 @@ export class PublicationController {
     description: 'Bad request',
   })
   async uploadFile(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles()
+    {
+      coverImage = null,
+      file,
+    }: { coverImage?: Express.Multer.File; file: Express.Multer.File },
     @Body() createPublicationDto: CreatePublicationDto,
     @Request() req,
   ) {
+    console.log('============ in upload file =================');
+    console.log(createPublicationDto);
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -161,13 +176,18 @@ export class PublicationController {
     };
     console.log('createPublicationDto updated:', combinedData);
 
-    const result = await this.publicationService.create(file, combinedData);
+    const result = await this.publicationService.create(
+      coverImage ? coverImage[0] : null,
+      file[0],
+      combinedData,
+    );
 
     return {
       message: 'File uploaded successfully',
       publication: result.publication,
       metadata: result.metadata,
     };
+    return;
   }
 
   @Post('bucket')
