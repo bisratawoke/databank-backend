@@ -354,11 +354,15 @@ export class PublicationService {
 
   generatePublicUrl(bucketName: string, filePath: string): string {
     const minioServerUrl = `${process.env.MINIO_PROD_ENDPOINT}:${process.env.MINIO_PORT}`;
+    console.log('================= in public url gen  ==============');
+    console.log(`${minioServerUrl}/${bucketName}/${filePath}`);
     return `${minioServerUrl}/${bucketName}/${filePath}`;
   }
 
   generatePublicUrlProd(bucketName: string, filePath: string): string {
-    const minioServerUrl = `${process.env.MINIO_PROD_ENDPOINT}:${process.env.MINIO_PORT}`;
+    const minioServerUrl = `${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}`;
+    console.log('==================== in generate public url pro ============');
+    console.log(`${minioServerUrl}/${bucketName}/${filePath}`);
     return `${minioServerUrl}/${bucketName}/${filePath}`;
   }
 
