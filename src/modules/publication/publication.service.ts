@@ -177,7 +177,7 @@ export class PublicationService {
       coverImage.buffer,
       coverImage.mimetype,
     );
-    const link = await this.generatePublicUrl(bucketName, filePath);
+    const link = await this.generatePublicUrlProd(bucketName, filePath);
 
     return link;
   }
@@ -353,7 +353,12 @@ export class PublicationService {
   }
 
   generatePublicUrl(bucketName: string, filePath: string): string {
-    const minioServerUrl = `${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}`;
+    const minioServerUrl = `${process.env.MINIO_PROD_ENDPOINT}:${process.env.MINIO_PORT}`;
+    return `${minioServerUrl}/${bucketName}/${filePath}`;
+  }
+
+  generatePublicUrlProd(bucketName: string, filePath: string): string {
+    const minioServerUrl = `${process.env.MINIO_PROD_ENDPOINT}:${process.env.MINIO_PORT}`;
     return `${minioServerUrl}/${bucketName}/${filePath}`;
   }
 
