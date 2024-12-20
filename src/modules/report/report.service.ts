@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model, PipelineStage, SortOrder, Types, SortValues } from 'mongoose';
 import { CreateReportDto } from './dto/create-report.dto';
 import { Report, Status } from './schemas/report.schema';
 import { DataService } from '../data/data.service';
@@ -19,6 +19,11 @@ import { Department } from '../department/schemas/department.schema';
 import { SubCategory } from '../sub-category/schemas/sub-category.schema';
 import { Category } from '../category/schemas/category.schema';
 import { UserService } from '../auth/services/user.service';
+import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
+import { Field } from '../field/schemas/field.schema';
+import { ReportQueryDto } from './dto/report-query.dto';
+
+
 @Injectable()
 export class ReportService {
   constructor(
@@ -26,6 +31,7 @@ export class ReportService {
     @InjectModel(Data.name) private readonly dataModel: Model<Data>,
     @InjectModel(Department.name)
     private readonly departmentModel: Model<Department>,
+    @InjectModel(Field.name) private readonly fieldModel: Model<Field>,
 
     @InjectModel(SubCategory.name)
     private readonly subCategoryModel: Model<SubCategory>,
@@ -34,7 +40,8 @@ export class ReportService {
     private readonly amqpConnection: AmqpConnection,
     private readonly departmentService: DepartmentService,
     private readonly userService: UserService,
-  ) {}
+  ) { }
+
 
   public async dissmenationDeptResponse(reportId, status, from) {
     try {
@@ -72,7 +79,7 @@ export class ReportService {
         });
       });
       return {};
-    } catch (error) {}
+    } catch (error) { }
   }
 
   async getDepartmentHead({ reportId }: { reportId: string }) {
@@ -364,6 +371,124 @@ export class ReportService {
       .exec();
   }
 
+
+  async findAllPaginated(query: ReportQueryDto) {
+    const { page = 1, limit = 10, status } = query;
+
+    const reports = await this.reportModel
+      .find()
+      .where('status').equals(status)
+      .select('-fields -data') // Exclude fields and data initially
+      .populate('author', 'name email') // Only select necessary author fields
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(); // Use lean for better performance
+
+    return {
+      data: reports,
+      pagination: {
+        page,
+        limit,
+        total: await this.reportModel.countDocuments(),
+      },
+    };
+  }
+
+  async findReportFields(reportId: string, query: PaginationQueryDto) {
+    const { page = 1, limit = 10 } = query;
+
+    const reportWithFields = await this.reportModel
+      .findById(reportId)
+      .select('fields')
+      .populate({
+        path: 'fields',
+        options: {
+          skip: (page - 1) * limit,
+          limit: limit,
+        },
+        populate: {
+          path: 'type',
+          model: 'FieldType',
+        },
+      })
+      .exec();
+
+    if (!reportWithFields) {
+      throw new NotFoundException('Report not found')
+    }
+
+    const totalItems = await this.reportModel.aggregate([
+      {
+        $project: {
+          fieldsCount: { $size: '$fields' }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalDataItems: { $sum: '$fieldsCount' }
+        }
+      }
+    ]).exec();
+
+    const totalDataItems = totalItems[0]?.totalDataItems || 0;
+    const fields = reportWithFields ? reportWithFields.fields : [];
+
+    return {
+      data: fields,
+      pagination: {
+        page,
+        limit,
+        totalItems: totalDataItems,
+      }
+    };
+  }
+
+  async findReportData(reportId: string, query: PaginationQueryDto) {
+    const { page = 1, limit = 10 } = query;
+
+    const reportWithData = await this.reportModel
+      .findById(reportId)
+      .select('data')
+      .populate({
+        path: 'data',
+        options: {
+          skip: (page - 1) * limit,
+          limit: limit,
+        }
+      })
+      .exec();
+
+    if (!reportWithData) {
+      throw new NotFoundException('Report not found')
+    }
+    const totalItems = await this.reportModel.aggregate([
+      {
+        $project: {
+          dataCount: { $size: '$data' }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalDataItems: { $sum: '$dataCount' }
+        }
+      }
+    ]).exec();
+
+    const totalDataItems = totalItems[0]?.totalDataItems || 0;
+    const data = reportWithData ? reportWithData.data : [];
+    return {
+      data: data,
+      pagination: {
+        page,
+        limit,
+        totalItems: totalDataItems
+      },
+    }
+  }
+
+
   async findOne(id: string): Promise<Report> {
     const report = await this.reportModel
       .findById(id)
@@ -391,6 +516,35 @@ export class ReportService {
     }
     return report;
   }
+  async findOneNotPopulated(id: string): Promise<Report> {
+    const report = await this.reportModel
+      .findById(id)
+      .select('-fields -data') // Exclude fields and data initially
+      .populate('author', 'name email') // Only select necessary author fields
+      .exec();
+    // .populate({
+    //   path: 'fields',
+    //   populate: {
+    //     path: 'type',
+    //     model: 'FieldType',
+    //   },
+    // })
+    // .populate({
+    //   path: 'data',
+    //   populate: {
+    //     path: 'field',
+    //     model: 'Field',
+    //     populate: {
+    //       path: 'type',
+    //       model: 'FieldType',
+    //     },
+    //   },
+    // })
+    if (!report) {
+      throw new NotFoundException(`Report with ID ${id} not found`);
+    }
+    return report;
+  }
 
   async update(id: string, updateReportDto: UpdateReportDto): Promise<Report> {
     try {
@@ -404,22 +558,22 @@ export class ReportService {
 
       const updatedFields = fields
         ? [
-            ...new Set([
-              ...existingReport.fields.map((field: Types.ObjectId) =>
-                field.toString(),
-              ),
-              ...fields,
-            ]),
-          ].map((field) => new Types.ObjectId(field))
+          ...new Set([
+            ...existingReport.fields.map((field: Types.ObjectId) =>
+              field.toString(),
+            ),
+            ...fields,
+          ]),
+        ].map((field) => new Types.ObjectId(field))
         : existingReport.fields;
 
       const updatedData = data
         ? [
-            ...new Set([
-              ...existingReport.data.map((d: Types.ObjectId) => d.toString()),
-              ...data,
-            ]),
-          ].map((d) => new Types.ObjectId(d))
+          ...new Set([
+            ...existingReport.data.map((d: Types.ObjectId) => d.toString()),
+            ...data,
+          ]),
+        ].map((d) => new Types.ObjectId(d))
         : existingReport.data;
 
       const updatedReport = await this.reportModel

@@ -10,6 +10,7 @@ import {
     UseGuards,
     Patch,
     Request,
+    Query,
 } from '@nestjs/common';
 import { ReportService } from '../report.service';
 import { CreateReportDto } from '../dto/create-report.dto';
@@ -29,6 +30,7 @@ import { UpdateStatusDto } from '../dto/UpdateStatus.dto';
 import { PortalRolesGuard } from 'src/modules/auth/guards/portal-roles.guard';
 import { PortalRoles } from 'src/decorators/portal-roles.decorator';
 import { PortalUserRole } from 'src/modules/auth/constants/portal-user-role';
+import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PortalRolesGuard)
@@ -44,8 +46,7 @@ export class PortalReportController {
         type: [ReportDto],
     })
     @PortalRoles(PortalUserRole.PORTAL_USER)
-    async findAll(@Request() req) {
-        console.log(req.user.sub);
+    async findAll(@Query() query: PaginationQueryDto) {
         return this.reportService.findAll();
     }
 

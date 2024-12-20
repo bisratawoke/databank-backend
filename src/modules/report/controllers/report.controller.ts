@@ -10,6 +10,7 @@ import {
   UseGuards,
   Patch,
   Request,
+  Query,
 } from '@nestjs/common';
 import { ReportService } from '../report.service';
 import { CreateReportDto } from '../dto/create-report.dto';
@@ -30,6 +31,11 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/modules/auth/constants/user-role';
 import { PortalRoles } from 'src/decorators/portal-roles.decorator';
 import { PortalUserRole } from 'src/modules/auth/constants/portal-user-role';
+import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
+import { DataDto } from 'src/modules/data/dto/data.dto';
+import { FieldDto } from 'src/modules/field/dto/field.dto';
+import { ReportQueryDto } from '../dto/report-query.dto';
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Reports')
 @Controller('reports')
@@ -74,7 +80,6 @@ export class ReportController {
     });
   }
 
-  @Get()
   @ApiOperation({ summary: 'Get all reports' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -82,9 +87,45 @@ export class ReportController {
     type: [ReportDto],
   })
   @Roles(UserRole.ADMIN, UserRole.DEPARTMENT_HEAD, UserRole.DISSEMINATION_HEAD, UserRole.PORTAL_USER)
-  async findAll(@Request() req) {
-    console.log(req.user.sub);
+  @Get()
+  async findAll() {
     return this.reportService.findAll();
+  }
+
+  @ApiOperation({ summary: 'Get all reports paginated' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Reports successfully retrieved.',
+    type: [ReportDto],
+  })
+  @Roles(UserRole.ADMIN, UserRole.DEPARTMENT_HEAD, UserRole.DISSEMINATION_HEAD, UserRole.PORTAL_USER)
+  @Get('/all')
+  async findAllPaginated(@Query() query: ReportQueryDto) {
+    return this.reportService.findAllPaginated(query);
+  }
+
+  @Get('/:reportId/fields')
+  @ApiOperation({ summary: 'Get fields of a report by ID' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' }) // Swagger doc for URL param
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Fields successfully retrieved.',
+    type: [FieldDto],
+  })
+  async getReportFields(@Param('reportId') reportId: string, @Query() query: PaginationQueryDto) {
+    return this.reportService.findReportFields(reportId, query);
+  }
+
+  @Get('/:reportId/data')
+  @ApiOperation({ summary: 'Get data of a report by ID' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' }) // Swagger doc for URL param
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Data successfully retrieved.',
+    type: [DataDto],
+  })
+  async getReportData(@Param('reportId') reportId: string, @Query() query: PaginationQueryDto) {
+    return this.reportService.findReportData(reportId, query);
   }
 
   @Get(':id')
@@ -101,6 +142,22 @@ export class ReportController {
   })
   async findOne(@Param('id') id: string) {
     return this.reportService.findOne(id);
+  }
+
+  @Get('/:reportId/single')
+  @ApiOperation({ summary: 'Get a report by ID un populated' })
+  @ApiParam({ name: 'id', type: String, description: 'Report ID' }) // Swagger doc for URL param
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report successfully retrieved.',
+    type: ReportDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async findOneSingle(@Param('id') id: string) {
+    return this.reportService.findOneNotPopulated(id);
   }
 
   @Put(':id')
