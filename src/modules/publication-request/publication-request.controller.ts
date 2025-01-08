@@ -162,6 +162,59 @@ export class PublicationRequestController {
     return this.publicationRequestService.approve(publicationRequestId);
   }
 
+  @Patch('/final-approval/:publicationRequestId')
+  @ApiOperation({ summary: 'Final Approval for publication Request' })
+  @ApiParam({
+    name: 'publicationRequestId',
+    type: String,
+    description: 'Publication Request Id',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Publication successfully approved',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async finalApproval(
+    @Param('publicationRequestId', new ObjectIdValidationPipe())
+    publicationRequestId: string,
+  ) {
+    return this.publicationRequestService.finalApproval(publicationRequestId);
+  }
+
+  @Patch('/set-file/:publicationRequestId')
+  @ApiOperation({ summary: 'Set file path' })
+  @ApiParam({
+    name: 'fileName',
+    type: String,
+    description: 'File path',
+  })
+  @ApiParam({
+    name: 'publicationRequestId',
+    type: String,
+    description: 'Publication Request Id',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Publication file path successfully set',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async setFile(
+    @Param('publicationRequestId', new ObjectIdValidationPipe())
+    publicationRequestId: string,
+    @Body('filePath') filePath: string,
+  ) {
+    return this.publicationRequestService.setFilePath(
+      publicationRequestId,
+      filePath,
+    );
+  }
+
   @Patch('/seconday-approval/:publicationRequestId')
   @ApiOperation({ summary: 'Secondary Approval for publication Request' })
   @ApiParam({

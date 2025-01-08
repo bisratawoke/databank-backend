@@ -55,6 +55,36 @@ export class PublicationRequestService {
     );
   }
 
+  async finalApproval(publicationRequestId) {
+    const currentPublicationRequest = await this.publicationRequestModel
+      .findOne({ _id: publicationRequestId })
+      .exec();
+    return await this.publicationRequestModel
+      .findByIdAndUpdate(
+        { _id: publicationRequestId },
+        {
+          status: Status.FINAL_APPOVAL,
+        },
+        { new: true },
+      )
+      .exec();
+  }
+
+  async setFilePath(publicationRequestId, filePath) {
+    const currentPublicationRequest = await this.publicationRequestModel
+      .findOne({ _id: publicationRequestId })
+      .exec();
+    return await this.publicationRequestModel
+      .findByIdAndUpdate(
+        { _id: publicationRequestId },
+        {
+          fileName: filePath,
+        },
+        { new: true },
+      )
+      .exec();
+  }
+
   async secondaryApproval(publicationRequestId) {
     const currentPublicationRequest = await this.publicationRequestModel
       .findOne({ _id: publicationRequestId })
