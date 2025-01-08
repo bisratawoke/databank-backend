@@ -154,10 +154,9 @@ export class PublicationRequestService {
   }
 
   async findAll(userId: string): Promise<PublicationRequest[]> {
-    // .find({ author: userId })
     return this.publicationRequestModel
       .find()
-      .populate('author category')
+      .populate('author category paymentData')
       .exec();
   }
 
@@ -167,7 +166,7 @@ export class PublicationRequestService {
         _id: id,
         //  author: userId
       })
-      .populate('author category')
+      .populate('author category paymentData')
       .populate('department')
       .exec();
 
