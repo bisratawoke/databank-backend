@@ -22,10 +22,14 @@ export enum Status {
   PAYMENT_PENDING = 'Payment pending',
   PAYMENT_VERIFIED = 'Payment verified',
   DEPUTY_APPROVED = 'Deputy Approved',
+  FINAL_APPOVAL = 'Final Approved',
 }
 
 @Schema()
 export class PublicationRequest extends Document {
+  @Prop({ required: false, unique: false, type: String })
+  fileName: string;
+
   @Prop({ required: false, unique: false, type: Boolean, default: false })
   paymentRequired: boolean;
 
@@ -66,6 +70,12 @@ export class PublicationRequest extends Document {
     required: false,
   })
   department: Types.ObjectId;
+
+  @Prop({
+    type: Date,
+    default: Date.now,
+  })
+  createdAt: Date;
 }
 
 export const PublicationRequestSchema =

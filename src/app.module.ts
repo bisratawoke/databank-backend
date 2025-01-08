@@ -17,6 +17,7 @@ import { NotifireModule } from './modules/notifire/notifire.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PortalUserModule } from './modules/auth/portal-user.module';
 import { PublicationRequestModule } from './modules/publication-request/publication-request.module';
+import { PaymentModule } from './modules/payment/payment.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -45,6 +46,7 @@ import { PublicationRequestModule } from './modules/publication-request/publicat
     NotifireModule,
     PortalUserModule,
     PublicationRequestModule,
+    PaymentModule,
   ],
 })
 export class AppModule { }
