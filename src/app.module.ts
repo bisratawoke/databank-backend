@@ -18,6 +18,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { PortalUserModule } from './modules/auth/portal-user.module';
 import { PublicationRequestModule } from './modules/publication-request/publication-request.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { ChatterModule } from './modules/chatter/chatter.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -47,6 +48,7 @@ import { PaymentModule } from './modules/payment/payment.module';
     PortalUserModule,
     PublicationRequestModule,
     PaymentModule,
+    ChatterModule,
   ],
 })
 export class AppModule { }
