@@ -56,34 +56,6 @@ export class ChatterService {
     };
   }
 
-  // async getChatBySubjectId(id: string): Promise<any> {
-  //   // Step 1: Attempt to fetch the Chatter document using the subject ID
-  //   let chatter = await this.chatterModel.findOne({ subject: id }).exec();
-
-  //   // Step 2: If Chatter does not exist, create it
-  //   if (!chatter) {
-  //     console.log(
-  //       `Chatter with subject ID ${id} not found. Creating a new Chatter.`,
-  //     );
-  //     const createdChatter = new this.chatterModel({
-  //       subject: id,
-  //       messages: [],
-  //     });
-  //     chatter = await createdChatter.save();
-  //   }
-
-  //   // Step 3: Fetch messages using the IDs in the chatter's messages array
-  //   const messages = await this.messageModel
-  //     .find({ _id: { $in: chatter.messages } })
-  //     .exec();
-
-  //   // Step 4: Combine and return the results
-  //   return {
-  //     ...chatter.toObject(),
-  //     messages, // Replace message IDs with full message documents
-  //   };
-  // }
-
   async findAll(query: any): Promise<any[]> {
     // Step 1: Fetch all Chatter documents
     const chatters = await this.chatterModel.find(query).exec();
