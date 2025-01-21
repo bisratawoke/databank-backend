@@ -5,12 +5,14 @@ import Chatter from './schemas/chatter.schema';
 import { CreateChatterDto, UpdateChatterDto } from './dto/chatter.dto';
 import Message from './schemas/message.schema';
 import mongoose from 'mongoose';
+import { User } from '../auth/schemas/user.schema';
 
 @Injectable()
 export class ChatterService {
   constructor(
     @InjectModel(Chatter.name) private readonly chatterModel: Model<Chatter>,
     @InjectModel(Message.name) private readonly messageModel: Model<Message>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
   async getChatBySubjectId(id: string): Promise<any> {
@@ -34,10 +36,23 @@ export class ChatterService {
       .find({ _id: { $in: chatter.messages } })
       .exec();
 
-    // Step 4: Combine and return the results
+    // Step 4: Manually join messages with user data
+    const messagesWithUsers = await Promise.all(
+      messages.map(async (message) => {
+        const user = await this.userModel.findById(message.from).exec();
+        return {
+          ...message.toObject(),
+          user, // Add user data to each message
+        };
+      }),
+    );
+
+    console.log('========= in message model ==================');
+    console.log(messagesWithUsers);
+    // Step 5: Combine and return the results
     return {
       ...chatter.toObject(),
-      messages, // Replace message IDs with full message documents
+      messages: messagesWithUsers, // Replace message IDs with full message documents (including user data)
     };
   }
 
