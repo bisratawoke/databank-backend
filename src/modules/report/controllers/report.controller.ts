@@ -40,7 +40,7 @@ import { ReportQueryDto } from '../dto/report-query.dto';
 @ApiTags('Reports')
 @Controller('reports')
 export class ReportController {
-  constructor(private readonly reportService: ReportService) { }
+  constructor(private readonly reportService: ReportService) {}
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update report status by ID' })
@@ -86,7 +86,12 @@ export class ReportController {
     description: 'Reports successfully retrieved.',
     type: [ReportDto],
   })
-  @Roles(UserRole.ADMIN, UserRole.DEPARTMENT_HEAD, UserRole.DISSEMINATION_HEAD, UserRole.PORTAL_USER)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.DEPARTMENT_HEAD,
+    UserRole.DISSEMINATION_HEAD,
+    UserRole.PORTAL_USER,
+  )
   @Get()
   async findAll() {
     return this.reportService.findAll();
@@ -98,7 +103,12 @@ export class ReportController {
     description: 'Reports successfully retrieved.',
     type: [ReportDto],
   })
-  @Roles(UserRole.ADMIN, UserRole.DEPARTMENT_HEAD, UserRole.DISSEMINATION_HEAD, UserRole.PORTAL_USER)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.DEPARTMENT_HEAD,
+    UserRole.DISSEMINATION_HEAD,
+    UserRole.PORTAL_USER,
+  )
   @Get('/all')
   async findAllPaginated(@Query() query: ReportQueryDto) {
     return this.reportService.findAllPaginated(query);
@@ -112,7 +122,10 @@ export class ReportController {
     description: 'Fields successfully retrieved.',
     type: [FieldDto],
   })
-  async getReportFields(@Param('reportId') reportId: string, @Query() query: PaginationQueryDto) {
+  async getReportFields(
+    @Param('reportId') reportId: string,
+    @Query() query: PaginationQueryDto,
+  ) {
     return this.reportService.findReportFields(reportId, query);
   }
 
@@ -124,7 +137,10 @@ export class ReportController {
     description: 'Data successfully retrieved.',
     type: [DataDto],
   })
-  async getReportData(@Param('reportId') reportId: string, @Query() query: PaginationQueryDto) {
+  async getReportData(
+    @Param('reportId') reportId: string,
+    @Query() query: PaginationQueryDto,
+  ) {
     return this.reportService.findReportData(reportId, query);
   }
 
@@ -177,8 +193,6 @@ export class ReportController {
     @Param('id') id: string,
     @Body() updateReportDto: UpdateReportDto,
   ) {
-    console.log('id:', id);
-    console.log('updateReportDto:', updateReportDto);
     return this.reportService.update(id, updateReportDto);
   }
 
@@ -209,8 +223,6 @@ export class ReportController {
     description: 'Report not found.',
   })
   async IsDepartmentHead(@Param('reportId') reportId: string, @Request() req) {
-    console.log('hit');
-    console.log(req.user);
     const result = await this.reportService.isReportDepartmentHead({
       reportId,
       from: req.user.sub,
@@ -330,6 +342,7 @@ export class ReportController {
   async Approve(@Param('reportId') reportId: string) {
     return this.reportService.approve(reportId);
   }
+
   @Patch('/reject/:reportId')
   @ApiOperation({ summary: 'Reject a report by ID' })
   @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
@@ -359,9 +372,6 @@ export class ReportController {
     description: 'Report not found.',
   })
   async Publish(@Param('reportId') reportId: string) {
-    console.log('========= in publish ========');
-    console.log(reportId);
-
     return this.reportService.publish(reportId);
   }
 
