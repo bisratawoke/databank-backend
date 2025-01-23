@@ -16,7 +16,7 @@ import {
   UsersResponseDto,
   userToDto,
 } from '../dto/user/user-response.dto';
-import { PaginationQueryDto } from '../dto/user/paginated-user.dto';
+import { PaginationQueryDto } from '../../../common/dto/paginated-query.dto';
 import { UserRole } from '../constants/user-role';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class UserService {
   constructor(
     // private prisma: PrismaService,
     @InjectModel(User.name) private readonly userModel: Model<User>,
-  ) {}
+  ) { }
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const existingUser = await this.userModel

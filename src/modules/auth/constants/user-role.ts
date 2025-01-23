@@ -1,3 +1,4 @@
+
 export enum UserRole {
   ADMIN = 'ADMIN',
   DEPARTMENT_HEAD = 'DEPARTMENT_HEAD',
@@ -6,6 +7,7 @@ export enum UserRole {
   DISSEMINATION_EXPERT = 'DISSEMINATION_EXPERT',
   DEPUTY_DIRECTOR = 'DEPUTY_DIRECTOR',
   PORTAL_USER = 'PORTAL_USER',
+  FINANCIAL_OFFICER = 'FINANCIAL_OFFICER',
 }
 
 export const USER_ROLE_RANK: Record<UserRole, number> = {
@@ -16,4 +18,5 @@ export const USER_ROLE_RANK: Record<UserRole, number> = {
   [UserRole.DISSEMINATION_EXPERT]: 4,
   [UserRole.DEPUTY_DIRECTOR]: 5,
   [UserRole.PORTAL_USER]: 6,
+  [UserRole.FINANCIAL_OFFICER]: 7,
 };

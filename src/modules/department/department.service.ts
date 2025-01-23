@@ -8,12 +8,17 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { SearchDepartmentDto } from './dto/search-department.dto';
 import { User } from '../auth/schemas/user.schema';
 import { UserRole } from '../auth/constants/user-role';
+import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
+import { Report } from '../report/schemas/report.schema';
+import { report } from 'process';
+import { populate } from 'dotenv';
 @Injectable()
 export class DepartmentService {
   constructor(
     @InjectModel(Department.name) private departmentModel: Model<Department>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
-  ) {}
+    @InjectModel(Report.name) private readonly reportModel: Model<Report>
+  ) { }
 
   public async isDepartmentHead(userId: string) {
     const departmentHead = await this.getDepartmentHead(userId);
@@ -118,6 +123,75 @@ export class DepartmentService {
       })
       .exec();
   }
+  async findAllPaginated(
+    query?: PaginationQueryDto,
+    searchDto?: SearchDepartmentDto,
+  ) {
+    const filter: any = {};
+    if (searchDto?.name) {
+      filter['name'] = { $regex: searchDto.name, $options: 'i' }; // Case-insensitive search
+    }
+
+    const { page = 1, limit = 10 } = query;
+    const skip = (page - 1) * limit;
+
+
+    // Fetch total count of departments
+    const totalDepartments = await this.departmentModel.countDocuments(filter);
+
+    // Fetch departments and populate categories and subcategories
+    const departments = await this.departmentModel
+      .find(filter)
+      .populate({
+        path: 'category',
+        populate: {
+          path: 'subcategory',
+          populate: {
+            path: 'report'
+          }
+        },
+      })
+      .limit(limit)
+      .skip(skip)
+      .exec();
+
+    // Handle nested population and manual pagination for `report`
+    // for (const department of departments) {
+    //   // Ensure categories are populated
+    //   const categories = department.category as any[]; // Cast to `any` for flexibility
+    //   for (const category of categories) {
+    //     if (category.subcategory) {
+    //       for (const subcategory of category.subcategory) {
+
+
+    //         // Manually fetch reports with pagination
+    //         // const reports = await this.reportModel
+    //         //   .find({ subcategory: subcategory._id })
+    //         //   .countDocuments()
+    //         //   .limit(limit)
+    //         //   .skip(skip)
+    //         //   .sort({ createdAt: -1 })
+    //         //   .exec();
+
+
+    //       }
+    //     }
+    //   }
+    // }
+
+
+    return {
+      departments,
+      pagination: {
+        page,
+        limit,
+        totalDepartments,
+
+      }
+    };
+  }
+
+
 
   /**
    * Retrieve a single Department by ID

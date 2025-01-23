@@ -35,7 +35,7 @@ import { CurrentUser } from '../../../decorators/current-user.decorator';
 import { Roles } from '../../../decorators/roles.decorator';
 import { ActivityLoggerInterceptor } from 'src/interceptors/activity-logger.interceptor';
 import { UserResponseDto, userToDto } from '../dto/user/user-response.dto';
-import { PaginationQueryDto } from '../dto/user/paginated-user.dto';
+import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -43,7 +43,7 @@ import { PaginationQueryDto } from '../dto/user/paginated-user.dto';
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @ApiOperation({ summary: 'Retrieve a current logged in user' })
   @ApiResponse({ status: 200, description: 'User retrieved successfully.' })
@@ -66,7 +66,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Retrieve all users with pagination' })
   @ApiResponse({ status: 200, description: 'Users retrieved successfully.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  @Roles(UserRole.ADMIN, UserRole.DEPARTMENT_HEAD)
+  @Roles(UserRole.ADMIN)
   @Get()
   findAll(@Query() query: PaginationQueryDto) {
     return this.userService.findAllPaginated(query);

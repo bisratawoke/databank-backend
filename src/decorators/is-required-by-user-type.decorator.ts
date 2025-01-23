@@ -3,7 +3,7 @@ import {
   ValidationOptions,
   ValidationArguments,
 } from 'class-validator';
-import { PortalUserType } from '../modules/auth/constants/portal-user-type';
+import { PortalUserType } from '../modules/auth/constants/portal-user-role';
 
 export function IsRequiredByUserType(
   userTypes: PortalUserType[],

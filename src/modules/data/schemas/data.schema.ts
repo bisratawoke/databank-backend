@@ -4,6 +4,7 @@ import { Field } from 'src/modules/field/schemas/field.schema';
 
 @Schema()
 export class Data extends Document {
+
     @Prop({ type: Types.ObjectId, ref: Field.name, required: true })
     field: Types.ObjectId;
 

@@ -6,7 +6,7 @@ import {
   IsOptional,
   MinLength,
 } from 'class-validator';
-import { PortalUserType } from '../../constants/portal-user-type';
+import { PortalUserType } from '../../constants/portal-user-role';
 import { IsRequiredByUserType } from '../../../../decorators/is-required-by-user-type.decorator';
 
 @ApiTags('portal-users')

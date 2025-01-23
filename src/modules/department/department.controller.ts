@@ -27,13 +27,14 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { SetDepartmentHeadDto } from './dto/set-department-head.dto';
+import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
 
 // @ApiBearerAuth()
 // @UseGuards(JwtAuthGuard)
 @ApiTags('Departments') // Tag for grouping in Swagger UI
 @Controller('departments')
 export class DepartmentController {
-  constructor(private readonly departmentsService: DepartmentService) {}
+  constructor(private readonly departmentsService: DepartmentService) { }
 
   /**
    * Create a new Department
@@ -65,6 +66,22 @@ export class DepartmentController {
       setDepartmentHeadDto.headId,
     );
   }
+
+  @ApiOperation({ summary: 'Retrieve all departments with optional search and pagination' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of departments returned successfully.',
+  })
+  @Get('/all')
+  async findAllPaginated(
+    @Query() departmentQuery: PaginationQueryDto,
+    @Query('name') searchDepartmentDto: SearchDepartmentDto,
+  ) {
+    // console.log("query: ", departmentQuery.limit)
+    return this.departmentsService.findAllPaginated(departmentQuery, searchDepartmentDto);
+  }
+
+
   /**
    * Retrieve all Departments with optional search
    * GET /departments
@@ -85,6 +102,7 @@ export class DepartmentController {
   ): Promise<Department[]> {
     return this.departmentsService.findAll(searchDepartmentDto);
   }
+
 
   /**
    * Retrieve a single Department by ID
