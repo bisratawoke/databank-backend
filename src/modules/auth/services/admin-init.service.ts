@@ -14,7 +14,7 @@ export class AdminInitializationService implements OnApplicationBootstrap {
     // private readonly prisma: PrismaService,
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   async onApplicationBootstrap() {
     await this.initializeAdminIfNeeded();
@@ -34,23 +34,15 @@ export class AdminInitializationService implements OnApplicationBootstrap {
       if (!adminEmail || !adminPassword) {
         console.warn(
           'WARNING: No admin account exists and no admin credentials provided in environment variables. ' +
-          'System will generate temporary credentials.',
+            'System will generate temporary credentials.',
         );
 
         const tempPassword = crypto.randomBytes(16).toString('hex');
         const tempEmail = `admin-${crypto.randomBytes(4).toString('hex')}@temporary.com`;
 
         await this.createAdminAccount(tempEmail, tempPassword);
-
-        console.log('\n=== TEMPORARY ADMIN CREDENTIALS ===');
-        console.log(`Email: ${tempEmail}`);
-        console.log(`Password: ${tempPassword}`);
-        console.log(
-          'IMPORTANT: Change these credentials immediately after first login!\n',
-        );
       } else {
         await this.createAdminAccount(adminEmail, adminPassword);
-        console.log(`Admin account created with email: ${adminEmail}`);
       }
     }
   }

@@ -35,7 +35,6 @@ export class AuthService {
       if (!user.isActive) {
         throw new UnauthorizedException('Account is inactive');
       }
-      console.log('user obj: ', user);
       return user;
     }
     return null;
@@ -110,7 +109,6 @@ export class AuthService {
       });
       return { access_token: accessToken };
     } catch (err) {
-      console.log(err);
       throw new UnauthorizedException('Invalid refresh token3');
     }
   }

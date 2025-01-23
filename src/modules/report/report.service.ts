@@ -23,7 +23,6 @@ import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
 import { Field } from '../field/schemas/field.schema';
 import { ReportQueryDto } from './dto/report-query.dto';
 
-
 @Injectable()
 export class ReportService {
   constructor(
@@ -40,21 +39,17 @@ export class ReportService {
     private readonly amqpConnection: AmqpConnection,
     private readonly departmentService: DepartmentService,
     private readonly userService: UserService,
-  ) { }
-
+  ) {}
 
   public async dissmenationDeptResponse(reportId, status, from) {
     try {
-      console.log('========== in dissmenationDeptResponse =================');
       const departmentHead = await this.getDepartmentHead({ reportId });
-      console.log(departmentHead);
       await this.publishToInappQueue({
         body: `report ${reportId} has been updated to ${status}`,
         to: departmentHead._id.toString(),
       });
       return {};
     } catch (err) {
-      console.log(err);
       throw err;
     } finally {
     }
@@ -73,8 +68,7 @@ export class ReportService {
   }) {
     try {
       const dissmenationHeads = await this.getDissimenationHead();
-      console.log('========== in dis head =================');
-      console.log(dissmenationHeads);
+
       dissmenationHeads.forEach(async (dissmenationHead) => {
         await this.publishToInappQueue({
           body: `reports ${reportId} has been updated to approved by dpertment head and requires your final say!`,
@@ -82,7 +76,7 @@ export class ReportService {
         });
       });
       return {};
-    } catch (error) { }
+    } catch (error) {}
   }
 
   async getDepartmentHead({ reportId }: { reportId: string }) {
@@ -108,9 +102,6 @@ export class ReportService {
           String(department._id.toString()),
         );
 
-      console.log('======= is report department head ============');
-      console.log(from);
-      console.log(departmentHead._id);
       return from.toString() == departmentHead._id.toString();
     } catch (err) {
     } finally {
@@ -123,10 +114,6 @@ export class ReportService {
     from: string,
   ) {
     try {
-      console.log(
-        '================== in initial request response =====================',
-      );
-      console.log(status);
       if (!(await this.isReportDepartmentHead({ reportId, from })))
         throw new UnauthorizedException('Not Authorized');
 
@@ -179,8 +166,6 @@ export class ReportService {
         to: departmentHead._id,
       };
 
-      console.log('======= in request initial approval method ======');
-      console.log(departmentHead);
       // await this.amqpConnection.publish('logs_exchange', 'email', message);
       await this.amqpConnection.publish(
         'logs_exchange',
@@ -208,8 +193,6 @@ export class ReportService {
         report: reportId,
       });
 
-      console.log('============= in sub category ================');
-      console.log(subCategory);
       if (!subCategory) {
         throw new Error('SubCategory containing the report not found');
       }
@@ -279,8 +262,6 @@ export class ReportService {
         { new: true },
       );
 
-      console.log('=========== in publish service =================');
-      console.log(updatedReport);
       if (!updatedReport) {
         throw new NotFoundException(`Report with ID ${reportId} not found`);
       }
@@ -376,13 +357,13 @@ export class ReportService {
       .exec();
   }
 
-
   async findAllPaginated(query: ReportQueryDto) {
     const { page = 1, limit = 10, status } = query;
 
     const reports = await this.reportModel
       .find()
-      .where('status').equals(status)
+      .where('status')
+      .equals(status)
       .select('-fields -data') // Exclude fields and data initially
       .populate('author', 'name email') // Only select necessary author fields
       .skip((page - 1) * limit)
@@ -419,22 +400,24 @@ export class ReportService {
       .exec();
 
     if (!reportWithFields) {
-      throw new NotFoundException('Report not found')
+      throw new NotFoundException('Report not found');
     }
 
-    const totalItems = await this.reportModel.aggregate([
-      {
-        $project: {
-          fieldsCount: { $size: '$fields' }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalDataItems: { $sum: '$fieldsCount' }
-        }
-      }
-    ]).exec();
+    const totalItems = await this.reportModel
+      .aggregate([
+        {
+          $project: {
+            fieldsCount: { $size: '$fields' },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalDataItems: { $sum: '$fieldsCount' },
+          },
+        },
+      ])
+      .exec();
 
     const totalDataItems = totalItems[0]?.totalDataItems || 0;
     const fields = reportWithFields ? reportWithFields.fields : [];
@@ -445,7 +428,7 @@ export class ReportService {
         page,
         limit,
         totalItems: totalDataItems,
-      }
+      },
     };
   }
 
@@ -460,26 +443,28 @@ export class ReportService {
         options: {
           skip: (page - 1) * limit,
           limit: limit,
-        }
+        },
       })
       .exec();
 
     if (!reportWithData) {
-      throw new NotFoundException('Report not found')
+      throw new NotFoundException('Report not found');
     }
-    const totalItems = await this.reportModel.aggregate([
-      {
-        $project: {
-          dataCount: { $size: '$data' }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalDataItems: { $sum: '$dataCount' }
-        }
-      }
-    ]).exec();
+    const totalItems = await this.reportModel
+      .aggregate([
+        {
+          $project: {
+            dataCount: { $size: '$data' },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalDataItems: { $sum: '$dataCount' },
+          },
+        },
+      ])
+      .exec();
 
     const totalDataItems = totalItems[0]?.totalDataItems || 0;
     const data = reportWithData ? reportWithData.data : [];
@@ -488,11 +473,10 @@ export class ReportService {
       pagination: {
         page,
         limit,
-        totalItems: totalDataItems
+        totalItems: totalDataItems,
       },
-    }
+    };
   }
-
 
   async findOne(id: string): Promise<Report> {
     const report = await this.reportModel
@@ -553,7 +537,6 @@ export class ReportService {
 
   async update(id: string, updateReportDto: UpdateReportDto): Promise<Report> {
     try {
-      console.log('arguments recieved: ', { id, updateReportDto });
       const { fields, data } = updateReportDto;
 
       const existingReport = await this.reportModel.findById(id).exec();
@@ -563,22 +546,22 @@ export class ReportService {
 
       const updatedFields = fields
         ? [
-          ...new Set([
-            ...existingReport.fields.map((field: Types.ObjectId) =>
-              field.toString(),
-            ),
-            ...fields,
-          ]),
-        ].map((field) => new Types.ObjectId(field))
+            ...new Set([
+              ...existingReport.fields.map((field: Types.ObjectId) =>
+                field.toString(),
+              ),
+              ...fields,
+            ]),
+          ].map((field) => new Types.ObjectId(field))
         : existingReport.fields;
 
       const updatedData = data
         ? [
-          ...new Set([
-            ...existingReport.data.map((d: Types.ObjectId) => d.toString()),
-            ...data,
-          ]),
-        ].map((d) => new Types.ObjectId(d))
+            ...new Set([
+              ...existingReport.data.map((d: Types.ObjectId) => d.toString()),
+              ...data,
+            ]),
+          ].map((d) => new Types.ObjectId(d))
         : existingReport.data;
 
       const updatedReport = await this.reportModel

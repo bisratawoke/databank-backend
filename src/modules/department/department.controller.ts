@@ -34,7 +34,7 @@ import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
 @ApiTags('Departments') // Tag for grouping in Swagger UI
 @Controller('departments')
 export class DepartmentController {
-  constructor(private readonly departmentsService: DepartmentService) { }
+  constructor(private readonly departmentsService: DepartmentService) {}
 
   /**
    * Create a new Department
@@ -67,7 +67,9 @@ export class DepartmentController {
     );
   }
 
-  @ApiOperation({ summary: 'Retrieve all departments with optional search and pagination' })
+  @ApiOperation({
+    summary: 'Retrieve all departments with optional search and pagination',
+  })
   @ApiResponse({
     status: 200,
     description: 'List of departments returned successfully.',
@@ -77,10 +79,11 @@ export class DepartmentController {
     @Query() departmentQuery: PaginationQueryDto,
     @Query('name') searchDepartmentDto: SearchDepartmentDto,
   ) {
-    // console.log("query: ", departmentQuery.limit)
-    return this.departmentsService.findAllPaginated(departmentQuery, searchDepartmentDto);
+    return this.departmentsService.findAllPaginated(
+      departmentQuery,
+      searchDepartmentDto,
+    );
   }
-
 
   /**
    * Retrieve all Departments with optional search
@@ -102,7 +105,6 @@ export class DepartmentController {
   ): Promise<Department[]> {
     return this.departmentsService.findAll(searchDepartmentDto);
   }
-
 
   /**
    * Retrieve a single Department by ID

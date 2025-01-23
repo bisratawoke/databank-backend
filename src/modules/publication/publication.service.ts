@@ -80,8 +80,6 @@ export class PublicationService {
       .populate('author')
       .exec();
 
-    console.log('============ in get report author =================');
-    console.log(report);
     return report ? report.author : null;
   }
 
@@ -91,13 +89,7 @@ export class PublicationService {
     from: string,
   ) {
     try {
-      console.log(
-        '================== in initial request response =====================',
-      );
-      console.log(status);
-
       const author = await this.getReportAuthor(publicationId);
-      console.log(`the author is ${author}`);
       await this.publishToInappQueue({
         to: author._id.toString(),
         body: `publication ${publicationId} status has been updated to ${status}`,
@@ -117,8 +109,6 @@ export class PublicationService {
         { new: true },
       );
 
-      console.log('=========== in publish service =================');
-      console.log(updatedReport);
       if (!updatedReport) {
         throw new NotFoundException(
           `Report with ID ${publicationId} not found`,
@@ -226,7 +216,6 @@ export class PublicationService {
       );
     }
 
-    console.log(coverImageLink);
     const newPublication = new this.publicationModel({
       fileName: filePath,
       bucketName: bucketName,
@@ -319,9 +308,7 @@ export class PublicationService {
         await this.minioService.client.bucketExists(bucketName);
       if (!bucketExists) {
         await this.minioService.client.makeBucket(bucketName, 'us-east-1');
-        console.log(`Bucket ${bucketName} created successfully.`);
       } else {
-        console.log(`Bucket ${bucketName} already exists.`);
       }
     } catch (err) {
       console.error('Error creating bucket:', err);
@@ -344,25 +331,19 @@ export class PublicationService {
         filePath,
         expirySeconds,
       );
-      console.log(`Generated presigned URL: ${url}`);
       return url;
     } catch (err) {
-      console.error('Error generating presigned URL:', err);
       throw err;
     }
   }
 
   generatePublicUrl(bucketName: string, filePath: string): string {
     const minioServerUrl = `${process.env.MINIO_PROD_ENDPOINT}:${process.env.MINIO_PORT}`;
-    console.log('================= in public url gen  ==============');
-    console.log(`${minioServerUrl}/${bucketName}/${filePath}`);
     return `${minioServerUrl}/${bucketName}/${filePath}`;
   }
 
   generatePublicUrlProd(bucketName: string, filePath: string): string {
     const minioServerUrl = `${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}`;
-    console.log('==================== in generate public url pro ============');
-    console.log(`${minioServerUrl}/${bucketName}/${filePath}`);
     return `${minioServerUrl}/${bucketName}/${filePath}`;
   }
 
@@ -421,10 +402,7 @@ export class PublicationService {
       }
 
       return Array.from(locations).sort();
-    } catch (err) {
-      console.log('============== error is here =================');
-      console.log(err);
-    }
+    } catch (err) {}
   }
 
   async uploadFileFromBuffer(
@@ -444,7 +422,6 @@ export class PublicationService {
         stream,
         fileBuffer.length,
       );
-      console.log('File uploaded successfully.');
 
       const metastoreId = await this.metastoreService.create(metadata);
 
@@ -489,10 +466,7 @@ export class PublicationService {
         publication.metaStoreId = new Types.ObjectId(newMetastore._id);
         await publication.save();
       }
-
-      console.log(`Metadata updated for file ${fileName}`);
     } catch (err) {
-      console.error('Error updating file metadata:', err);
       throw err;
     }
   }
@@ -512,7 +486,6 @@ export class PublicationService {
     id: string,
     forceDelete?: boolean,
   ): Promise<{ message: string }> {
-    console.log('forceDelete:', forceDelete);
     const publication = await this.findOne(id);
     if (!publication) {
       throw new NotFoundException(`Publication with id ${id} not found`);
@@ -542,7 +515,6 @@ export class PublicationService {
           bucketName,
           fileName,
         );
-        console.log;
         if (
           minioFileInfo.size !== publication.metadata.size ||
           minioFileInfo.lastModified.toISOString() !==
@@ -572,7 +544,6 @@ export class PublicationService {
         );
       }
 
-      console.log(`Publication ${id} and associated data deleted successfully`);
       return {
         message: fileExists
           ? 'Publication and associated data deleted successfully'

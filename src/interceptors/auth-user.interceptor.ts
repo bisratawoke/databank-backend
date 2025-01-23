@@ -18,7 +18,6 @@ export class AuthUserInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    console.log('user in interceptor: ', user);
 
     if (!user) {
       throw new UnauthorizedException('No authenticated user found');

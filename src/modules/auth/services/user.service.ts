@@ -24,7 +24,7 @@ export class UserService {
   constructor(
     // private prisma: PrismaService,
     @InjectModel(User.name) private readonly userModel: Model<User>,
-  ) { }
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const existingUser = await this.userModel
@@ -134,8 +134,6 @@ export class UserService {
     const user = await this.userModel
       .find({ roles: UserRole.DISSEMINATION_HEAD })
       .exec();
-    console.log('=========== in find dissimenation head =================');
-    console.log(user);
     return user;
   }
 

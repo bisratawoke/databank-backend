@@ -162,8 +162,6 @@ export class PublicationController {
     @Body() createPublicationDto: CreatePublicationDto,
     @Request() req,
   ) {
-    console.log('============ in upload file =================');
-    console.log(createPublicationDto);
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -174,7 +172,6 @@ export class PublicationController {
       type: file.mimetype,
       author: req.user.sub,
     };
-    console.log('createPublicationDto updated:', combinedData);
 
     const result = await this.publicationService.create(
       coverImage ? coverImage[0] : null,
@@ -357,8 +354,6 @@ export class PublicationController {
     description: 'Report not found.',
   })
   async Publish(@Param('publicationId') publicationId: string) {
-    console.log('========= in publish ========');
-    console.log(publicationId);
     return this.publicationService.publish(publicationId);
   }
   @ApiOperation({ summary: 'Get all publications' })
@@ -499,7 +494,6 @@ export class PublicationController {
 
       fileStream.pipe(res);
     } catch (err) {
-      console.log('Error generating download link:', err);
       res.status(500).json({ error: 'Error generating download link' });
     }
   }

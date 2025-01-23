@@ -21,9 +21,6 @@ export class ChatterService {
 
     // Step 2: If Chatter does not exist, create it
     if (!chatter) {
-      console.log(
-        `Chatter with subject ID ${id} not found. Creating a new Chatter.`,
-      );
       const createdChatter = new this.chatterModel({
         subject: id,
         messages: [],
@@ -47,8 +44,6 @@ export class ChatterService {
       }),
     );
 
-    console.log('========= in message model ==================');
-    console.log(messagesWithUsers);
     // Step 5: Combine and return the results
     return {
       ...chatter.toObject(),
@@ -105,12 +100,6 @@ export class ChatterService {
     userId: string;
     chatterId: string;
   }): Promise<any> {
-    console.log({
-      message,
-      userId,
-      chatterId,
-    });
-
     // Create the message
     const obj = {
       message, // Matches the 'message' field in the schema
@@ -119,8 +108,6 @@ export class ChatterService {
 
     const createdMessage = new this.messageModel(obj);
     const savedMessage = await createdMessage.save();
-
-    console.log('Saved Message:', savedMessage);
 
     // Validate Chatter ID
 
@@ -136,8 +123,6 @@ export class ChatterService {
         { new: true }, // Return the updated document
       )
       .populate('messages');
-
-    console.log('Updated Chatter:', updatedChatter);
 
     const res = await this.findOne(updatedChatter._id.toString());
     return res;

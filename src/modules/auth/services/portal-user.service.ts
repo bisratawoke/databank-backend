@@ -72,18 +72,17 @@ export class PortalUserService {
     });
 
     const user = await newPortalUser.save();
-    const { password: omittedPassword, ...userWithoutPassword } = user.toObject();
-    return userWithoutPassword
+    const { password: omittedPassword, ...userWithoutPassword } =
+      user.toObject();
+    return userWithoutPassword;
   }
 
   async login(loginDto: PortalUserLoginDto) {
-    console.log('loginDto: ', loginDto);
     const user = await this.portalUserModel.findOne({ email: loginDto.email });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    console.log('user: ', user);
     const isPasswordValid = await bcrypt.compare(
       loginDto.password,
       user.password,
