@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ReportService } from './report.service';
-import { ReportController } from './report.controller';
+import { ReportController } from './controllers/report.controller';
 import { Report, ReportSchema } from './schemas/report.schema';
 import { Data, DataSchema } from '../data/schemas/data.schema';
 import {
@@ -22,6 +22,7 @@ import {
   SubCategory,
   SubCategorySchema,
 } from '../sub-category/schemas/sub-category.schema';
+import { PortalReportController } from './controllers/portal-report.controller';
 
 @Module({
   imports: [
@@ -47,7 +48,7 @@ import {
       { name: SubCategory.name, schema: SubCategorySchema },
     ]),
   ],
-  controllers: [ReportController],
+  controllers: [ReportController, PortalReportController],
   providers: [ReportService, DataService],
 })
-export class ReportModule {}
+export class ReportModule { }
