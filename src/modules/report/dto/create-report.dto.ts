@@ -1,4 +1,3 @@
-// dto/create-report-dto.ts
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ReportDto } from './report.dto';
 import { Type } from 'class-transformer';
@@ -76,6 +75,46 @@ export class CreateReportDto extends ReportDto {
   readonly author: string;
 
   // New optional fields
+  @ApiPropertyOptional({
+    description: 'Data provider of the report.',
+    example: 'Government Agency',
+  })
+  @IsOptional()
+  @IsString()
+  readonly data_provider?: string;
+
+  @ApiPropertyOptional({
+    description: 'Source and collection details of the data.',
+    example: 'Collected from field surveys.',
+  })
+  @IsOptional()
+  @IsString()
+  readonly data_source_and_collection?: string;
+
+  @ApiPropertyOptional({
+    description: 'Geographical coverage of the dataset.',
+    example: 'National',
+  })
+  @IsOptional()
+  @IsString()
+  readonly data_geo_coverage?: string;
+
+  @ApiPropertyOptional({
+    description: 'Method used to collect the data.',
+    example: 'Online surveys and direct interviews.',
+  })
+  @IsOptional()
+  @IsString()
+  readonly data_collection_method?: string;
+
+  @ApiPropertyOptional({
+    description: 'Any processing or adjustments applied to the data.',
+    example: 'Data was cleaned and normalized.',
+  })
+  @IsOptional()
+  @IsString()
+  readonly data_processing_adjustment?: string;
+
   @ApiPropertyOptional({
     description:
       'Information on the accuracy, reliability, and limitations of the dataset.',

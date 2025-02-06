@@ -52,6 +52,9 @@ export class PublicationRequest extends Document {
   @Prop({ required: true, unique: false, type: String })
   dateImportance: string;
 
+  @Prop({ required: true, unique: false, type: String })
+  dataSpecification: string;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: PortalUser.name })
   author: Types.ObjectId;
 

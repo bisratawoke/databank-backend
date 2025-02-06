@@ -15,6 +15,8 @@ export class CreatePublicationRequestDto {
 
   @IsString()
   dateImportance: string;
+  @IsString()
+  dataSpecification: string;
 
   @IsEnum(ADMIN_UNITS)
   adminUnits: ADMIN_UNITS;
