@@ -78,6 +78,8 @@ export class PublicationRequestController {
     @Request() req,
     @UploadedFile() file?: Express.Multer.File,
   ) {
+    console.log('======== in publication request ========');
+    console.log(file);
     let fileUrl: string[] | null = [];
 
     if (file) {
