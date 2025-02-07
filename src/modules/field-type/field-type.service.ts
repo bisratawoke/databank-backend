@@ -9,12 +9,14 @@ import { Model } from 'mongoose';
 import { FieldType } from './schemas/field-type.schema';
 import { CreateFieldTypeDto } from './dto/create-field-type.dto';
 import { UpdateFieldTypeDto } from './dto/update-field-type.dto';
+import { Field } from '../field/schemas/field.schema';
 
 @Injectable()
 export class FieldTypeService {
   constructor(
     @InjectModel(FieldType.name) private fieldTypeModel: Model<FieldType>,
-  ) { }
+    @InjectModel(Field.name) private fieldModel: Model<Field>,
+  ) {}
 
   // Create a new FieldType
   async create(createFieldTypeDto: CreateFieldTypeDto): Promise<FieldType> {
@@ -34,6 +36,10 @@ export class FieldTypeService {
     return this.fieldTypeModel.find().exec();
   }
 
+  async findRelatedFields(id: string): Promise<Field[]> {
+    const result = await this.fieldModel.find({ type: id });
+    return result;
+  }
   // Retrieve a FieldType by ID
   async findById(id: string): Promise<FieldType> {
     const fieldType = await this.fieldTypeModel.findById(id).exec();

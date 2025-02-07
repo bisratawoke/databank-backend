@@ -23,6 +23,8 @@ import {
 } from '@nestjs/swagger';
 import { FieldTypeDto } from './dto/field-type.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { FieldDto } from '../field/dto/field.dto';
+import { Field } from '../field/schemas/field.schema';
 
 // @ApiBearerAuth()
 // @UseGuards(JwtAuthGuard)
@@ -58,6 +60,22 @@ export class FieldTypeController {
   })
   async findAll(): Promise<FieldType[]> {
     return this.fieldTypeService.findAll();
+  }
+
+  @Get('/related-fields/:id')
+  @ApiOperation({ summary: 'Get a related fields by field type ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Field Type ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Fields successfully retrieved.',
+    type: FieldDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Field type not found.',
+  })
+  async findRelatedFields(@Param('id') id: string): Promise<Field[]> {
+    return this.fieldTypeService.findRelatedFields(id);
   }
 
   @Get(':id')
