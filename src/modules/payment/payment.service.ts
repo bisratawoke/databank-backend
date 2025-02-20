@@ -47,7 +47,9 @@ export class PublicationPaymentService {
     });
 
     if (dto.publciationRequest) {
-      await this.publicationRequestModel.findByIdAndUpdate(
+      console.log('========= in payment result page =========');
+      console.log(dto);
+      const result = await this.publicationRequestModel.findByIdAndUpdate(
         dto.publciationRequest,
         {
           status: Status.PAYMENT_VERIFIED,
@@ -57,6 +59,7 @@ export class PublicationPaymentService {
           runValidators: true,
         },
       );
+      console.log(result);
     }
     if (!updatedPayment) {
       throw new NotFoundException(`PublicationPayment with ID ${id} not found`);

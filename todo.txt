@@ -1,0 +1,10 @@
+- SEO optimization (Data portal)
+- (Optional) Refactoring stat data (client rendered or serverside rendered)
+- Data Portal Ui optimization
+    pages:-
+        - login / reg
+        - home page
+        - global nav bar (redesign)
+- Update discovery page
+- Set password
+    - should prompt new user to change password

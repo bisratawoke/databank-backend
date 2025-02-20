@@ -331,12 +331,12 @@ export class ReportService {
     }
   }
 
-  async findAll(): Promise<Report[]> {
-    return this.reportModel
+  async findAll(): Promise<any[]> {
+    // Fetch reports with existing populations
+    const reports = await this.reportModel
       .find()
       .populate({
         path: 'fields',
-
         populate: {
           path: 'type',
           model: 'FieldType',
@@ -355,7 +355,68 @@ export class ReportService {
       })
       .populate('author')
       .exec();
+
+    // Fetch all departments with their categories, subcategories, and reports
+    const departments = await this.departmentModel
+      .find()
+      .populate({
+        path: 'category',
+        populate: {
+          path: 'subcategory',
+          populate: {
+            path: 'report',
+            model: 'Report',
+          },
+        },
+      })
+      .exec();
+
+    // Map reports to their departments
+    const reportWithDepartment = reports.map((report) => {
+      // Find the department that contains this report
+      const department = departments.find((dept) =>
+        dept.category.some((category: any) =>
+          category.subcategory.some((subcategory) =>
+            subcategory.report.some((r) => r._id.equals(report._id)),
+          ),
+        ),
+      );
+
+      // Return report with department added dynamically
+      return {
+        ...report.toObject(),
+        department: department ? department.toObject() : null,
+      };
+    });
+
+    return reportWithDepartment;
   }
+
+  // async findAll(): Promise<Report[]> {
+  //   return this.reportModel
+  //     .find()
+  //     .populate({
+  //       path: 'fields',
+
+  //       populate: {
+  //         path: 'type',
+  //         model: 'FieldType',
+  //       },
+  //     })
+  //     .populate({
+  //       path: 'data',
+  //       populate: {
+  //         path: 'field',
+  //         model: 'Field',
+  //         populate: {
+  //           path: 'type',
+  //           model: 'FieldType',
+  //         },
+  //       },
+  //     })
+  //     .populate('author')
+  //     .exec();
+  // }
 
   async findAllPaginated(query: ReportQueryDto) {
     const { page = 1, limit = 10, status } = query;

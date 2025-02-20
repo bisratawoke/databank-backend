@@ -47,6 +47,9 @@ export class User extends Document {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'ActivityLog' }] })
   activityLogs: Types.ObjectId[];
+
+  @Prop({ type: Boolean, default: true })
+  firstLogin?: Boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

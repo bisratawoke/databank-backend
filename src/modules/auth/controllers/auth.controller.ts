@@ -22,6 +22,7 @@ import { AuthService } from '../services/auth.service';
 import { JwtAuthGuard } from '../guards/jwt.guard';
 import { ActivityLogService } from '../services/activity-log.service';
 import { ActivityLoggerInterceptor } from '../../../interceptors/activity-logger.interceptor';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
 
 @ApiTags('Auth')
 @UseInterceptors(ActivityLoggerInterceptor)
@@ -64,9 +65,20 @@ export class AuthController {
   @ApiOperation({ summary: 'Reset password using the provided token' })
   @ApiResponse({ status: 200, description: 'Password successfully reset.' })
   @ApiResponse({ status: 400, description: 'Invalid reset token or password.' })
+  @UseGuards(JwtAuthGuard)
   @Post('reset-password')
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    await this.authService.resetPassword(resetPasswordDto);
+  async resetPassword(
+    @CurrentUser() userInfo,
+    @Request() req,
+    @Body() resetPasswordDto: any,
+  ) {
+    console.log('========== in reset password =============');
+    console.log(req.user.sub);
+    console.log(userInfo);
+    await this.authService.resetPassword({
+      userId: req.user.sub,
+      newPassword: resetPasswordDto.password,
+    });
     return { message: 'Password successfully reset' };
   }
 

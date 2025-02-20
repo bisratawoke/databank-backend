@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -13,6 +14,8 @@ import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { plainToClass } from 'class-transformer';
 import { User } from '../schemas/user.schema';
 import { userToDto } from '../dto/user/user-response.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +24,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     // private readonly mailService: MailService,
     private readonly configService: ConfigService,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
   private async validateUser(
@@ -130,19 +134,29 @@ export class AuthService {
     // await this.mailService.sendPasswordResetEmail(email, resetToken);
   }
 
-  async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    const hashedToken = await bcrypt.hash(resetPasswordDto.token, 10);
-    const user = await this.usersService.findByPasswordResetToken(hashedToken);
+  async resetPassword(resetPasswordDto: {
+    userId: string;
+    newPassword: string;
+  }) {
+    const { userId, newPassword } = resetPasswordDto;
 
-    if (!user || user.passwordResetExpires < new Date()) {
-      throw new BadRequestException('Invalid or expired reset token');
+    // Find the user by ID
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
 
-    await this.usersService.update(user.id, {
-      password: await bcrypt.hash(resetPasswordDto.newPassword, 10),
-      passwordResetToken: null,
-      passwordResetExpires: null,
-    });
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the user's password and clear reset token fields
+    user.password = hashedPassword;
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+    await user.save();
+
+    return { message: 'Password has been successfully reset' };
   }
 
   async verifyEmail(token: string) {
