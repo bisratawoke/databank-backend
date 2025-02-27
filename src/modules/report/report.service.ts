@@ -254,6 +254,25 @@ export class ReportService {
     } finally {
     }
   }
+  async deputyApproval(reportId: string) {
+    try {
+      const updatedReport = await this.reportModel.findByIdAndUpdate(
+        new Types.ObjectId(reportId),
+        { status: Status['Deputy Approved'] },
+        { new: true },
+      );
+
+      if (!updatedReport) {
+        throw new NotFoundException(`Report with ID ${reportId} not found`);
+      }
+
+      return updatedReport;
+    } catch (err) {
+      throw err;
+    } finally {
+    }
+  }
+
   async publish(reportId: string) {
     try {
       const updatedReport = await this.reportModel.findByIdAndUpdate(

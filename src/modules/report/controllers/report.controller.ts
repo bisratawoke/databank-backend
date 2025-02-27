@@ -91,6 +91,7 @@ export class ReportController {
     UserRole.DEPARTMENT_HEAD,
     UserRole.DISSEMINATION_HEAD,
     UserRole.PORTAL_USER,
+    UserRole.DEPUTY_DIRECTOR,
   )
   @Get()
   async findAll() {
@@ -108,6 +109,7 @@ export class ReportController {
     UserRole.DEPARTMENT_HEAD,
     UserRole.DISSEMINATION_HEAD,
     UserRole.PORTAL_USER,
+    UserRole.DEPUTY_DIRECTOR,
   )
   @Get('/all')
   async findAllPaginated(@Query() query: ReportQueryDto) {
@@ -357,6 +359,22 @@ export class ReportController {
   })
   async Reject(@Param('reportId') reportId: string) {
     return this.reportService.reject(reportId);
+  }
+
+  @Patch('/deputy-approve/:reportId')
+  @ApiOperation({ summary: 'deputy approval a report by ID' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Report successfully updated.',
+    type: ReportDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async deputyApproval(@Param('reportId') reportId: string) {
+    return this.reportService.deputyApproval(reportId);
   }
 
   @Patch('/publish/:reportId')

@@ -7,6 +7,7 @@ export enum Status {
   Approved = 'approved',
   Rejected = 'rejected',
   Published = 'published',
+  'Deputy Approved' = 'deputy approved',
 }
 
 export enum COVERAGE {
