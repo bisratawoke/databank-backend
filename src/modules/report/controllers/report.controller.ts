@@ -35,8 +35,8 @@ import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
 import { DataDto } from 'src/modules/data/dto/data.dto';
 import { FieldDto } from 'src/modules/field/dto/field.dto';
 import { ReportQueryDto } from '../dto/report-query.dto';
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+// @ApiBearerAuth()
+// @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Reports')
 @Controller('reports')
 export class ReportController {
@@ -86,16 +86,35 @@ export class ReportController {
     description: 'Reports successfully retrieved.',
     type: [ReportDto],
   })
-  @Roles(
-    UserRole.ADMIN,
-    UserRole.DEPARTMENT_HEAD,
-    UserRole.DISSEMINATION_HEAD,
-    UserRole.PORTAL_USER,
-    UserRole.DEPUTY_DIRECTOR,
-  )
+  // @Roles(
+  //   UserRole.ADMIN,
+  //   UserRole.DEPARTMENT_HEAD,
+  //   UserRole.DISSEMINATION_HEAD,
+  //   UserRole.PORTAL_USER,
+  //   UserRole.DEPUTY_DIRECTOR,
+  // )
   @Get()
   async findAll() {
     return this.reportService.findAll();
+  }
+
+  @ApiOperation({ summary: 'Get all reports pages' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Reports successfully retrieved.',
+    type: [ReportDto],
+  })
+  // @Roles(
+  //   UserRole.ADMIN,
+  //   UserRole.DEPARTMENT_HEAD,
+  //   UserRole.DISSEMINATION_HEAD,
+  //   UserRole.PORTAL_USER,
+  //   UserRole.DEPUTY_DIRECTOR,
+  // )
+  @Get('pages')
+  async findPages() {
+    console.log('============== in find page ============');
+    return this.reportService.findAllUnAuth();
   }
 
   @ApiOperation({ summary: 'Get all reports paginated' })
@@ -159,6 +178,7 @@ export class ReportController {
     description: 'Report not found.',
   })
   async findOne(@Param('id') id: string) {
+    console.log('============== in find one ============');
     return this.reportService.findOne(id);
   }
 
@@ -195,6 +215,8 @@ export class ReportController {
     @Param('id') id: string,
     @Body() updateReportDto: UpdateReportDto,
   ) {
+    console.log('========= hit me ========');
+    console.log(updateReportDto);
     return this.reportService.update(id, updateReportDto);
   }
 

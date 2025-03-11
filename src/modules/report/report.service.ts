@@ -411,31 +411,33 @@ export class ReportService {
     return reportWithDepartment;
   }
 
-  // async findAll(): Promise<Report[]> {
-  //   return this.reportModel
-  //     .find()
-  //     .populate({
-  //       path: 'fields',
+  async findAllUnAuth(): Promise<Report[]> {
+    return (
+      this.reportModel
+        .find()
+        // .populate({
+        //   path: 'fields',
 
-  //       populate: {
-  //         path: 'type',
-  //         model: 'FieldType',
-  //       },
-  //     })
-  //     .populate({
-  //       path: 'data',
-  //       populate: {
-  //         path: 'field',
-  //         model: 'Field',
-  //         populate: {
-  //           path: 'type',
-  //           model: 'FieldType',
-  //         },
-  //       },
-  //     })
-  //     .populate('author')
-  //     .exec();
-  // }
+        //   populate: {
+        //     path: 'type',
+        //     model: 'FieldType',
+        //   },
+        // })
+        // .populate({
+        //   path: 'data',
+        //   populate: {
+        //     path: 'field',
+        //     model: 'Field',
+        //     populate: {
+        //       path: 'type',
+        //       model: 'FieldType',
+        //     },
+        //   },
+        // })
+        .populate('author')
+        .exec()
+    );
+  }
 
   async findAllPaginated(query: ReportQueryDto) {
     const { page = 1, limit = 10, status } = query;
@@ -618,9 +620,12 @@ export class ReportService {
   async update(id: string, updateReportDto: UpdateReportDto): Promise<Report> {
     try {
       const { fields, data } = updateReportDto;
-
+      console.log('======== in here ==============');
+      console.log(data);
+      console.log(id);
       const existingReport = await this.reportModel.findById(id).exec();
       if (!existingReport) {
+        console.log('========== in error ==========');
         throw new NotFoundException(`Report with ID ${id} not found`);
       }
 
@@ -644,6 +649,8 @@ export class ReportService {
           ].map((d) => new Types.ObjectId(d))
         : existingReport.data;
 
+      console.log('======== in service ========');
+      console.log(updatedData);
       const updatedReport = await this.reportModel
         .findByIdAndUpdate(
           id,
