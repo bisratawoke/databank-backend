@@ -154,6 +154,7 @@ export class AuthService {
     user.password = hashedPassword;
     user.passwordResetToken = null;
     user.passwordResetExpires = null;
+    user.lastLogin = new Date();
     await user.save();
 
     return { message: 'Password has been successfully reset' };

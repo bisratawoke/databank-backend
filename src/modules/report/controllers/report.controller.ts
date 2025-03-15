@@ -129,6 +129,7 @@ export class ReportController {
     UserRole.DISSEMINATION_HEAD,
     UserRole.PORTAL_USER,
     UserRole.DEPUTY_DIRECTOR,
+    UserRole.DEPARTMENT_EXPERT,
   )
   @Get('/all')
   async findAllPaginated(@Query() query: ReportQueryDto) {
