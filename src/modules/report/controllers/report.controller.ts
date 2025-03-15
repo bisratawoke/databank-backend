@@ -35,8 +35,8 @@ import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
 import { DataDto } from 'src/modules/data/dto/data.dto';
 import { FieldDto } from 'src/modules/field/dto/field.dto';
 import { ReportQueryDto } from '../dto/report-query.dto';
-// @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
+// @UseGuards(JwtAuthGuard)
 @ApiTags('Reports')
 @Controller('reports')
 export class ReportController {
@@ -63,6 +63,7 @@ export class ReportController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a new report' })
   @ApiBody({ type: CreateReportDto })
   @ApiResponse({
@@ -75,6 +76,7 @@ export class ReportController {
     description: 'Invalid input data.',
   })
   async create(@Body() createReportDto: CreateReportDto, @Request() req) {
+    console.log('=========== in create retport ======');
     return this.reportService.create({
       report: { ...createReportDto, author: req.user.sub },
     });
