@@ -46,11 +46,12 @@ export class PublicationPaymentService {
       runValidators: true,
     });
 
+    console.log('========= in payment result page =========');
+    // console.log(updatedPayment);
+
     if (dto.publciationRequest) {
-      console.log('========= in payment result page =========');
-      console.log(dto);
       const result = await this.publicationRequestModel.findByIdAndUpdate(
-        dto.publciationRequest,
+        id,
         {
           status: Status.PAYMENT_VERIFIED,
         },

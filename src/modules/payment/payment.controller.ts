@@ -58,6 +58,9 @@ export class PublicationPaymentController {
     @Param('id') id: string,
     @Body() dto: UpdatePublicationPaymentDto,
   ): Promise<PublicationPayment> {
+    console.log('========= in payment updating ============');
+    console.log(dto);
+    console.log(id);
     return this.service.update(id, dto);
   }
 
