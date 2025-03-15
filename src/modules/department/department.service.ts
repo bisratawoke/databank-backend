@@ -17,23 +17,31 @@ export class DepartmentService {
   constructor(
     @InjectModel(Department.name) private departmentModel: Model<Department>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
-    @InjectModel(Report.name) private readonly reportModel: Model<Report>
-  ) { }
+    @InjectModel(Report.name) private readonly reportModel: Model<Report>,
+  ) {}
 
   public async isDepartmentHead(userId: string) {
     const departmentHead = await this.getDepartmentHead(userId);
     return userId == departmentHead._id;
   }
 
+  // public async getDepartmentHeadByDepartmentId(deptId: string) {
+  //   const department = await this.departmentModel
+  //     .findById(deptId)
+  //     .populate('head')
+  //     .exec();
+
+  //   return department.head;
+  // }
+
   public async getDepartmentHeadByDepartmentId(deptId: string) {
-    const department = await this.departmentModel
-      .findById(deptId)
-      .populate('head')
-      .exec();
-
-    return department.head;
+    console.log('============= in get department head =======');
+    const users = await this.userModel.find({
+      department: deptId,
+      roles: { $in: [UserRole.DEPARTMENT_HEAD] },
+    });
+    return users[0];
   }
-
   public async getDepartmentHead(userId: string) {
     const user = await this.userModel
       .findById(userId)
@@ -135,7 +143,6 @@ export class DepartmentService {
     const { page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
-
     // Fetch total count of departments
     const totalDepartments = await this.departmentModel.countDocuments(filter);
 
@@ -147,8 +154,8 @@ export class DepartmentService {
         populate: {
           path: 'subcategory',
           populate: {
-            path: 'report'
-          }
+            path: 'report',
+          },
         },
       })
       .limit(limit)
@@ -163,7 +170,6 @@ export class DepartmentService {
     //     if (category.subcategory) {
     //       for (const subcategory of category.subcategory) {
 
-
     //         // Manually fetch reports with pagination
     //         // const reports = await this.reportModel
     //         //   .find({ subcategory: subcategory._id })
@@ -173,12 +179,10 @@ export class DepartmentService {
     //         //   .sort({ createdAt: -1 })
     //         //   .exec();
 
-
     //       }
     //     }
     //   }
     // }
-
 
     return {
       departments,
@@ -186,12 +190,9 @@ export class DepartmentService {
         page,
         limit,
         totalDepartments,
-
-      }
+      },
     };
   }
-
-
 
   /**
    * Retrieve a single Department by ID

@@ -155,6 +155,8 @@ export class ReportService {
           String(department._id.toString()),
         );
 
+      console.log('============ in request initial approval =============');
+      console.log(departmentHead);
       const emailMessage = {
         body: `report created. please update the status!`,
         to: departmentHead.email,

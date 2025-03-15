@@ -260,6 +260,7 @@ export class ReportController {
   }
 
   @Post('/request-initial-approval/:reportId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Request initial approval' })
   @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
   @ApiResponse({
