@@ -143,6 +143,7 @@ export class PortalUserController {
     )
     authorizationLetter?: Express.Multer.File,
   ) {
+    console.log('=========== in register ===========');
     return this.portalUserService.create(
       createPortalUserDto,
       authorizationLetter,

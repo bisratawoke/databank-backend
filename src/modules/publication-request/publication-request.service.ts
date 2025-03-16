@@ -11,6 +11,8 @@ import PublicationPayment, {
   PaymentStatus,
 } from './schemas/publication-payment.schema';
 import CreatePublicationRequestWithAuthorId from './dto/create-publication-request-with-user-id';
+import { DepartmentService } from '../department/department.service';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class PublicationRequestService {
@@ -19,6 +21,8 @@ export class PublicationRequestService {
     private readonly publicationRequestModel: Model<PublicationRequest>,
     @InjectModel(PublicationPayment.name)
     private readonly publicationPaymentModel: Model<PublicationPayment>,
+    private readonly departmentService: DepartmentService,
+    private readonly amqpConnection: AmqpConnection,
   ) {}
 
   async getCurrentPortalUserPublicationRequests(portalUserId: string) {
@@ -119,8 +123,17 @@ export class PublicationRequestService {
       { new: true },
     );
   }
+
+  private async publishToInappQueue(message: { body: string; to: string }) {
+    await this.amqpConnection.publish(
+      'logs_exchange',
+      'inapp_notification_queue',
+      message,
+    );
+  }
+
   async assignPublicationToDepartment(deparmentId, publicationRequestId) {
-    return await this.publicationRequestModel
+    const result = await this.publicationRequestModel
       .findByIdAndUpdate(
         { _id: publicationRequestId },
         {
@@ -130,6 +143,18 @@ export class PublicationRequestService {
         { new: true },
       )
       .exec();
+
+    const departmentHead: any =
+      await this.departmentService.getDepartmentHeadByDepartmentId(
+        String(deparmentId),
+      );
+
+    this.publishToInappQueue({
+      body: 'Publication Request Assigned to you',
+      to: departmentHead._id,
+    });
+    console.log(departmentHead);
+    return result;
   }
   async createPublicationRequest(
     createPublicationRequestDto: CreatePublicationRequestWithAuthorId,

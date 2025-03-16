@@ -13,11 +13,23 @@ import { MinioModule } from 'src/minio/minio.module';
 import PublicationPayment, {
   PublicationPaymentSchema,
 } from './schemas/publication-payment.schema';
+import { DepartmentModule } from '../department/department.module';
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 
 @Module({
   controllers: [PublicationRequestController],
   providers: [PublicationRequestService],
   imports: [
+    RabbitMQModule.forRoot(RabbitMQModule, {
+      exchanges: [
+        {
+          name: 'logs_exchange',
+          type: 'topic',
+        },
+      ],
+      uri: 'amqp://localhost:5672',
+      connectionInitOptions: { wait: false },
+    }),
     MongooseModule.forFeature([
       { name: PublicationRequest.name, schema: PublicationRequestSchema },
       { name: PublicationPayment.name, schema: PublicationPaymentSchema },
@@ -30,7 +42,7 @@ import PublicationPayment, {
     AuthModule,
     CategoryModule,
     MinioModule,
+    DepartmentModule,
   ],
 })
 export class PublicationRequestModule {}
-

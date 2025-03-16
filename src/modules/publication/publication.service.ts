@@ -494,61 +494,13 @@ export class PublicationService {
     const { fileName, bucketName, metadata } = publication;
 
     try {
-      let fileExists = true;
-      try {
-        await this.minioService.client.statObject(bucketName, fileName);
-      } catch (error) {
-        if (error.code === 'NotFound') {
-          fileExists = false;
-          if (!forceDelete) {
-            throw new BadRequestException(
-              `File ${fileName} not found in bucket ${bucketName}. Use forceDelete to remove database entries.`,
-            );
-          }
-        } else {
-          throw error;
-        }
-      }
+      return await this.publicationModel.findByIdAndDelete(id);
 
-      if (fileExists) {
-        const minioFileInfo = await this.minioService.client.statObject(
-          bucketName,
-          fileName,
-        );
-        if (
-          minioFileInfo.size !== publication.metadata.size ||
-          minioFileInfo.lastModified.toISOString() !==
-            publication.metadata.modified_date.toISOString()
-        ) {
-          if (!forceDelete) {
-            throw new BadRequestException(
-              'File details in MinIO do not match publication record. Use forceDelete to remove anyway.',
-            );
-          }
-        }
-      }
-
-      if (fileExists) {
-        await this.minioService.client.removeObject(bucketName, fileName);
-      }
-
-      if (metadata) {
-        await this.metastoreService.remove(metadata._id.toString());
-      }
-
-      const deletedPublication =
-        await this.publicationModel.findByIdAndDelete(id);
-      if (!deletedPublication) {
-        throw new Error(
-          'Publication was not found in the database during deletion',
-        );
-      }
-
-      return {
-        message: fileExists
-          ? 'Publication and associated data deleted successfully'
-          : 'Publication database entries deleted successfully. File was already removed from MinIO.',
-      };
+      // return {
+      //   message: fileExists
+      //     ? 'Publication and associated data deleted successfully'
+      //     : 'Publication database entries deleted successfully. File was already removed from MinIO.',
+      // };
     } catch (error) {
       console.error(`Error deleting publication ${id}:`, error);
 
@@ -561,6 +513,85 @@ export class PublicationService {
       );
     }
   }
+  // async deletePublication(
+  //   id: string,
+  //   forceDelete?: boolean,
+  // ): Promise<{ message: string }> {
+  //   const publication = await this.findOne(id);
+  //   if (!publication) {
+  //     throw new NotFoundException(`Publication with id ${id} not found`);
+  //   }
+
+  //   const { fileName, bucketName, metadata } = publication;
+
+  //   try {
+  //     let fileExists = true;
+  //     try {
+  //       await this.minioService.client.statObject(bucketName, fileName);
+  //     } catch (error) {
+  //       if (error.code === 'NotFound') {
+  //         fileExists = false;
+  //         if (!forceDelete) {
+  //           throw new BadRequestException(
+  //             `File ${fileName} not found in bucket ${bucketName}. Use forceDelete to remove database entries.`,
+  //           );
+  //         }
+  //       } else {
+  //         throw error;
+  //       }
+  //     }
+
+  //     if (fileExists) {
+  //       const minioFileInfo = await this.minioService.client.statObject(
+  //         bucketName,
+  //         fileName,
+  //       );
+  //       if (
+  //         minioFileInfo.size !== publication.metadata.size ||
+  //         minioFileInfo.lastModified.toISOString() !==
+  //           publication.metadata.modified_date.toISOString()
+  //       ) {
+  //         if (!forceDelete) {
+  //           throw new BadRequestException(
+  //             'File details in MinIO do not match publication record. Use forceDelete to remove anyway.',
+  //           );
+  //         }
+  //       }
+  //     }
+
+  //     if (fileExists) {
+  //       await this.minioService.client.removeObject(bucketName, fileName);
+  //     }
+
+  //     if (metadata) {
+  //       await this.metastoreService.remove(metadata._id.toString());
+  //     }
+
+  //     const deletedPublication =
+  //       await this.publicationModel.findByIdAndDelete(id);
+  //     if (!deletedPublication) {
+  //       throw new Error(
+  //         'Publication was not found in the database during deletion',
+  //       );
+  //     }
+
+  //     return {
+  //       message: fileExists
+  //         ? 'Publication and associated data deleted successfully'
+  //         : 'Publication database entries deleted successfully. File was already removed from MinIO.',
+  //     };
+  //   } catch (error) {
+  //     console.error(`Error deleting publication ${id}:`, error);
+
+  //     if (error instanceof BadRequestException) {
+  //       throw error;
+  //     }
+
+  //     throw new InternalServerErrorException(
+  //       `Failed to delete publication ${id}. Partial deletion may have occurred.`,
+  //     );
+  //   }
+  // }
 
   private async uploadFileToMinio(
     bucketName: string,

@@ -43,27 +43,27 @@ export class PortalUserService {
 
     let authorizationLetterData = null;
 
-    if (
-      authorizationLetter &&
-      (rest.userType === PortalUserType.COMPANY ||
-        rest.userType === PortalUserType.NGO ||
-        rest.userType === PortalUserType.FOREIGN_COMPANY)
-    ) {
-      const filename = `${uuidv4()}-${authorizationLetter.originalname}`;
-      const path = `authorization-letters/${filename}`;
+    // if (
+    //   authorizationLetter &&
+    //   (rest.userType === PortalUserType.COMPANY ||
+    //     rest.userType === PortalUserType.NGO ||
+    //     rest.userType === PortalUserType.FOREIGN_COMPANY)
+    // ) {
+    //   const filename = `${uuidv4()}-${authorizationLetter.originalname}`;
+    //   const path = `authorization-letters/${filename}`;
 
-      const url = await this.minioService.portalUploadFile(
-        authorizationLetter,
-        path,
-      );
+    //   const url = await this.minioService.portalUploadFile(
+    //     authorizationLetter,
+    //     path,
+    //   );
 
-      authorizationLetterData = {
-        url,
-        path,
-        filename,
-        mimetype: authorizationLetter.mimetype,
-      };
-    }
+    //   authorizationLetterData = {
+    //     url,
+    //     path,
+    //     filename,
+    //     mimetype: authorizationLetter.mimetype,
+    //   };
+    // }
 
     const newPortalUser = new this.portalUserModel({
       ...rest,
