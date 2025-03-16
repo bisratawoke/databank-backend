@@ -11,26 +11,11 @@ export class PortalUser extends Document {
   @Prop({ required: true })
   fullName: string;
 
-  @Prop({
-    required: function () {
-      return (
-        this.userType === PortalUserType.COMPANY ||
-        this.userType === PortalUserType.NGO ||
-        this.userType === PortalUserType.FOREIGN_COMPANY
-      );
-    },
-  })
+  @Prop({})
   companyName: string;
 
   @Prop({
     type: Object,
-    required: function () {
-      return (
-        this.userType === PortalUserType.COMPANY ||
-        this.userType === PortalUserType.NGO ||
-        this.userType === PortalUserType.FOREIGN_COMPANY
-      );
-    },
   })
   authorizationLetter: {
     url: string;
@@ -43,20 +28,18 @@ export class PortalUser extends Document {
   email: string;
 
   @Prop({
-    type: String, required: function () {
-      return (
-        this.userType !== PortalUserType.INDIVIDUAL
-      )
-    }
+    type: String,
+    required: function () {
+      return this.userType !== PortalUserType.INDIVIDUAL;
+    },
   })
   phoneNumber: string;
 
   @Prop({
-    type: String, required: function () {
-      return (
-        this.userType === PortalUserType.INDIVIDUAL
-      )
-    }
+    type: String,
+    required: function () {
+      return this.userType === PortalUserType.INDIVIDUAL;
+    },
   })
   mobileNumber: string;
 
@@ -77,7 +60,6 @@ export class PortalUser extends Document {
     },
   })
   roles: UserRole[];
-
 }
 
 export const PortalUserSchema = SchemaFactory.createForClass(PortalUser);

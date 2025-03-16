@@ -34,14 +34,11 @@ export class PortalUserService {
 
   async create(
     createPortalUserDto: CreatePortalUserDto,
-    authorizationLetter?: Express.Multer.File,
   ): Promise<Partial<PortalUser>> {
     const { password, ...rest } = createPortalUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    this.validateUserTypeFields(createPortalUserDto);
-
-    let authorizationLetterData = null;
+    // this.validateUserTypeFields(createPortalUserDto);
 
     // if (
     //   authorizationLetter &&
@@ -68,10 +65,10 @@ export class PortalUserService {
     const newPortalUser = new this.portalUserModel({
       ...rest,
       password: hashedPassword,
-      authorizationLetter: authorizationLetterData,
     });
 
     const user = await newPortalUser.save();
+    console.log('======= in service te =================');
     const { password: omittedPassword, ...userWithoutPassword } =
       user.toObject();
     return userWithoutPassword;

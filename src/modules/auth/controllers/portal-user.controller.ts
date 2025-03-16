@@ -126,28 +126,9 @@ export class PortalUserController {
     status: 201,
     description: 'The portal user has been successfully created',
   })
-  async register(
-    @Body() createPortalUserDto: CreatePortalUserDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: /(pdf|doc|docx)$/,
-        })
-        .addMaxSizeValidator({
-          maxSize: 5 * 1024 * 1024, // 5MB
-        })
-        .build({
-          fileIsRequired: false,
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
-    authorizationLetter?: Express.Multer.File,
-  ) {
+  async register(@Body() createPortalUserDto: CreatePortalUserDto) {
     console.log('=========== in register ===========');
-    return this.portalUserService.create(
-      createPortalUserDto,
-      authorizationLetter,
-    );
+    return this.portalUserService.create(createPortalUserDto);
   }
 
   @Post('login')

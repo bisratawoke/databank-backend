@@ -14,6 +14,7 @@ import CreatePublicationRequestWithAuthorId from './dto/create-publication-reque
 import { DepartmentService } from '../department/department.service';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { EmailService } from '../notifire/EmailService';
+import { populate } from 'dotenv';
 
 @Injectable()
 export class PublicationRequestService {
@@ -62,9 +63,26 @@ export class PublicationRequestService {
   }
 
   async finalApproval(publicationRequestId) {
-    const currentPublicationRequest = await this.publicationRequestModel
+    const currentPublicationRequest: any = await this.publicationRequestModel
       .findOne({ _id: publicationRequestId })
+      .populate('author')
       .exec();
+
+    this.emailService.sendEmail(
+      'Your Requested Publication Download Link',
+      `Dear ${currentPublicationRequest.author.fullName},
+
+Thank you for your interest in our publication. Please find your download link below:
+
+${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}/${process.env.MINIO_PORTAL_BUCKET}/${currentPublicationRequest.fileName}
+
+Should you have any questions or require further assistance, please do not hesitate to contact us.
+
+Best regards,
+ESS`,
+      currentPublicationRequest.author.email,
+    );
+
     return await this.publicationRequestModel
       .findByIdAndUpdate(
         { _id: publicationRequestId },
@@ -132,8 +150,15 @@ export class PublicationRequestService {
 
     console.log(req.author);
     await this.emailService.sendEmail(
-      'Status update of publicaiton request',
-      'Rejected',
+      'Publication Request Status Update',
+      `Dear ${req.author.fullName},
+
+We regret to inform you that your recent publication request has not been approved. Should you have any questions or need further clarification, please feel free to contact our support team.
+
+Thank you for your understanding.
+
+Best regards,
+ESS`,
       req.author.email,
     );
 

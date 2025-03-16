@@ -90,6 +90,7 @@ export class PublicationService {
   ) {
     try {
       const author = await this.getReportAuthor(publicationId);
+      console.log(author);
       await this.publishToInappQueue({
         to: author._id.toString(),
         body: `publication ${publicationId} status has been updated to ${status}`,
@@ -148,7 +149,7 @@ export class PublicationService {
       const dissmenationHeads = await this.getDissimenationHead();
       dissmenationHeads.forEach(async (dissmenationHead) => {
         await this.publishToInappQueue({
-          body: `publication ${publicationId} has been uploaded by dpertment head and requires your final say!`,
+          body: `publication ${publicationId} has been uploaded by department head and requires your final say!`,
           to: dissmenationHead._id.toString(),
         });
       });
