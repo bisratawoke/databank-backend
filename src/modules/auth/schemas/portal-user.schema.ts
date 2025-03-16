@@ -14,6 +14,8 @@ export class PortalUser extends Document {
   @Prop({})
   companyName: string;
 
+  @Prop({})
+  country: string;
   @Prop({
     type: Object,
   })

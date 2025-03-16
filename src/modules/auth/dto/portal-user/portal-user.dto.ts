@@ -44,6 +44,9 @@ export class CreatePortalUserDto {
   )
   companyName?: string;
 
+  @IsString()
+  @IsOptional()
+  country: string;
   @ApiProperty({
     description: 'The email address of the user',
   })
