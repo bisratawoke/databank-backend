@@ -28,6 +28,9 @@ export class EmailService {
     };
     try {
       await this.transporter.sendMail(mailOptions);
-    } catch (error) {}
+    } catch (error) {
+      console.log('============= in send email method error ===============');
+      console.log(error);
+    }
   }
 }

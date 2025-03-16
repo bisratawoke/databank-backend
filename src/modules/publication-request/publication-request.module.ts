@@ -15,6 +15,7 @@ import PublicationPayment, {
 } from './schemas/publication-payment.schema';
 import { DepartmentModule } from '../department/department.module';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { NotifireModule } from '../notifire/notifire.module';
 
 @Module({
   controllers: [PublicationRequestController],
@@ -43,6 +44,7 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
     CategoryModule,
     MinioModule,
     DepartmentModule,
+    NotifireModule,
   ],
 })
 export class PublicationRequestModule {}

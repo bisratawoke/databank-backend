@@ -26,5 +26,6 @@ import { AuthModule } from '../auth/auth.module';
   ],
   controllers: [NotifireController],
   providers: [RabbitMqService, EmailService, NotifireService],
+  exports: [EmailService],
 })
 export class NotifireModule {}

@@ -13,6 +13,7 @@ import PublicationPayment, {
 import CreatePublicationRequestWithAuthorId from './dto/create-publication-request-with-user-id';
 import { DepartmentService } from '../department/department.service';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { EmailService } from '../notifire/EmailService';
 
 @Injectable()
 export class PublicationRequestService {
@@ -23,6 +24,7 @@ export class PublicationRequestService {
     private readonly publicationPaymentModel: Model<PublicationPayment>,
     private readonly departmentService: DepartmentService,
     private readonly amqpConnection: AmqpConnection,
+    private readonly emailService: EmailService,
   ) {}
 
   async getCurrentPortalUserPublicationRequests(portalUserId: string) {
@@ -117,11 +119,25 @@ export class PublicationRequestService {
   }
 
   async reject(publicationRequestId: string) {
-    return await this.publicationRequestModel.findByIdAndUpdate(
+    const result = await this.publicationRequestModel.findByIdAndUpdate(
       { _id: publicationRequestId },
       { status: Status.Rejected },
       { new: true },
     );
+    console.log('======= in reject ====');
+    const req: any = await this.publicationRequestModel
+      .findById({ _id: publicationRequestId })
+      .populate('author')
+      .exec();
+
+    console.log(req.author);
+    await this.emailService.sendEmail(
+      'Status update of publicaiton request',
+      'Rejected',
+      req.author.email,
+    );
+
+    return result;
   }
 
   private async publishToInappQueue(message: { body: string; to: string }) {
@@ -154,6 +170,7 @@ export class PublicationRequestService {
       to: departmentHead._id,
     });
     console.log(departmentHead);
+    // this.emailService.sendEmail('', 'Publication Request Assigned to you');
     return result;
   }
   async createPublicationRequest(
