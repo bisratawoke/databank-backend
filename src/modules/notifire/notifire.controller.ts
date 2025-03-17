@@ -6,7 +6,6 @@ import {
   Param,
   Put,
   Delete,
-  UseInterceptors,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -20,15 +19,19 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { AuthUserInterceptor } from 'src/interceptors/auth-user.interceptor';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { EmailService } from './EmailService';
+import { SendEmailDto } from './dto/send-email.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('notifire')
 @Controller('notifire')
 export class NotifireController {
-  constructor(private readonly notifiresService: NotifireService) {}
+  constructor(
+    private readonly notifiresService: NotifireService,
+    private readonly emailService: EmailService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new notifire' })
@@ -87,5 +90,28 @@ export class NotifireController {
   @ApiResponse({ status: 404, description: 'Notifire not found' })
   async remove(@Param('id') id: string): Promise<Notifire> {
     return this.notifiresService.remove(id);
+  }
+
+  // New endpoint: POST /notifire/email
+  @Post('email')
+  @ApiOperation({ summary: 'Send an email' })
+  @ApiResponse({
+    status: 201,
+    description: 'Email sent successfully',
+    schema: {
+      example: { message: 'Email sent successfully' },
+    },
+  })
+  async sendEmail(
+    @Body() sendEmailDto: SendEmailDto,
+  ): Promise<{ message: string }> {
+    console.log('======= in send email =========');
+    console.log(sendEmailDto);
+    await this.emailService.sendEmail(
+      sendEmailDto.subject,
+      sendEmailDto.body,
+      sendEmailDto.recipient,
+    );
+    return { message: 'Email sent successfully' };
   }
 }
