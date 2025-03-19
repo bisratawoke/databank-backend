@@ -53,3 +53,10 @@ export class User extends Document {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.pre('save', function (next) {
+  if (typeof this.department === 'string' && this.department === '') {
+    this.department = null;
+  }
+  next();
+});

@@ -43,7 +43,7 @@ import { PaginationQueryDto } from 'src/common/dto/paginated-query.dto';
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @ApiOperation({ summary: 'Retrieve a current logged in user' })
   @ApiResponse({ status: 200, description: 'User retrieved successfully.' })
