@@ -327,11 +327,36 @@ export class PublicationController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Report not found.',
   })
-  async requestSecondApproval(
+  async requestInitialApproval(
     @Param('publicationId') publicationId: string,
     @Request() req,
   ) {
     const result = await this.publicationService.requestInitalApproval({
+      publicationId,
+      from: req.user.sub,
+    });
+    return result;
+  }
+  @Post('/request-second-approval/:publicationId')
+  @ApiOperation({ summary: 'Request inital approval' })
+  @ApiParam({
+    name: 'publicationId',
+    type: String,
+    description: 'Publication ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async requestSecondApproval(
+    @Param('publicationId') publicationId: string,
+    @Request() req,
+  ) {
+    const result = await this.publicationService.requestSecondApproval({
       publicationId,
       from: req.user.sub,
     });

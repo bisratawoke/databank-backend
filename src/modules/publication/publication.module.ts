@@ -11,9 +11,11 @@ import { MetastoreService } from '../metastore/metastore.service';
 import { Publication, PublicationSchema } from './schemas/publication.schema';
 import { AuthModule } from '../auth/auth.module';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { NotifireModule } from '../notifire/notifire.module';
 @Module({
   imports: [
     AuthModule,
+    NotifireModule,
     RabbitMQModule.forRoot(RabbitMQModule, {
       exchanges: [
         {

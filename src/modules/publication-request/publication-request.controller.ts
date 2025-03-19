@@ -44,6 +44,129 @@ export class PublicationRequestController {
     private readonly minioService: MinioService,
   ) {}
 
+  @Post('/dissmination-assign-department/:reportId')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Request second approval' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async requestFinalApproval(
+    @Param('reportId') reportId: string,
+    @Request() req,
+  ) {
+    const result =
+      await this.publicationRequestService.sendMessageToDissimenationHead({
+        message: 'Assign A Department to the newly created publication request',
+      });
+    return;
+  }
+
+  @Post('/request-initial-approval/:departmentId')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Request second approval' })
+  @ApiParam({ name: 'departmentId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async requestSecondApproval(
+    @Param('departmentId') departmentId: string,
+    @Request() req,
+  ) {
+    const result = await this.publicationRequestService.requestInitialApproval({
+      departmentId,
+    });
+    return result;
+  }
+
+  @Post('/request-finiance-officer/:publicationRequestId')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Request second approval' })
+  @ApiParam({
+    name: 'publicationRequestId',
+    type: String,
+    description: 'Report ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async requestFinianceOfficer(
+    @Param('publicationRequestId') publicationRequestId: string,
+    @Request() req,
+  ) {
+    const result = await this.publicationRequestService.requestFinianceOfficer({
+      publicationRequestId,
+    });
+    return result;
+  }
+
+  @Post('/request-deputy/:publicationRequestId')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Request second approval' })
+  @ApiParam({
+    name: 'publicationRequestId',
+    type: String,
+    description: 'Report ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async requestDeputy(
+    @Param('publicationRequestId') publicationRequestId: string,
+    @Request() req,
+  ) {
+    const result = await this.publicationRequestService.RequestDeputy({
+      publicationRequestId,
+    });
+    return result;
+  }
+
+  @Post('/request-dissmination-approved/:publicationRequestId')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Request second approval' })
+  @ApiParam({
+    name: 'publicationRequestId',
+    type: String,
+    description: 'Report ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async requestDissimination(
+    @Param('publicationRequestId') publicationRequestId: string,
+    @Request() req,
+  ) {
+    const result = await this.publicationRequestService.RequestDissimination({
+      publicationRequestId,
+    });
+    return result;
+  }
+
   @Get('me')
   @ApiOperation({
     summary: 'Get publication requests of the current logged in portal user',

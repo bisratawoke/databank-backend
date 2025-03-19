@@ -20,6 +20,7 @@ import { CreatePublicationDto } from './dto/create-publication.dto';
 import { populate } from 'dotenv';
 import { UserService } from '../auth/services/user.service';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { EmailService } from '../notifire/EmailService';
 @Injectable()
 export class PublicationService {
   constructor(
@@ -29,6 +30,7 @@ export class PublicationService {
     private readonly metastoreService: MetastoreService,
     private readonly userService: UserService,
     private readonly amqpConnection: AmqpConnection,
+    private readonly emailService: EmailService,
   ) {}
 
   async reject(publicationId: string) {
@@ -95,6 +97,7 @@ export class PublicationService {
         to: author._id.toString(),
         body: `publication ${publicationId} status has been updated to ${status}`,
       });
+
       return author;
     } catch (err) {
       throw err;
@@ -139,6 +142,24 @@ export class PublicationService {
     return updatedPublication;
   }
   public async requestInitalApproval({
+    publicationId,
+    from,
+  }: {
+    publicationId: string;
+    from: string;
+  }) {
+    try {
+      const dissmenationHeads = await this.getDissimenationHead();
+      dissmenationHeads.forEach(async (dissmenationHead) => {
+        await this.publishToInappQueue({
+          body: `publication ${publicationId} has been uploaded by department head and requires your final say!`,
+          to: dissmenationHead._id.toString(),
+        });
+      });
+      return {};
+    } catch (error) {}
+  }
+  public async requestSecondApproval({
     publicationId,
     from,
   }: {

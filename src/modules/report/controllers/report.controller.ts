@@ -300,7 +300,6 @@ export class ReportController {
     @Body('status') status: string,
     @Param('reportId') reportId: string,
   ) {
-    console.log('======= in initial request response =========');
     const result = await this.reportService.initialRequestResponse(
       status,
       reportId,

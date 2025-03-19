@@ -15,6 +15,7 @@ import { DepartmentService } from '../department/department.service';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { EmailService } from '../notifire/EmailService';
 import { populate } from 'dotenv';
+import { UserService } from '../auth/services/user.service';
 
 @Injectable()
 export class PublicationRequestService {
@@ -26,8 +27,69 @@ export class PublicationRequestService {
     private readonly departmentService: DepartmentService,
     private readonly amqpConnection: AmqpConnection,
     private readonly emailService: EmailService,
+    private readonly userService: UserService,
   ) {}
 
+  async RequestDissimination({
+    publicationRequestId,
+  }: {
+    publicationRequestId: string;
+  }) {
+    const officers = await this.userService.findDissimenationHead();
+
+    officers.forEach((officer) => {
+      this.publishToInappQueue({
+        body: 'Please update status to newly created publication Request',
+        to: officer._id.toString(),
+      });
+    });
+  }
+  async requestFinianceOfficer({
+    publicationRequestId,
+  }: {
+    publicationRequestId: string;
+  }) {
+    const officers = await this.userService.findFinancialOfficer();
+    officers.forEach((officer) => {
+      this.publishToInappQueue({
+        body: 'Please Set Finaicail Details to newly created publication Request',
+        to: officer._id.toString(),
+      });
+    });
+  }
+  async RequestDeputy({
+    publicationRequestId,
+  }: {
+    publicationRequestId: string;
+  }) {
+    const officers = await this.userService.findDeputyHead();
+    officers.forEach((officer) => {
+      this.publishToInappQueue({
+        body: 'Please approve to newly created publication Request',
+        to: officer._id.toString(),
+      });
+    });
+  }
+  async requestInitialApproval({ departmentId }: { departmentId: string }) {
+    const departmentHead: any =
+      await this.departmentService.getDepartmentHeadByDepartmentId(
+        String(departmentId),
+      );
+
+    await this.publishToInappQueue({
+      body: `Please Update the status of newly created publication request`,
+      to: departmentHead._id.toString(),
+    });
+  }
+  async sendMessageToDissimenationHead({ message }: { message: string }) {
+    const heads = await this.userService.findDissimenationHead();
+    heads.forEach(async (head) => {
+      this.publishToInappQueue({
+        body: message,
+        to: head._id.toString(),
+      });
+    });
+  }
   async getCurrentPortalUserPublicationRequests(portalUserId: string) {
     return this.publicationRequestModel.find({
       author: portalUserId,
