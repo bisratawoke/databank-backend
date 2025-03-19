@@ -59,6 +59,7 @@ export class ReportService {
     const user = await this.userService.findDissimenationHead();
     return user;
   }
+
   public async requestSecondApproval({
     reportId,
     from,
@@ -67,12 +68,31 @@ export class ReportService {
     from: string;
   }) {
     try {
-      const dissmenationHeads = await this.getDissimenationHead();
+      const heads = await this.userService.findDeputyHead();
 
-      dissmenationHeads.forEach(async (dissmenationHead) => {
+      heads.forEach(async (head) => {
         await this.publishToInappQueue({
-          body: `reports ${reportId} has been updated to approved by dpertment head and requires your final say!`,
-          to: dissmenationHead._id.toString(),
+          body: `reports ${reportId} has been updated to approved by department head and requires approval!`,
+          to: head._id.toString(),
+        });
+      });
+      return {};
+    } catch (error) {}
+  }
+  public async requestDissiminationApproval({
+    reportId,
+    from,
+  }: {
+    reportId: string;
+    from: string;
+  }) {
+    try {
+      const heads = await this.getDissimenationHead();
+
+      heads.forEach(async (head) => {
+        await this.publishToInappQueue({
+          body: `reports ${reportId} has been updated to approved by department head and requires approval!`,
+          to: head._id.toString(),
         });
       });
       return {};
@@ -101,6 +121,8 @@ export class ReportService {
         await this.departmentService.getDepartmentHeadByDepartmentId(
           String(department._id.toString()),
         );
+      console.log('============== is report department head ============');
+      console.log(departmentHead);
 
       return from.toString() == departmentHead._id.toString();
     } catch (err) {
@@ -118,6 +140,10 @@ export class ReportService {
         throw new UnauthorizedException('Not Authorized');
 
       const author = await this.getReportAuthor(reportId);
+      console.log(
+        '=========== in inital request response service ================',
+      );
+      console.log(author);
       await this.publishToInappQueue({
         to: author._id.toString(),
         body: `report ${reportId} status has been updated to ${status}`,

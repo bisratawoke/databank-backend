@@ -203,6 +203,12 @@ export class UserService {
     return user;
   }
 
+  async findDeputyHead(): Promise<User[] | null> {
+    const user = await this.userModel
+      .find({ roles: UserRole.DEPUTY_DIRECTOR })
+      .exec();
+    return user;
+  }
   async findOne(id: string): Promise<UserResponseDto> {
     const user = await this.userModel
       .findById(id)

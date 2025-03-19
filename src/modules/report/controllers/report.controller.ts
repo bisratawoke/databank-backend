@@ -239,6 +239,7 @@ export class ReportController {
   }
 
   @Post('/is-head/:reportId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Request to verify if i am head' })
   @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
   @ApiResponse({
@@ -281,6 +282,7 @@ export class ReportController {
     });
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('/initial-request-response/:reportId')
   @ApiOperation({ summary: 'Response to inital appoval request' })
   @ApiBody({ type: UpdateStatusDto })
@@ -298,6 +300,7 @@ export class ReportController {
     @Body('status') status: string,
     @Param('reportId') reportId: string,
   ) {
+    console.log('======= in initial request response =========');
     const result = await this.reportService.initialRequestResponse(
       status,
       reportId,
@@ -308,6 +311,7 @@ export class ReportController {
   }
 
   @Post('/request-second-approval/:reportId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Request second approval' })
   @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
   @ApiResponse({
@@ -323,6 +327,28 @@ export class ReportController {
     @Request() req,
   ) {
     const result = await this.reportService.requestSecondApproval({
+      reportId,
+      from: req.user.sub,
+    });
+    return result;
+  }
+  @Post('/request-final-approval/:reportId')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Request second approval' })
+  @ApiParam({ name: 'reportId', type: String, description: 'Report ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request was successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Report not found.',
+  })
+  async requestFinalApproval(
+    @Param('reportId') reportId: string,
+    @Request() req,
+  ) {
+    const result = await this.reportService.requestDissiminationApproval({
       reportId,
       from: req.user.sub,
     });
